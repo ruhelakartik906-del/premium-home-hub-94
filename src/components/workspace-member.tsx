@@ -21,6 +21,7 @@ function useSellerProps(uid: string) { return useQuery({ queryKey: ['seller-prop
 function useSellerInterests(uid: string) { return useQuery({ queryKey: ['seller-interests', uid], queryFn: async () => { const { data } = await supabase.from('interests').select('id,status,created_at,preferred_time,properties!inner(ref,title,seller_id)').eq('properties.seller_id', uid).order('created_at', { ascending: false }); return data ?? []; } }); }
 
 import { SavedProperties } from '@/components/workspace-extra';
+import { KycDocumentsUploader, DOC_LABELS } from '@/components/kyc-documents';
 export function MemberBody({ role, section, me }: { role: 'buyer' | 'seller'; section: string; me: Me }) {
   if (!section) return role === 'buyer' ? <BuyerOverview me={me} /> : <SellerOverview me={me} />;
   switch (section) {
@@ -209,25 +210,26 @@ const KYC_FIELDS: { key: string; label: string; props: Record<string, unknown>; 
   { key: 'account_number', label: 'Account number', props: { required: true, pattern: '[0-9]{6,20}' } },
   { key: 'ifsc', label: 'IFSC code', props: { required: true, pattern: '[A-Za-z]{4}0[A-Za-z0-9]{6}', placeholder: 'HDFC0001234' } },
 ];
-export const KYC_FIELD_LABELS: Record<string, string> = Object.fromEntries(KYC_FIELDS.map((f) => [f.key, f.label]));
+export const KYC_FIELD_LABELS: Record<string, string> = { ...Object.fromEntries(KYC_FIELDS.map((f) => [f.key, f.label])), ...Object.fromEntries(Object.entries(DOC_LABELS).map(([k, v]) => [`doc:${k}`, v])) };
 
 function Verification({ me, role }: { me: Me; role: 'buyer' | 'seller' }) {
   const qc = useQueryClient();
   const sub = useQuery({ queryKey: ['my-kyc', me.user.id], queryFn: async () => { const { data } = await supabase.from('kyc_submissions').select('*').eq('user_id', me.user.id).order('created_at', { ascending: false }).limit(1).maybeSingle(); return data; } });
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState(false); const [docsReady, setDocsReady] = useState(false);
   const p = me.profile!; const v = p.verification_status;
   const last = sub.data; const retry = v === 'rejected' || v === 'changes_required';
   const required = v === 'changes_required' && last?.required_fields?.length ? last.required_fields : null;
+  const requiredDocs = required ? required.filter((k) => k.startsWith('doc:')).map((k) => k.slice(4)) : null;
   const steps = [['Account created', true], ['Details submitted', ['submitted', 'approved', 'rejected', 'changes_required'].includes(v)], ['Team review', ['approved', 'rejected', 'changes_required'].includes(v)], ['Verified', v === 'approved']] as const;
   if (sub.isLoading) return <Panel><p className="muted">Loading…</p></Panel>;
   return <>
     <div className="verify-steps">{steps.map(([l, ok], i) => <div key={l} className={ok ? 'ok' : ''}><span>{ok ? '✓' : i + 1}</span>{l}</div>)}</div>
     {v === 'approved' ? <Panel><div className="empty-state"><BadgeCheck /><h3>You are verified.</h3><p>Your verified details are locked. To change them, raise a support ticket and the Eliteoz team can reopen your verification.</p></div></Panel>
-      : v === 'submitted' ? <Panel><div className="empty-state"><FileCheck /><h3>Under review.</h3><p>Submitted on {last ? fmtDate(last.created_at) : '—'}. Your account stays active while we review.</p></div></Panel>
+      : v === 'submitted' ? <Panel><div className="empty-state"><FileCheck /><h3>Pending review.</h3><p>Submitted on {last ? fmtDate(last.created_at) : '—'}. Your account stays active while we review.</p></div></Panel>
         : <form className="panel" onSubmit={async (e) => {
-          e.preventDefault(); const f = new FormData(e.currentTarget); const g = (k: string) => String(f.get(k) ?? '').trim().slice(0, 60); setBusy(true);
+          e.preventDefault(); if (!docsReady) { toast.error('Please upload all required documents first'); return; } const f = new FormData(e.currentTarget); const g = (k: string) => String(f.get(k) ?? '').trim().slice(0, 60); setBusy(true);
           const { error } = await supabase.from('kyc_submissions').insert({ user_id: me.user.id, pan: g('pan').toUpperCase(), gov_id: g('gov_id'), gst: g('gst') || null, account_holder: g('account_holder'), bank_name: g('bank_name'), account_number: g('account_number'), ifsc: g('ifsc').toUpperCase() });
-          setBusy(false); if (error) { toast.error('Could not submit. Please check the details.'); return; }
+          setBusy(false); if (error) { toast.error(error.message.includes('Missing required documents') ? 'Please upload all required documents first' : 'Could not submit. Please check the details.'); return; }
           toast.success(retry ? 'Verification resubmitted' : 'Verification submitted'); qc.invalidateQueries();
         }}>
           <h2>{retry ? 'Resubmit your verification' : 'Complete your verification'}</h2>
@@ -240,8 +242,10 @@ function Verification({ me, role }: { me: Me; role: 'buyer' | 'seller' }) {
               return <div className="field" key={fd.key}><label>{fd.label}{fd.props['required'] ? ' *' : ''}{flagged && <small className="danger-text"> — needs correction</small>}{locked && <small className="muted"> — locked</small>}</label><input name={fd.key} className="field-input" defaultValue={prev} readOnly={locked} style={flagged ? { borderColor: 'var(--destructive)' } : undefined} {...fd.props} /></div>;
             })}
           </div>
+          <div className="form-section" style={{ marginTop: 20 }}><h3>Documents</h3><p className="muted small">Stored privately. Only you and the Eliteoz Master Admin can open them.</p></div>
+          <KycDocumentsUploader userId={me.user.id} role={role} required={required ? requiredDocs ?? [] : null} onReadyChange={(r) => r !== docsReady && setDocsReady(r)} />
           <p className="muted small">These details are visible only to you and the Eliteoz admin team.</p>
-          <div className="form-actions"><Button type="submit" disabled={busy}>{busy ? 'Submitting…' : retry ? 'Resubmit for verification' : 'Submit for verification'}</Button></div>
+          <div className="form-actions"><Button type="submit" disabled={busy || !docsReady}>{busy ? 'Submitting…' : retry ? 'Resubmit for verification' : 'Submit for verification'}</Button></div>
         </form>}
   </>;
 }
