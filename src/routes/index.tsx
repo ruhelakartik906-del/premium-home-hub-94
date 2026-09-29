@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
+import { Footer } from '@/components/eliteoz';
 import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import logo from '@/assets/eliteoz-logo.webp.asset.json';
