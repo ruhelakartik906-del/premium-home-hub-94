@@ -109,3 +109,25 @@ export const adminDeactivateUser = createServerFn({ method: 'POST' })
     await supabaseAdmin.from('audit_logs').insert({ actor_id: context.userId, target_user_id: data.userId, action: 'account_deactivated', details: { reason: data.reason } });
     return { ok: true as const };
   });
+
+/** MSG91 SMS key status (masked) — admin only. */
+export const getSmsKeyStatus = createServerFn({ method: 'GET' })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const { data } = await supabaseAdmin.from('gateway_secrets').select('msg91_auth_key').eq('id', 1).maybeSingle();
+    return { masked: mask(data?.msg91_auth_key ?? null) };
+  });
+
+export const saveSmsKey = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ authKey: z.string().trim().min(10).max(128) }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const { error } = await supabaseAdmin.from('gateway_secrets').upsert({ id: 1, msg91_auth_key: data.authKey, updated_at: new Date().toISOString() });
+    if (error) return { ok: false as const, error: 'Could not save the SMS key.' };
+    await supabaseAdmin.from('audit_logs').insert({ actor_id: context.userId, action: 'settings_changed:sms_key', details: { updated: true } });
+    return { ok: true as const };
+  });
