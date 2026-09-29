@@ -80,7 +80,7 @@ export function RegisterFlow({ initialRole }: { initialRole?: string }) {
   const fee = pay?.activation_fee ?? ACTIVATION_FEE;
   const steps = ['Your details', 'Verify mobile', 'Activation payment'];
 
-  const [dup, setDup] = useState(false);
+  const [dup, setDup] = useState<false | 'active' | 'pending'>(false);
   const send = useServerFn(sendOtp);
   const verify = useServerFn(verifyOtp);
   const [masked, setMasked] = useState('');
@@ -92,11 +92,11 @@ export function RegisterFlow({ initialRole }: { initialRole?: string }) {
   useEffect(() => { if (step !== 1) return; setNow(Date.now()); const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, [step]);
   const secsLeft = Math.max(0, Math.ceil((expiresAt - now) / 1000));
   const resendLeft = Math.max(0, Math.ceil((resendAt - now) / 1000));
-  const requestOtp = async (mobile: string) => {
-    setBusy(true); setError(''); setInfo('');
-    const r = await send({ data: { mobile } }).catch(() => ({ ok: false as const, error: 'Please enter a valid 10-digit Indian mobile number.' }));
+  const requestOtp = async (mobile: string, email: string) => {
+    setBusy(true); setError(''); setInfo(''); setDup(false);
+    const r = await send({ data: { mobile, email } }).catch(() => ({ ok: false as const, error: 'Please enter a valid 10-digit Indian mobile number.' }));
     setBusy(false);
-    if (!r.ok) { setError(r.error); if ('retryAfter' in r && r.retryAfter) setResendAt(Date.now() + r.retryAfter * 1000); return false; }
+    if (!r.ok) { setError(r.error); if ('duplicate' in r && r.duplicate) setDup(r.duplicate); if ('retryAfter' in r && r.retryAfter) setResendAt(Date.now() + r.retryAfter * 1000); return false; }
     setMasked(r.masked); setOtp(['', '', '', '', '', '']); setOtpToken('');
     setExpiresAt(Date.now() + r.expiresIn * 1000); setResendAt(Date.now() + r.resendIn * 1000); setNow(Date.now());
     setInfo(`OTP sent successfully to ${r.masked}`);
@@ -108,7 +108,7 @@ export function RegisterFlow({ initialRole }: { initialRole?: string }) {
     if (!token) { setError('Please verify your mobile number first.'); return; }
     setBusy(true); setError(''); setDup(false);
     const res = await register({ data: { otpToken: token, role, full_name: details['full_name'] ?? '', email: details['email'] ?? '', password: details['password'] ?? '', mobile: details['mobile'] ?? '', dob: details['dob'] ?? '', gender: details['gender'], country: details['country'], state: details['state'], city: details['city'], address: details['address'], pincode: details['pincode'], company_name: details['company_name'], business_type: details['business_type'] } }).catch(() => ({ ok: false as const, error: 'Please check your details and try again.' }));
-    if (!res.ok) { setBusy(false); setError(res.error); setDup('duplicate' in res && !!res.duplicate); if ('reverify' in res) { setOtpToken(''); setOtp(['', '', '', '', '', '']); } return; }
+    if (!res.ok) { setBusy(false); setError(res.error); setDup('duplicate' in res && res.duplicate ? res.duplicate : false); if ('reverify' in res) { setOtpToken(''); setOtp(['', '', '', '', '', '']); } return; }
     const { error: signErr } = await supabase.auth.signInWithPassword({ email: details['email'] ?? '', password: details['password'] ?? '' });
     setBusy(false);
     if (signErr) { toast.error('Account created. Please log in to complete payment.'); navigate({ to: '/login' }); return; }
@@ -136,7 +136,7 @@ export function RegisterFlow({ initialRole }: { initialRole?: string }) {
       <p>{step === 0 ? 'Tell us a little about yourself. Identity documents are collected later in Verification.' : step === 1 ? `Enter the 6-digit code sent to ${masked || 'your mobile'}.` : 'One final step and your dashboard opens automatically.'}</p>
       <div className="steps">{steps.map((x, i) => <div className={`step ${i === step ? 'active' : ''} ${i < step ? 'done' : ''}`} key={x}><span>{i < step ? '✓' : i + 1}</span>{x}</div>)}</div>
 
-      {step === 0 && <form id="details-form" className="form-grid" onSubmit={(e) => { e.preventDefault(); const f = new FormData(e.currentTarget); const d: Record<string, string> = {}; f.forEach((v, k) => { d[k] = String(v); }); if ((d['password'] ?? '').length < 8) { setError('Password must be at least 8 characters.'); return; } if (!/^[6-9]\d{9}$/.test((d['mobile'] ?? '').replace(/\D/g, '').slice(-10))) { setError('Please enter a valid 10-digit Indian mobile number.'); return; } setDetails(d as Details); setError(''); void requestOtp(d['mobile'] ?? '').then((ok) => { if (ok) setStep(1); }); }}>
+      {step === 0 && <form id="details-form" className="form-grid" onSubmit={(e) => { e.preventDefault(); const f = new FormData(e.currentTarget); const d: Record<string, string> = {}; f.forEach((v, k) => { d[k] = String(v); }); if ((d['password'] ?? '').length < 8) { setError('Password must be at least 8 characters.'); return; } if (!/^[6-9]\d{9}$/.test((d['mobile'] ?? '').replace(/\D/g, '').slice(-10))) { setError('Please enter a valid 10-digit Indian mobile number.'); return; } setDetails(d as Details); setError(''); void requestOtp(d['mobile'] ?? '', d['email'] ?? '').then((ok) => { if (ok) setStep(1); }); }}>
         {fields.filter((x) => !x.seller || role === 'seller').map((x) => <div key={x.key} className={`field ${x.full || x.key === 'dob' ? 'full' : ''}`}><label htmlFor={x.key}>{x.label}{x.required && ' *'}</label>
           {x.key === 'gender' ? <select id={x.key} name={x.key} className="field-input" defaultValue={details[x.key] ?? ''}><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select>
             : x.key === 'dob' ? <DobInput name="dob" defaultValue={details['dob']} />
@@ -147,7 +147,7 @@ export function RegisterFlow({ initialRole }: { initialRole?: string }) {
       {step === 1 && <>{info && <Notice>{info}</Notice>}
         <OtpInput value={otp} onChange={setOtp} onComplete={(code) => { void afterOtp(code); }} />
         <p className="muted">{secsLeft > 0 ? `Code expires in ${String(Math.floor(secsLeft / 60)).padStart(2, '0')}:${String(secsLeft % 60).padStart(2, '0')}` : 'Code expired — please request a new OTP.'}</p>
-        <div className="flex gap-2"><Button variant="link" disabled={busy || resendLeft > 0} onClick={() => { void requestOtp(details['mobile'] ?? ''); }}>{resendLeft > 0 ? `Resend OTP in ${resendLeft}s` : 'Resend OTP'}</Button><Button variant="link" onClick={() => { setStep(0); setInfo(''); setError(''); }}>Change number</Button></div></>}
+        <div className="flex gap-2"><Button variant="link" disabled={busy || resendLeft > 0} onClick={() => { void requestOtp(details['mobile'] ?? '', details['email'] ?? ''); }}>{resendLeft > 0 ? `Resend OTP in ${resendLeft}s` : 'Resend OTP'}</Button><Button variant="link" onClick={() => { setStep(0); setInfo(''); setError(''); }}>Change number</Button></div></>}
 
       {step === 2 && gateway && <><div className="panel pay-panel"><div className="pay-head"><div><span className="eyebrow">ACTIVATION FEE</span><div className="payment-total">₹{fee.toLocaleString('en-IN')}</div></div><span className="status pending">{pay?.mode === 'live' ? 'RAZORPAY' : 'TEST MODE'}</span></div>
         <p className="muted">You'll pay securely via Razorpay (card, UPI or net banking). Your account activates only after Razorpay confirms the payment.</p>
@@ -156,7 +156,7 @@ export function RegisterFlow({ initialRole }: { initialRole?: string }) {
 
       {busy && step === 1 && <p className="muted">Please wait…</p>}
       {error && <p role="alert" className="form-error">{error}</p>}
-      {dup && <Button onClick={() => navigate({ to: '/login' })}>Go to login <ArrowRight /></Button>}
+      {dup && <Button onClick={() => navigate({ to: '/login' })}>{dup === 'pending' ? 'Login & Continue' : 'Login'} <ArrowRight /></Button>}
       <div className="form-actions">
         <Button variant="outline" disabled={busy} onClick={() => { setError(''); if (step === 0) setRole(null); else setStep(step - 1); }}><ArrowLeft /> Back</Button>
         {step === 0 && <Button type="submit" form="details-form" disabled={busy}>{busy ? 'Sending OTP…' : <>Send OTP <ArrowRight /></>}</Button>}

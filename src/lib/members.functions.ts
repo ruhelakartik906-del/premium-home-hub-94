@@ -35,7 +35,12 @@ async function createMember(m: Member, opts: { byAdmin: boolean; pendingPayment?
   const id = created.user.id;
   await supabaseAdmin.from('user_roles').insert({ user_id: id, role: m.role });
   const n = (v?: string) => (v && v.trim() ? v.trim() : null);
-  await supabaseAdmin.from('profiles').insert({ id, full_name: m.full_name, email: m.email, mobile: m.mobile, dob: n(m.dob), gender: n(m.gender), country: n(m.country), state: n(m.state), city: n(m.city), address: n(m.address), pincode: n(m.pincode), company_name: n(m.company_name), business_type: n(m.business_type), account_type: m.role, created_by_admin: opts.byAdmin, mobile_verified: !!opts.mobileVerified, ...(opts.pendingPayment ? { status: 'pending_payment' } : {}) });
+  const { error: profErr } = await supabaseAdmin.from('profiles').insert({ id, full_name: m.full_name, email: m.email, mobile: m.mobile, dob: n(m.dob), gender: n(m.gender), country: n(m.country), state: n(m.state), city: n(m.city), address: n(m.address), pincode: n(m.pincode), company_name: n(m.company_name), business_type: n(m.business_type), account_type: m.role, created_by_admin: opts.byAdmin, mobile_verified: !!opts.mobileVerified, ...(opts.pendingPayment ? { status: 'pending_payment' } : {}) });
+  if (profErr) {
+    // Unique email/mobile collision (e.g. two simultaneous signups): roll back the auth user.
+    await supabaseAdmin.auth.admin.deleteUser(id);
+    return { ok: false as const, error: profErr.code === '23505' ? 'An account already exists with these details. Please log in.' : 'Could not create the account. Please try again.' };
+  }
   if (opts.payment) {
     await supabaseAdmin.from('transactions').insert({ user_id: id, amount: Number((await supabaseAdmin.from('payment_settings').select('activation_fee').eq('id', 1).maybeSingle()).data?.activation_fee ?? ACTIVATION_FEE), purpose: 'activation', method: opts.payment.method, status: opts.payment.status, provider: 'offline', verified_via: 'offline', account_role: m.role, notes: 'Recorded by Master Admin (offline/manual payment)', payer_name: m.full_name, payer_email: m.email });
   }
@@ -49,15 +54,9 @@ export const registerMember = createServerFn({ method: 'POST' })
   .inputValidator((d) => memberSchema.extend({ otpToken: z.string().regex(/^[a-f0-9]{64}$/) }).parse(d))
   .handler(async ({ data: input }) => {
     const { otpToken, ...data } = input;
-    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
-    const digits = data.mobile.replace(/\D/g, '').slice(-10);
-    const { data: existing } = await supabaseAdmin.from('profiles').select('status,email,mobile')
-      .or(`email.ilike.${data.email.replace(/[,()%*]/g, '')},mobile.ilike.%${digits}`).limit(5);
-    const dup = (existing ?? []).find((p) => p.email.toLowerCase() === data.email.toLowerCase() || (p.mobile ?? '').replace(/\D/g, '').slice(-10) === digits);
-    if (dup) {
-      const pending = dup.status === 'pending_payment';
-      return { ok: false as const, duplicate: pending ? 'pending' as const : 'active' as const, error: pending ? 'You already have an account. Please login to continue your registration.' : 'You already have an active account. Please login.' };
-    }
+    const { findExistingAccount, DUP_MESSAGES } = await import('@/lib/otp.server');
+    const existing = await findExistingAccount(data.email, data.mobile);
+    if (existing) return { ok: false as const, duplicate: existing, error: DUP_MESSAGES[existing] };
     const { consumeOtpToken } = await import('@/lib/otp.server');
     if (!(await consumeOtpToken(data.mobile, otpToken))) return { ok: false as const, error: 'Mobile verification expired. Please verify your mobile number again.', reverify: true as const };
     const r = await createMember(data, { byAdmin: false, pendingPayment: true, mobileVerified: true });

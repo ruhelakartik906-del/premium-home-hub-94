@@ -23,8 +23,11 @@ function randomToken() {
 }
 
 export const sendOtp = createServerFn({ method: 'POST' })
-  .inputValidator((d) => z.object({ mobile: mobileSchema }).parse(d))
+  .inputValidator((d) => z.object({ mobile: mobileSchema, email: z.string().trim().email().max(200) }).parse(d))
   .handler(async ({ data }) => {
+    const { findExistingAccount, DUP_MESSAGES } = await import('@/lib/otp.server');
+    const existing = await findExistingAccount(data.email, data.mobile);
+    if (existing) return { ok: false as const, duplicate: existing, error: DUP_MESSAGES[existing] };
     const authkey = process.env['APITXT_AUTHKEY'];
     if (!authkey) return { ok: false as const, error: 'SMS service is not configured yet. Please try again later.' };
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
