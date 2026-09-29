@@ -1,6 +1,6 @@
 import { Link, useNavigate } from '@tanstack/react-router';
 import { useServerFn } from '@tanstack/react-start';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, BriefcaseBusiness, CheckCircle2, CreditCard, Landmark, LockKeyhole, Smartphone, UserRound } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -39,6 +39,27 @@ export function OtpInput({ value, onChange, onComplete }: { value: string[]; onC
   </div>;
 }
 
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+/** Date of birth as three simple pickers (DD / Month / YYYY). Submits ISO yyyy-mm-dd via a hidden input. */
+export function DobInput({ name, defaultValue, required }: { name: string; defaultValue?: string | null; required?: boolean }) {
+  const [y0, m0, d0] = (defaultValue ?? '').split('-');
+  const [d, setD] = useState(d0 ?? ''); const [m, setM] = useState(m0 ?? ''); const [y, setY] = useState(y0 ?? '');
+  const thisYear = new Date().getFullYear();
+  const years = Array.from({ length: 83 }, (_, i) => String(thisYear - 18 - i));
+  const maxDay = y && m ? new Date(Number(y), Number(m), 0).getDate() : 31;
+  const day = d && Number(d) > maxDay ? String(maxDay).padStart(2, '0') : d;
+  const value = day && m && y ? `${y}-${m}-${day}` : '';
+  return <div className="dob-input">
+    <select aria-label="Day" className="field-input" value={day} required={required} onChange={(e) => setD(e.target.value)}><option value="">DD</option>{Array.from({ length: maxDay }, (_, i) => String(i + 1).padStart(2, '0')).map((x) => <option key={x} value={x}>{x}</option>)}</select>
+    <select aria-label="Month" className="field-input" value={m} required={required} onChange={(e) => setM(e.target.value)}><option value="">Month</option>{MONTHS.map((x, i) => <option key={x} value={String(i + 1).padStart(2, '0')}>{x}</option>)}</select>
+    <select aria-label="Year" className="field-input" value={y} required={required} onChange={(e) => setY(e.target.value)}><option value="">YYYY</option>{years.map((x) => <option key={x}>{x}</option>)}</select>
+    <input type="hidden" name={name} value={value} />
+    {value && <small className="dob-preview">{day}/{m}/{y}</small>}
+  </div>;
+}
+
+type PaySettings = { enabled: boolean; activation_fee: number; provider: string; mode: string };
+
 export function RegisterFlow({ initialRole }: { initialRole?: string }) {
   const navigate = useNavigate();
   const register = useServerFn(registerMember);
@@ -50,20 +71,25 @@ export function RegisterFlow({ initialRole }: { initialRole?: string }) {
   const [agree, setAgree] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const steps = ['Your details', 'Verify mobile', 'Activation payment'];
+  const [pay, setPay] = useState<PaySettings | null>(null);
+  useEffect(() => { supabase.from('payment_settings').select('enabled,activation_fee,provider,mode').eq('id', 1).maybeSingle().then(({ data }) => setPay(data ? { ...data, activation_fee: Number(data.activation_fee) } : { enabled: false, activation_fee: ACTIVATION_FEE, provider: '', mode: 'test' })); }, []);
+  const gateway = !!pay?.enabled;
+  const fee = pay?.activation_fee ?? ACTIVATION_FEE;
+  const steps = gateway ? ['Your details', 'Verify mobile', 'Activation payment'] : ['Your details', 'Verify mobile'];
 
-  const pay = async () => {
+  const finish = async () => {
     if (!role) return;
-    if (!agree) { setError('Please accept the activation terms to continue.'); return; }
+    if (gateway && !agree) { setError('Please accept the activation terms to continue.'); return; }
     setBusy(true); setError('');
-    const res = await register({ data: { role, paymentMethod: method, full_name: details.full_name ?? '', email: details.email ?? '', password: details.password ?? '', mobile: details.mobile ?? '', dob: details.dob ?? '', gender: details.gender, country: details.country, state: details.state, city: details.city, address: details.address, pincode: details.pincode, company_name: details.company_name, business_type: details.business_type } }).catch(() => ({ ok: false as const, error: 'Please check your details and try again.' }));
+    const res = await register({ data: { role, ...(gateway ? { paymentMethod: method } : {}), full_name: details['full_name'] ?? '', email: details['email'] ?? '', password: details['password'] ?? '', mobile: details['mobile'] ?? '', dob: details['dob'] ?? '', gender: details['gender'], country: details['country'], state: details['state'], city: details['city'], address: details['address'], pincode: details['pincode'], company_name: details['company_name'], business_type: details['business_type'] } }).catch(() => ({ ok: false as const, error: 'Please check your details and try again.' }));
     if (!res.ok) { setBusy(false); setError(res.error); return; }
-    const { error: signErr } = await supabase.auth.signInWithPassword({ email: details.email!, password: details.password! });
+    const { error: signErr } = await supabase.auth.signInWithPassword({ email: details['email'] ?? '', password: details['password'] ?? '' });
     setBusy(false);
     if (signErr) { toast.error('Account created. Please log in.'); navigate({ to: '/login' }); return; }
-    toast.success('Payment successful — welcome to Eliteoz');
+    toast.success(gateway ? 'Payment successful — welcome to Eliteoz' : 'Welcome to Eliteoz — your account is ready');
     navigate({ to: role === 'buyer' ? '/buyer' : '/seller' });
   };
+  const afterOtp = () => { if (gateway) setStep(2); else void finish(); };
 
   return <PageShell><div className="auth-wrap"><aside className="auth-image"><img src={hero} alt="Luxury residence" /><div className="auth-caption">A more considered<br />way to move.</div></aside><main className="auth-main"><div className="auth-panel">
     <span className="eyebrow">ELITEOZ MEMBERSHIP</span>
@@ -72,30 +98,33 @@ export function RegisterFlow({ initialRole }: { initialRole?: string }) {
       <button className="role-card" onClick={() => setRole('seller')}><BriefcaseBusiness size={27} /><strong>Seller</strong><span>Present and manage high-value properties for a considered audience.</span></button>
     </div></> : <>
       <h1>{step === 0 ? `${role === 'buyer' ? 'Buyer' : 'Seller'} registration` : step === 1 ? 'Verify your mobile' : 'Activate your membership'}</h1>
-      <p>{step === 0 ? 'Tell us a little about yourself. Identity documents are collected later in Verification.' : step === 1 ? `Enter the 6-digit code sent to ${details.mobile ?? 'your mobile'}.` : 'One final step and your dashboard opens automatically.'}</p>
+      <p>{step === 0 ? 'Tell us a little about yourself. Identity documents are collected later in Verification.' : step === 1 ? `Enter the 6-digit code sent to ${details['mobile'] ?? 'your mobile'}.` : 'One final step and your dashboard opens automatically.'}</p>
       <div className="steps">{steps.map((x, i) => <div className={`step ${i === step ? 'active' : ''} ${i < step ? 'done' : ''}`} key={x}><span>{i < step ? '✓' : i + 1}</span>{x}</div>)}</div>
 
       {step === 0 && <form id="details-form" className="form-grid" onSubmit={(e) => { e.preventDefault(); const f = new FormData(e.currentTarget); const d: Record<string, string> = {}; f.forEach((v, k) => { d[k] = String(v); }); if ((d['password'] ?? '').length < 8) { setError('Password must be at least 8 characters.'); return; } setDetails(d as Details); setError(''); setStep(1); }}>
-        {fields.filter((x) => !x.seller || role === 'seller').map((x) => <div key={x.key} className={`field ${x.full ? 'full' : ''}`}><label htmlFor={x.key}>{x.label}{x.required && ' *'}</label>
+        {fields.filter((x) => !x.seller || role === 'seller').map((x) => <div key={x.key} className={`field ${x.full || x.key === 'dob' ? 'full' : ''}`}><label htmlFor={x.key}>{x.label}{x.required && ' *'}</label>
           {x.key === 'gender' ? <select id={x.key} name={x.key} className="field-input" defaultValue={details[x.key] ?? ''}><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select>
-            : <input id={x.key} name={x.key} className="field-input" type={x.type ?? 'text'} required={x.required} defaultValue={details[x.key] ?? ''} minLength={x.key === 'password' ? 8 : undefined} placeholder={x.label} />}</div>)}
+            : x.key === 'dob' ? <DobInput name="dob" defaultValue={details['dob']} />
+            : <input id={x.key} name={x.key} className="field-input" type={x.type ?? 'text'} required={x.required} defaultValue={details[x.key] ?? ''} minLength={x.key === 'password' ? 8 : undefined} placeholder={x.label} />}
+          {x.seller && <small className="muted">Set once. Later changes are handled by the Eliteoz team via a support ticket.</small>}</div>)}
       </form>}
 
       {step === 1 && <><Notice>Demo mode: SMS is not sent yet. Enter any 6 digits — the cursor moves automatically and you continue once all digits are filled.</Notice>
-        <OtpInput value={otp} onChange={setOtp} onComplete={() => { setTimeout(() => setStep(2), 350); }} />
+        <OtpInput value={otp} onChange={setOtp} onComplete={() => { setTimeout(afterOtp, 350); }} />
         <div className="flex gap-2"><Button variant="link" onClick={() => { setOtp(['', '', '', '', '', '']); toast('A new code would be sent here once SMS is connected.'); }}>Resend OTP</Button><Button variant="link" onClick={() => setStep(0)}>Change number</Button></div></>}
 
-      {step === 2 && <><div className="panel pay-panel"><div className="pay-head"><div><span className="eyebrow">ACTIVATION FEE</span><div className="payment-total">₹{ACTIVATION_FEE.toLocaleString('en-IN')}</div></div><span className="status pending">TEST MODE</span></div>
+      {step === 2 && gateway && <><div className="panel pay-panel"><div className="pay-head"><div><span className="eyebrow">ACTIVATION FEE</span><div className="payment-total">₹{fee.toLocaleString('en-IN')}</div></div><span className="status pending">{pay?.mode === 'live' ? pay.provider.toUpperCase() : 'TEST MODE'}</span></div>
         <div className="pay-methods">{([['test_card', 'Card', CreditCard], ['test_upi', 'UPI', Smartphone], ['test_netbanking', 'Net banking', Landmark]] as const).map(([k, l, I]) => <button type="button" key={k} className={`pay-method ${method === k ? 'active' : ''}`} onClick={() => setMethod(k)}><I size={20} />{l}</button>)}</div>
         <label className="filter-check"><input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} /> I agree to the activation terms and <Link className="text-link" to="/payment-policy">payment policy</Link>.</label></div>
-        <div className="preview-warning"><strong>Test payment.</strong> No real money is charged. A real payment gateway can be connected later.</div></>}
+        <div className="preview-warning"><strong>Test payment.</strong> No real money is charged until the live checkout is connected.</div></>}
 
+      {busy && step === 1 && <p className="muted">Creating your account…</p>}
       {error && <p role="alert" className="form-error">{error}</p>}
       <div className="form-actions">
         <Button variant="outline" disabled={busy} onClick={() => { setError(''); if (step === 0) setRole(null); else setStep(step - 1); }}><ArrowLeft /> Back</Button>
         {step === 0 && <Button type="submit" form="details-form">Continue <ArrowRight /></Button>}
-        {step === 1 && <Button disabled={otp.join('').length !== 6} onClick={() => setStep(2)}>Verify <ArrowRight /></Button>}
-        {step === 2 && <Button disabled={busy} onClick={pay}>{busy ? 'Processing…' : <>Pay ₹{ACTIVATION_FEE.toLocaleString('en-IN')} <LockKeyhole /></>}</Button>}
+        {step === 1 && <Button disabled={busy || otp.join('').length !== 6} onClick={afterOtp}>{busy ? 'Please wait…' : gateway ? <>Verify <ArrowRight /></> : <>Verify & open dashboard <ArrowRight /></>}</Button>}
+        {step === 2 && <Button disabled={busy} onClick={finish}>{busy ? 'Processing…' : <>Pay ₹{fee.toLocaleString('en-IN')} <LockKeyhole /></>}</Button>}
       </div>
     </>}
     <p className="auth-note">Already a member? <Link className="text-link" to="/login">Log in</Link></p>
