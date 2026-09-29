@@ -137,7 +137,7 @@ export function VerifyPaymentButton({ t }: { t: { id: string; status: string; pr
   const verify = async () => {
     if (!confirm('Confirm this payment was received? A registration payment will activate the account.')) return;
     const { data: auth } = await supabase.auth.getUser();
-    const { error } = await supabase.from('transactions').update({ status: 'success', verified_by: auth.user?.id, verified_at: new Date().toISOString() }).eq('id', t.id);
+    const { error } = await supabase.from('transactions').update({ status: 'success', verified_by: auth.user?.id ?? null, verified_at: new Date().toISOString() }).eq('id', t.id);
     if (error) { toast.error('Could not verify'); return; } toast.success('Payment verified'); qc.invalidateQueries();
   };
   return <div className="row-actions">{t.receipt_path && <Button size="sm" variant="ghost" onClick={viewReceipt}>Receipt</Button>}{t.status === 'pending' && t.provider === 'offline' && <Button size="sm" variant="outline" onClick={verify}>Verify</Button>}</div>;

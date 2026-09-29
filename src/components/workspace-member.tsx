@@ -237,7 +237,7 @@ function Verification({ me, role }: { me: Me; role: 'buyer' | 'seller' }) {
             {KYC_FIELDS.filter((fd) => !fd.seller || role === 'seller').map((fd) => {
               const locked = !!required && !required.includes(fd.key); const flagged = !!required?.includes(fd.key);
               const prev = retry && last ? String((last as Record<string, unknown>)[fd.key] ?? '') : fd.key === 'account_holder' ? p.full_name : '';
-              return <div className="field" key={fd.key}><label>{fd.label}{fd.props.required ? ' *' : ''}{flagged && <small className="danger-text"> — needs correction</small>}{locked && <small className="muted"> — locked</small>}</label><input name={fd.key} className="field-input" defaultValue={prev} readOnly={locked} style={flagged ? { borderColor: 'var(--destructive)' } : undefined} {...fd.props} /></div>;
+              return <div className="field" key={fd.key}><label>{fd.label}{fd.props['required'] ? ' *' : ''}{flagged && <small className="danger-text"> — needs correction</small>}{locked && <small className="muted"> — locked</small>}</label><input name={fd.key} className="field-input" defaultValue={prev} readOnly={locked} style={flagged ? { borderColor: 'var(--destructive)' } : undefined} {...fd.props} /></div>;
             })}
           </div>
           <p className="muted small">These details are visible only to you and the Eliteoz admin team.</p>
