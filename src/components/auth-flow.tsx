@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Notice, PageShell } from '@/components/eliteoz';
 import { hero } from '@/lib/eliteoz-data';
 import { registerMember, ACTIVATION_FEE } from '@/lib/members.functions';
+import { sendOtp, verifyOtp } from '@/lib/otp.functions';
 import { createFirstAdmin } from '@/lib/admin-setup.functions';
 import { supabase } from '@/integrations/supabase/client';
 import { accountAccess } from '@/lib/access';
@@ -80,18 +81,50 @@ export function RegisterFlow({ initialRole }: { initialRole?: string }) {
   const steps = ['Your details', 'Verify mobile', 'Activation payment'];
 
   const [dup, setDup] = useState(false);
-  const finish = async () => {
+  const send = useServerFn(sendOtp);
+  const verify = useServerFn(verifyOtp);
+  const [masked, setMasked] = useState('');
+  const [expiresAt, setExpiresAt] = useState(0);
+  const [resendAt, setResendAt] = useState(0);
+  const [now, setNow] = useState(0);
+  const [otpToken, setOtpToken] = useState('');
+  const [info, setInfo] = useState('');
+  useEffect(() => { if (step !== 1) return; setNow(Date.now()); const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, [step]);
+  const secsLeft = Math.max(0, Math.ceil((expiresAt - now) / 1000));
+  const resendLeft = Math.max(0, Math.ceil((resendAt - now) / 1000));
+  const requestOtp = async (mobile: string) => {
+    setBusy(true); setError(''); setInfo('');
+    const r = await send({ data: { mobile } }).catch(() => ({ ok: false as const, error: 'Please enter a valid 10-digit Indian mobile number.' }));
+    setBusy(false);
+    if (!r.ok) { setError(r.error); if ('retryAfter' in r && r.retryAfter) setResendAt(Date.now() + r.retryAfter * 1000); return false; }
+    setMasked(r.masked); setOtp(['', '', '', '', '', '']); setOtpToken('');
+    setExpiresAt(Date.now() + r.expiresIn * 1000); setResendAt(Date.now() + r.resendIn * 1000); setNow(Date.now());
+    setInfo(`OTP sent successfully to ${r.masked}`);
+    return true;
+  };
+  const finish = async (tokenArg?: string) => {
     if (!role) return;
+    const token = tokenArg ?? otpToken;
+    if (!token) { setError('Please verify your mobile number first.'); return; }
     setBusy(true); setError(''); setDup(false);
-    const res = await register({ data: { role, full_name: details['full_name'] ?? '', email: details['email'] ?? '', password: details['password'] ?? '', mobile: details['mobile'] ?? '', dob: details['dob'] ?? '', gender: details['gender'], country: details['country'], state: details['state'], city: details['city'], address: details['address'], pincode: details['pincode'], company_name: details['company_name'], business_type: details['business_type'] } }).catch(() => ({ ok: false as const, error: 'Please check your details and try again.' }));
-    if (!res.ok) { setBusy(false); setError(res.error); setDup('duplicate' in res && !!res.duplicate); return; }
+    const res = await register({ data: { otpToken: token, role, full_name: details['full_name'] ?? '', email: details['email'] ?? '', password: details['password'] ?? '', mobile: details['mobile'] ?? '', dob: details['dob'] ?? '', gender: details['gender'], country: details['country'], state: details['state'], city: details['city'], address: details['address'], pincode: details['pincode'], company_name: details['company_name'], business_type: details['business_type'] } }).catch(() => ({ ok: false as const, error: 'Please check your details and try again.' }));
+    if (!res.ok) { setBusy(false); setError(res.error); setDup('duplicate' in res && !!res.duplicate); if ('reverify' in res) { setOtpToken(''); setOtp(['', '', '', '', '', '']); } return; }
     const { error: signErr } = await supabase.auth.signInWithPassword({ email: details['email'] ?? '', password: details['password'] ?? '' });
     setBusy(false);
     if (signErr) { toast.error('Account created. Please log in to complete payment.'); navigate({ to: '/login' }); return; }
-    toast.success('Registration complete — one last step: activation payment');
+    toast.success('Mobile verified — one last step: activation payment');
     navigate({ to: '/activate', replace: true });
   };
-  const afterOtp = () => { void finish(); };
+  const afterOtp = async (code?: string) => {
+    const c = code ?? otp.join('');
+    if (busy || c.length !== 6) return;
+    setBusy(true); setError(''); setInfo('');
+    const r = await verify({ data: { mobile: details['mobile'] ?? '', otp: c } }).catch(() => ({ ok: false as const, error: 'Could not verify the OTP. Please try again.' }));
+    setBusy(false);
+    if (!r.ok) { setError(r.error); setOtp(['', '', '', '', '', '']); if ('expired' in r && r.expired) setExpiresAt(0); return; }
+    setOtpToken(r.token);
+    await finish(r.token);
+  };
 
   return <PageShell><div className="auth-wrap"><aside className="auth-image"><img src={hero} alt="Luxury residence" /><div className="auth-caption">A more considered<br />way to move.</div></aside><main className="auth-main"><div className="auth-panel">
     <span className="eyebrow">ELITEOZ MEMBERSHIP</span>
@@ -100,10 +133,10 @@ export function RegisterFlow({ initialRole }: { initialRole?: string }) {
       <button className="role-card" onClick={() => setRole('seller')}><BriefcaseBusiness size={27} /><strong>Seller</strong><span>Present and manage high-value properties for a considered audience.</span></button>
     </div></> : <>
       <h1>{step === 0 ? `${role === 'buyer' ? 'Buyer' : 'Seller'} registration` : step === 1 ? 'Verify your mobile' : 'Activate your membership'}</h1>
-      <p>{step === 0 ? 'Tell us a little about yourself. Identity documents are collected later in Verification.' : step === 1 ? `Enter the 6-digit code sent to ${details['mobile'] ?? 'your mobile'}.` : 'One final step and your dashboard opens automatically.'}</p>
+      <p>{step === 0 ? 'Tell us a little about yourself. Identity documents are collected later in Verification.' : step === 1 ? `Enter the 6-digit code sent to ${masked || 'your mobile'}.` : 'One final step and your dashboard opens automatically.'}</p>
       <div className="steps">{steps.map((x, i) => <div className={`step ${i === step ? 'active' : ''} ${i < step ? 'done' : ''}`} key={x}><span>{i < step ? '✓' : i + 1}</span>{x}</div>)}</div>
 
-      {step === 0 && <form id="details-form" className="form-grid" onSubmit={(e) => { e.preventDefault(); const f = new FormData(e.currentTarget); const d: Record<string, string> = {}; f.forEach((v, k) => { d[k] = String(v); }); if ((d['password'] ?? '').length < 8) { setError('Password must be at least 8 characters.'); return; } setDetails(d as Details); setError(''); setStep(1); }}>
+      {step === 0 && <form id="details-form" className="form-grid" onSubmit={(e) => { e.preventDefault(); const f = new FormData(e.currentTarget); const d: Record<string, string> = {}; f.forEach((v, k) => { d[k] = String(v); }); if ((d['password'] ?? '').length < 8) { setError('Password must be at least 8 characters.'); return; } if (!/^[6-9]\d{9}$/.test((d['mobile'] ?? '').replace(/\D/g, '').slice(-10))) { setError('Please enter a valid 10-digit Indian mobile number.'); return; } setDetails(d as Details); setError(''); void requestOtp(d['mobile'] ?? '').then((ok) => { if (ok) setStep(1); }); }}>
         {fields.filter((x) => !x.seller || role === 'seller').map((x) => <div key={x.key} className={`field ${x.full || x.key === 'dob' ? 'full' : ''}`}><label htmlFor={x.key}>{x.label}{x.required && ' *'}</label>
           {x.key === 'gender' ? <select id={x.key} name={x.key} className="field-input" defaultValue={details[x.key] ?? ''}><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select>
             : x.key === 'dob' ? <DobInput name="dob" defaultValue={details['dob']} />
@@ -111,23 +144,24 @@ export function RegisterFlow({ initialRole }: { initialRole?: string }) {
           {x.seller && <small className="muted">Set once. Later changes are handled by the Eliteoz team via a support ticket.</small>}</div>)}
       </form>}
 
-      {step === 1 && <><Notice>Demo mode: SMS is not sent yet. Enter any 6 digits — the cursor moves automatically and you continue once all digits are filled.</Notice>
-        <OtpInput value={otp} onChange={setOtp} onComplete={() => { setTimeout(afterOtp, 350); }} />
-        <div className="flex gap-2"><Button variant="link" onClick={() => { setOtp(['', '', '', '', '', '']); toast('A new code would be sent here once SMS is connected.'); }}>Resend OTP</Button><Button variant="link" onClick={() => setStep(0)}>Change number</Button></div></>}
+      {step === 1 && <>{info && <Notice>{info}</Notice>}
+        <OtpInput value={otp} onChange={setOtp} onComplete={(code) => { void afterOtp(code); }} />
+        <p className="muted">{secsLeft > 0 ? `Code expires in ${String(Math.floor(secsLeft / 60)).padStart(2, '0')}:${String(secsLeft % 60).padStart(2, '0')}` : 'Code expired — please request a new OTP.'}</p>
+        <div className="flex gap-2"><Button variant="link" disabled={busy || resendLeft > 0} onClick={() => { void requestOtp(details['mobile'] ?? ''); }}>{resendLeft > 0 ? `Resend OTP in ${resendLeft}s` : 'Resend OTP'}</Button><Button variant="link" onClick={() => { setStep(0); setInfo(''); setError(''); }}>Change number</Button></div></>}
 
       {step === 2 && gateway && <><div className="panel pay-panel"><div className="pay-head"><div><span className="eyebrow">ACTIVATION FEE</span><div className="payment-total">₹{fee.toLocaleString('en-IN')}</div></div><span className="status pending">{pay?.mode === 'live' ? 'RAZORPAY' : 'TEST MODE'}</span></div>
         <p className="muted">You'll pay securely via Razorpay (card, UPI or net banking). Your account activates only after Razorpay confirms the payment.</p>
         <label className="filter-check"><input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} /> I agree to the activation terms and <Link className="text-link" to="/payment-policy">payment policy</Link>.</label></div>
         {pay?.mode !== 'live' && <div className="preview-warning"><strong>Razorpay test mode.</strong> Use Razorpay test cards — no real money is charged.</div>}</>}
 
-      {busy && step === 1 && <p className="muted">Creating your account…</p>}
+      {busy && step === 1 && <p className="muted">Please wait…</p>}
       {error && <p role="alert" className="form-error">{error}</p>}
       {dup && <Button onClick={() => navigate({ to: '/login' })}>Go to login <ArrowRight /></Button>}
       <div className="form-actions">
         <Button variant="outline" disabled={busy} onClick={() => { setError(''); if (step === 0) setRole(null); else setStep(step - 1); }}><ArrowLeft /> Back</Button>
-        {step === 0 && <Button type="submit" form="details-form">Continue <ArrowRight /></Button>}
-        {step === 1 && <Button disabled={busy || otp.join('').length !== 6} onClick={afterOtp}>{busy ? 'Please wait…' : <>Verify & continue to payment <ArrowRight /></>}</Button>}
-        {step === 2 && <Button disabled={busy} onClick={finish}>{busy ? 'Processing…' : <>Pay ₹{fee.toLocaleString('en-IN')} <LockKeyhole /></>}</Button>}
+        {step === 0 && <Button type="submit" form="details-form" disabled={busy}>{busy ? 'Sending OTP…' : <>Send OTP <ArrowRight /></>}</Button>}
+        {step === 1 && <Button disabled={busy || otp.join('').length !== 6 || secsLeft === 0} onClick={() => { void afterOtp(); }}>{busy ? 'Please wait…' : <>Verify & continue to payment <ArrowRight /></>}</Button>}
+        {step === 2 && <Button disabled={busy} onClick={() => { void finish(); }}>{busy ? 'Processing…' : <>Pay ₹{fee.toLocaleString('en-IN')} <LockKeyhole /></>}</Button>}
       </div>
     </>}
     <p className="auth-note">Already a member? <Link className="text-link" to="/login">Log in</Link></p>
