@@ -8,6 +8,7 @@ import { Notice, PageShell, PropertyCard } from '@/components/eliteoz';
 import { publicPropertyQuery } from '@/lib/queries';
 import { useMe } from '@/hooks/use-auth';
 import { supabase } from '@/integrations/supabase/client';
+import { SaveButton } from '@/components/workspace-extra';
 
 export const Route = createFileRoute('/properties/$id')({
   loader: async ({ context, params }) => { const d = await context.queryClient.ensureQueryData(publicPropertyQuery(params.id)); if (!d.listing) throw notFound(); return { name: d.listing.name, description: d.listing.description }; },
@@ -56,7 +57,7 @@ function Details() {
       {p.amenities.length > 0 && <div className="detail-block"><h2>Amenities</h2><div className="amenities">{p.amenities.map((x) => <span key={x}>{x}</span>)}</div></div>}
       <Notice><strong>Eliteoz Verified Property.</strong> Private seller identity, bank and ownership documents are never displayed publicly.</Notice>
     </div>
-    <aside className="detail-aside"><span className="eyebrow">ASKING PRICE</span><div className="price">{p.price}</div><p>{p.area} · {p.type}</p><div className="notice"><BadgeCheck size={17} /> Eliteoz verified property</div><ContactForm propertyUuid={p.uuid} propertyName={p.name} /></aside></div>
+    <aside className="detail-aside"><span className="eyebrow">ASKING PRICE</span><div className="price">{p.price}</div><p>{p.area} · {p.type}</p><div className="notice"><BadgeCheck size={17} /> Eliteoz verified property</div><SaveButton propertyUuid={p.uuid} /><ContactForm propertyUuid={p.uuid} propertyName={p.name} /></aside></div>
     {data.related.length > 0 && <section className="section section-alt"><div className="container"><h2 style={{ fontSize: 36 }}>You may also like</h2><div className="property-grid">{data.related.map((x) => <PropertyCard key={x.id} property={x} />)}</div></div></section>}
   </main></PageShell>;
 }

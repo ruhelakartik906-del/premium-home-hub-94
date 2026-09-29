@@ -12,6 +12,7 @@ import { DobInput } from '@/components/auth-flow';
 import { adminCreateUser } from '@/lib/members.functions';
 import { Panel, SectionLink, Stat, Status, Table, Tabs, fmtDate } from '@/components/workspace';
 import type { Me } from '@/components/workspace-member';
+import { AuditLog, PlatformSettings } from '@/components/workspace-extra';
 
 async function notify(userIds: string[], title: string, body: string) {
   if (!userIds.length) return;
@@ -42,6 +43,8 @@ export function AdminBody({ section, me }: { section: string; me: Me }) {
     case 'integrations': return <Integrations />;
     case 'tickets': return <Tickets />;
     case 'gateway': return <Gateway />;
+    case 'settings': return <PlatformSettings />;
+    case 'audit': return <AuditLog />;
     default: return null;
   }
 }
