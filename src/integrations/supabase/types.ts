@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_logs: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          details: Json
+          id: string
+          target_user_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          target_user_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          target_user_id?: string | null
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           active: boolean
@@ -214,6 +241,27 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_settings: {
+        Row: {
+          id: number
+          reminder_days_before: number
+          updated_at: string
+          verification_days: number
+        }
+        Insert: {
+          id?: number
+          reminder_days_before?: number
+          updated_at?: string
+          verification_days?: number
+        }
+        Update: {
+          id?: number
+          reminder_days_before?: number
+          updated_at?: string
+          verification_days?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           account_type: string
@@ -232,6 +280,7 @@ export type Database = {
           id: string
           mobile: string | null
           pincode: string | null
+          reminder_sent_at: string | null
           state: string | null
           status: string
           updated_at: string
@@ -255,6 +304,7 @@ export type Database = {
           id: string
           mobile?: string | null
           pincode?: string | null
+          reminder_sent_at?: string | null
           state?: string | null
           status?: string
           updated_at?: string
@@ -278,6 +328,7 @@ export type Database = {
           id?: string
           mobile?: string | null
           pincode?: string | null
+          reminder_sent_at?: string | null
           state?: string | null
           status?: string
           updated_at?: string
@@ -466,6 +517,7 @@ export type Database = {
     Functions: {
       admin_exists: { Args: never; Returns: boolean }
       claim_first_admin: { Args: never; Returns: boolean }
+      enforce_verification_deadlines: { Args: never; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -473,6 +525,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_account_active: { Args: { _uid: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "buyer" | "seller"

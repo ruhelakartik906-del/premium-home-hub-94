@@ -52,7 +52,7 @@ export const registerMember = createServerFn({ method: 'POST' })
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
     const { data: s } = await supabaseAdmin.from('payment_settings').select('enabled').eq('id', 1).maybeSingle();
     if (s?.enabled && !paymentMethod) return { ok: false as const, error: 'Please choose a payment method.' };
-    return createMember(m, s?.enabled && paymentMethod ? { byAdmin: false, payment: { method: paymentMethod, status: 'success' } } : { byAdmin: false });
+    return createMember(m, s?.enabled && paymentMethod ? { byAdmin: false, payment: { method: paymentMethod, status: 'pending' } } : { byAdmin: false });
   });
 
 export const adminCreateUser = createServerFn({ method: 'POST' })
