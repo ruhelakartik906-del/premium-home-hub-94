@@ -49,6 +49,8 @@ export const createActivationOrder = createServerFn({ method: 'POST' })
     const { data: p } = await supabaseAdmin.from('profiles').select('full_name,email,mobile,status,account_type').eq('id', context.userId).maybeSingle();
     if (!p) return { ok: false as const, error: 'Profile not found.' };
     if (p.status !== 'pending_payment') return { ok: false as const, error: 'Your account does not need an activation payment.' };
+    const { data: paid } = await supabaseAdmin.from('transactions').select('id').eq('user_id', context.userId).eq('purpose', 'activation').eq('status', 'success').limit(1);
+    if (paid?.length) return { ok: false as const, error: 'Your activation payment is already confirmed. Please refresh the page.' };
     const cfg = await loadGateway();
     if (!cfg.enabled || !cfg.keyId || !cfg.keySecret) return { ok: false as const, error: 'Online payment is not available right now. Please contact the Eliteoz team.' };
     const amount = Math.round(cfg.fee * 100);
