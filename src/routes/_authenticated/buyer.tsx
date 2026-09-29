@@ -1,2 +1,3 @@
 import { createFileRoute, Outlet } from '@tanstack/react-router';
-export const Route=createFileRoute('/_authenticated/buyer')({component:()=> <Outlet/>});
+import { guardWorkspace } from '@/lib/access';
+export const Route=createFileRoute('/_authenticated/buyer')({beforeLoad:()=>guardWorkspace('buyer'),component:()=> <Outlet/>});

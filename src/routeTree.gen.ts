@@ -31,6 +31,7 @@ import { Route as SellersRouteImport } from './routes/sellers'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as VerificationPolicyRouteImport } from './routes/verification-policy'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as AuthenticatedActivateRouteImport } from './routes/_authenticated/activate'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedBuyerRouteImport } from './routes/_authenticated/buyer'
 import { Route as AuthenticatedSellerRouteImport } from './routes/_authenticated/seller'
@@ -155,6 +156,11 @@ const Char91DotwellKnownChar93OauthProtectedResourceRoute =
     path: '/.well-known/oauth-protected-resource',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedActivateRoute = AuthenticatedActivateRouteImport.update({
+  id: '/activate',
+  path: '/activate',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -248,6 +254,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/verification-policy': typeof VerificationPolicyRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/activate': typeof AuthenticatedActivateRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/buyer': typeof AuthenticatedBuyerRouteWithChildren
   '/seller': typeof AuthenticatedSellerRouteWithChildren
@@ -283,6 +290,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/verification-policy': typeof VerificationPolicyRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/activate': typeof AuthenticatedActivateRoute
   '/properties/$id': typeof PropertiesIdRoute
   '/properties': typeof PropertiesIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -318,6 +326,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/verification-policy': typeof VerificationPolicyRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/_authenticated/activate': typeof AuthenticatedActivateRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/buyer': typeof AuthenticatedBuyerRouteWithChildren
   '/_authenticated/seller': typeof AuthenticatedSellerRouteWithChildren
@@ -356,6 +365,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verification-policy'
     | '/.well-known/oauth-protected-resource'
+    | '/activate'
     | '/admin'
     | '/buyer'
     | '/seller'
@@ -391,6 +401,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verification-policy'
     | '/.well-known/oauth-protected-resource'
+    | '/activate'
     | '/properties/$id'
     | '/properties'
     | '/.lovable/oauth/consent'
@@ -425,6 +436,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verification-policy'
     | '/.well-known/oauth-protected-resource'
+    | '/_authenticated/activate'
     | '/_authenticated/admin'
     | '/_authenticated/buyer'
     | '/_authenticated/seller'
@@ -623,6 +635,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/activate': {
+      id: '/_authenticated/activate'
+      path: '/activate'
+      fullPath: '/activate'
+      preLoaderRoute: typeof AuthenticatedActivateRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
       path: '/admin'
@@ -757,12 +776,14 @@ const AuthenticatedSellerRouteWithChildren =
   AuthenticatedSellerRoute._addFileChildren(AuthenticatedSellerRouteChildren)
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedActivateRoute: typeof AuthenticatedActivateRoute
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedBuyerRoute: typeof AuthenticatedBuyerRouteWithChildren
   AuthenticatedSellerRoute: typeof AuthenticatedSellerRouteWithChildren
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedActivateRoute: AuthenticatedActivateRoute,
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedBuyerRoute: AuthenticatedBuyerRouteWithChildren,
   AuthenticatedSellerRoute: AuthenticatedSellerRouteWithChildren,

@@ -9,6 +9,7 @@ import { hero } from '@/lib/eliteoz-data';
 import { registerMember, ACTIVATION_FEE } from '@/lib/members.functions';
 import { createFirstAdmin } from '@/lib/admin-setup.functions';
 import { supabase } from '@/integrations/supabase/client';
+import { accountAccess } from '@/lib/access';
 
 type Role = 'buyer' | 'seller';
 type FieldKey = 'full_name' | 'email' | 'password' | 'mobile' | 'dob' | 'gender' | 'country' | 'state' | 'city' | 'address' | 'pincode' | 'company_name' | 'business_type';
@@ -76,24 +77,21 @@ export function RegisterFlow({ initialRole }: { initialRole?: string }) {
   useEffect(() => { supabase.from('payment_settings').select('enabled,activation_fee,provider,mode').eq('id', 1).maybeSingle().then(({ data }) => setPay(data ? { ...data, activation_fee: Number(data.activation_fee) } : { enabled: false, activation_fee: ACTIVATION_FEE, provider: '', mode: 'test' })); }, []);
   const gateway = !!pay?.enabled;
   const fee = pay?.activation_fee ?? ACTIVATION_FEE;
-  const steps = gateway ? ['Your details', 'Verify mobile', 'Activation payment'] : ['Your details', 'Verify mobile'];
+  const steps = ['Your details', 'Verify mobile', 'Activation payment'];
 
+  const [dup, setDup] = useState(false);
   const finish = async () => {
     if (!role) return;
-    if (gateway && !agree) { setError('Please accept the activation terms to continue.'); return; }
-    setBusy(true); setError('');
+    setBusy(true); setError(''); setDup(false);
     const res = await register({ data: { role, full_name: details['full_name'] ?? '', email: details['email'] ?? '', password: details['password'] ?? '', mobile: details['mobile'] ?? '', dob: details['dob'] ?? '', gender: details['gender'], country: details['country'], state: details['state'], city: details['city'], address: details['address'], pincode: details['pincode'], company_name: details['company_name'], business_type: details['business_type'] } }).catch(() => ({ ok: false as const, error: 'Please check your details and try again.' }));
-    if (!res.ok) { setBusy(false); setError(res.error); return; }
+    if (!res.ok) { setBusy(false); setError(res.error); setDup('duplicate' in res && !!res.duplicate); return; }
     const { error: signErr } = await supabase.auth.signInWithPassword({ email: details['email'] ?? '', password: details['password'] ?? '' });
-    if (signErr) { setBusy(false); toast.error('Account created. Please log in.'); navigate({ to: '/login' }); return; }
-    if ('needsPayment' in res && res.needsPayment) {
-      const r = await payActivation(); setBusy(false);
-      if (r.status === 'paid') toast.success('Payment confirmed — welcome to Eliteoz');
-      else toast.error(`${r.reason} Your account is saved — retry payment from your dashboard.`);
-    } else { setBusy(false); toast.success('Welcome to Eliteoz — your account is ready'); }
-    navigate({ to: role === 'buyer' ? '/buyer' : '/seller' });
+    setBusy(false);
+    if (signErr) { toast.error('Account created. Please log in to complete payment.'); navigate({ to: '/login' }); return; }
+    toast.success('Registration complete — one last step: activation payment');
+    navigate({ to: '/activate', replace: true });
   };
-  const afterOtp = () => { if (gateway) setStep(2); else void finish(); };
+  const afterOtp = () => { void finish(); };
 
   return <PageShell><div className="auth-wrap"><aside className="auth-image"><img src={hero} alt="Luxury residence" /><div className="auth-caption">A more considered<br />way to move.</div></aside><main className="auth-main"><div className="auth-panel">
     <span className="eyebrow">ELITEOZ MEMBERSHIP</span>
@@ -124,10 +122,11 @@ export function RegisterFlow({ initialRole }: { initialRole?: string }) {
 
       {busy && step === 1 && <p className="muted">Creating your account…</p>}
       {error && <p role="alert" className="form-error">{error}</p>}
+      {dup && <Button onClick={() => navigate({ to: '/login' })}>Go to login <ArrowRight /></Button>}
       <div className="form-actions">
         <Button variant="outline" disabled={busy} onClick={() => { setError(''); if (step === 0) setRole(null); else setStep(step - 1); }}><ArrowLeft /> Back</Button>
         {step === 0 && <Button type="submit" form="details-form">Continue <ArrowRight /></Button>}
-        {step === 1 && <Button disabled={busy || otp.join('').length !== 6} onClick={afterOtp}>{busy ? 'Please wait…' : gateway ? <>Verify <ArrowRight /></> : <>Verify & open dashboard <ArrowRight /></>}</Button>}
+        {step === 1 && <Button disabled={busy || otp.join('').length !== 6} onClick={afterOtp}>{busy ? 'Please wait…' : <>Verify & continue to payment <ArrowRight /></>}</Button>}
         {step === 2 && <Button disabled={busy} onClick={finish}>{busy ? 'Processing…' : <>Pay ₹{fee.toLocaleString('en-IN')} <LockKeyhole /></>}</Button>}
       </div>
     </>}
@@ -135,12 +134,8 @@ export function RegisterFlow({ initialRole }: { initialRole?: string }) {
   </div></main></div></PageShell>;
 }
 
-export async function routeForUser(): Promise<'/admin' | '/buyer' | '/seller' | null> {
-  const { data: u } = await supabase.auth.getUser();
-  if (!u.user) return null;
-  const { data } = await supabase.from('user_roles').select('role').eq('user_id', u.user.id);
-  const roles = (data ?? []).map((r) => r.role);
-  return roles.includes('admin') ? '/admin' : roles.includes('seller') ? '/seller' : '/buyer';
+export async function routeForUser() {
+  return (await accountAccess())?.dest ?? null;
 }
 
 export function LoginPage({ kind }: { kind: 'login' | 'forgot-password' | 'reset-password' }) {
