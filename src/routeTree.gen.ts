@@ -10,33 +10,218 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as BuyerGuidelinesRouteImport } from './routes/buyer-guidelines'
+import { Route as BuyersRouteImport } from './routes/buyers'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as FaqRouteImport } from './routes/faq'
+import { Route as HowItWorksRouteImport } from './routes/how-it-works'
+import { Route as PaymentPolicyRouteImport } from './routes/payment-policy'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as PropertiesRouteImport } from './routes/properties'
+import { Route as SellerGuidelinesRouteImport } from './routes/seller-guidelines'
+import { Route as SellersRouteImport } from './routes/sellers'
+import { Route as TermsRouteImport } from './routes/terms'
+import { Route as VerificationPolicyRouteImport } from './routes/verification-policy'
+import { Route as PropertiesIdRouteImport } from './routes/properties.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BuyerGuidelinesRoute = BuyerGuidelinesRouteImport.update({
+  id: '/buyer-guidelines',
+  path: '/buyer-guidelines',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BuyersRoute = BuyersRouteImport.update({
+  id: '/buyers',
+  path: '/buyers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HowItWorksRoute = HowItWorksRouteImport.update({
+  id: '/how-it-works',
+  path: '/how-it-works',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaymentPolicyRoute = PaymentPolicyRouteImport.update({
+  id: '/payment-policy',
+  path: '/payment-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PropertiesRoute = PropertiesRouteImport.update({
+  id: '/properties',
+  path: '/properties',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SellerGuidelinesRoute = SellerGuidelinesRouteImport.update({
+  id: '/seller-guidelines',
+  path: '/seller-guidelines',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SellersRoute = SellersRouteImport.update({
+  id: '/sellers',
+  path: '/sellers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VerificationPolicyRoute = VerificationPolicyRouteImport.update({
+  id: '/verification-policy',
+  path: '/verification-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PropertiesIdRoute = PropertiesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => PropertiesRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/buyer-guidelines': typeof BuyerGuidelinesRoute
+  '/buyers': typeof BuyersRoute
+  '/contact': typeof ContactRoute
+  '/faq': typeof FaqRoute
+  '/how-it-works': typeof HowItWorksRoute
+  '/payment-policy': typeof PaymentPolicyRoute
+  '/privacy': typeof PrivacyRoute
+  '/properties': typeof PropertiesRouteWithChildren
+  '/seller-guidelines': typeof SellerGuidelinesRoute
+  '/sellers': typeof SellersRoute
+  '/terms': typeof TermsRoute
+  '/verification-policy': typeof VerificationPolicyRoute
+  '/properties/$id': typeof PropertiesIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/buyer-guidelines': typeof BuyerGuidelinesRoute
+  '/buyers': typeof BuyersRoute
+  '/contact': typeof ContactRoute
+  '/faq': typeof FaqRoute
+  '/how-it-works': typeof HowItWorksRoute
+  '/payment-policy': typeof PaymentPolicyRoute
+  '/privacy': typeof PrivacyRoute
+  '/properties': typeof PropertiesRouteWithChildren
+  '/seller-guidelines': typeof SellerGuidelinesRoute
+  '/sellers': typeof SellersRoute
+  '/terms': typeof TermsRoute
+  '/verification-policy': typeof VerificationPolicyRoute
+  '/properties/$id': typeof PropertiesIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/buyer-guidelines': typeof BuyerGuidelinesRoute
+  '/buyers': typeof BuyersRoute
+  '/contact': typeof ContactRoute
+  '/faq': typeof FaqRoute
+  '/how-it-works': typeof HowItWorksRoute
+  '/payment-policy': typeof PaymentPolicyRoute
+  '/privacy': typeof PrivacyRoute
+  '/properties': typeof PropertiesRouteWithChildren
+  '/seller-guidelines': typeof SellerGuidelinesRoute
+  '/sellers': typeof SellersRoute
+  '/terms': typeof TermsRoute
+  '/verification-policy': typeof VerificationPolicyRoute
+  '/properties/$id': typeof PropertiesIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/buyer-guidelines'
+    | '/buyers'
+    | '/contact'
+    | '/faq'
+    | '/how-it-works'
+    | '/payment-policy'
+    | '/privacy'
+    | '/properties'
+    | '/seller-guidelines'
+    | '/sellers'
+    | '/terms'
+    | '/verification-policy'
+    | '/properties/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/about'
+    | '/buyer-guidelines'
+    | '/buyers'
+    | '/contact'
+    | '/faq'
+    | '/how-it-works'
+    | '/payment-policy'
+    | '/privacy'
+    | '/properties'
+    | '/seller-guidelines'
+    | '/sellers'
+    | '/terms'
+    | '/verification-policy'
+    | '/properties/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/buyer-guidelines'
+    | '/buyers'
+    | '/contact'
+    | '/faq'
+    | '/how-it-works'
+    | '/payment-policy'
+    | '/privacy'
+    | '/properties'
+    | '/seller-guidelines'
+    | '/sellers'
+    | '/terms'
+    | '/verification-policy'
+    | '/properties/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
+  BuyerGuidelinesRoute: typeof BuyerGuidelinesRoute
+  BuyersRoute: typeof BuyersRoute
+  ContactRoute: typeof ContactRoute
+  FaqRoute: typeof FaqRoute
+  HowItWorksRoute: typeof HowItWorksRoute
+  PaymentPolicyRoute: typeof PaymentPolicyRoute
+  PrivacyRoute: typeof PrivacyRoute
+  PropertiesRoute: typeof PropertiesRouteWithChildren
+  SellerGuidelinesRoute: typeof SellerGuidelinesRoute
+  SellersRoute: typeof SellersRoute
+  TermsRoute: typeof TermsRoute
+  VerificationPolicyRoute: typeof VerificationPolicyRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +233,134 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/buyer-guidelines': {
+      id: '/buyer-guidelines'
+      path: '/buyer-guidelines'
+      fullPath: '/buyer-guidelines'
+      preLoaderRoute: typeof BuyerGuidelinesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/buyers': {
+      id: '/buyers'
+      path: '/buyers'
+      fullPath: '/buyers'
+      preLoaderRoute: typeof BuyersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/how-it-works': {
+      id: '/how-it-works'
+      path: '/how-it-works'
+      fullPath: '/how-it-works'
+      preLoaderRoute: typeof HowItWorksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/payment-policy': {
+      id: '/payment-policy'
+      path: '/payment-policy'
+      fullPath: '/payment-policy'
+      preLoaderRoute: typeof PaymentPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/properties': {
+      id: '/properties'
+      path: '/properties'
+      fullPath: '/properties'
+      preLoaderRoute: typeof PropertiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/seller-guidelines': {
+      id: '/seller-guidelines'
+      path: '/seller-guidelines'
+      fullPath: '/seller-guidelines'
+      preLoaderRoute: typeof SellerGuidelinesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sellers': {
+      id: '/sellers'
+      path: '/sellers'
+      fullPath: '/sellers'
+      preLoaderRoute: typeof SellersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verification-policy': {
+      id: '/verification-policy'
+      path: '/verification-policy'
+      fullPath: '/verification-policy'
+      preLoaderRoute: typeof VerificationPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/properties/$id': {
+      id: '/properties/$id'
+      path: '/$id'
+      fullPath: '/properties/$id'
+      preLoaderRoute: typeof PropertiesIdRouteImport
+      parentRoute: typeof PropertiesRoute
+    }
   }
 }
 
+interface PropertiesRouteChildren {
+  PropertiesIdRoute: typeof PropertiesIdRoute
+}
+
+const PropertiesRouteChildren: PropertiesRouteChildren = {
+  PropertiesIdRoute: PropertiesIdRoute,
+}
+
+const PropertiesRouteWithChildren = PropertiesRoute._addFileChildren(
+  PropertiesRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
+  BuyerGuidelinesRoute: BuyerGuidelinesRoute,
+  BuyersRoute: BuyersRoute,
+  ContactRoute: ContactRoute,
+  FaqRoute: FaqRoute,
+  HowItWorksRoute: HowItWorksRoute,
+  PaymentPolicyRoute: PaymentPolicyRoute,
+  PrivacyRoute: PrivacyRoute,
+  PropertiesRoute: PropertiesRouteWithChildren,
+  SellerGuidelinesRoute: SellerGuidelinesRoute,
+  SellersRoute: SellersRoute,
+  TermsRoute: TermsRoute,
+  VerificationPolicyRoute: VerificationPolicyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
