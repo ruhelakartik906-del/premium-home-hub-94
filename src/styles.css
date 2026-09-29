@@ -85,3 +85,4 @@
 .gateway-toggle input{width:20px;height:20px;accent-color:var(--primary)}
 .gateway-toggle span{display:flex;flex-direction:column}.gateway-toggle small{color:var(--muted-foreground)}
 @media (max-width:560px){.dob-input{grid-template-columns:1fr 1.4fr 1fr;gap:6px}}
+.row-actions{position:relative}

@@ -41,7 +41,7 @@ export function OtpInput({ value, onChange, onComplete }: { value: string[]; onC
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 /** Date of birth as three simple pickers (DD / Month / YYYY). Submits ISO yyyy-mm-dd via a hidden input. */
-export function DobInput({ name, defaultValue, required }: { name: string; defaultValue?: string | null; required?: boolean }) {
+export function DobInput({ name, defaultValue, required }: { name: string; defaultValue?: string | null | undefined; required?: boolean }) {
   const [y0, m0, d0] = (defaultValue ?? '').split('-');
   const [d, setD] = useState(d0 ?? ''); const [m, setM] = useState(m0 ?? ''); const [y, setY] = useState(y0 ?? '');
   const thisYear = new Date().getFullYear();
