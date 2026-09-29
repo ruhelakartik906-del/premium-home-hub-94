@@ -273,6 +273,42 @@ export type Database = {
         }
         Relationships: []
       }
+      otp_verifications: {
+        Row: {
+          attempts: number
+          created_at: string
+          expires_at: string
+          id: string
+          mobile: string
+          otp_hash: string
+          status: string
+          verified_at: string | null
+          verify_token_hash: string | null
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          expires_at: string
+          id?: string
+          mobile: string
+          otp_hash: string
+          status?: string
+          verified_at?: string | null
+          verify_token_hash?: string | null
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          expires_at?: string
+          id?: string
+          mobile?: string
+          otp_hash?: string
+          status?: string
+          verified_at?: string | null
+          verify_token_hash?: string | null
+        }
+        Relationships: []
+      }
       payment_settings: {
         Row: {
           activation_fee: number
@@ -443,6 +479,7 @@ export type Database = {
           gender: string | null
           id: string
           mobile: string | null
+          mobile_verified: boolean
           pincode: string | null
           reminder_sent_at: string | null
           state: string | null
@@ -467,6 +504,7 @@ export type Database = {
           gender?: string | null
           id: string
           mobile?: string | null
+          mobile_verified?: boolean
           pincode?: string | null
           reminder_sent_at?: string | null
           state?: string | null
@@ -491,6 +529,7 @@ export type Database = {
           gender?: string | null
           id?: string
           mobile?: string | null
+          mobile_verified?: boolean
           pincode?: string | null
           reminder_sent_at?: string | null
           state?: string | null
