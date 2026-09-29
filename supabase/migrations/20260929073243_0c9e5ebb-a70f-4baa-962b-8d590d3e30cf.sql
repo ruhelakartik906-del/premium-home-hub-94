@@ -1,0 +1,5 @@
+CREATE POLICY "media read all" ON storage.objects FOR SELECT TO anon, authenticated USING (bucket_id = 'property-media');
+CREATE POLICY "media seller upload" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'property-media' AND (storage.foldername(name))[1] = auth.uid()::text);
+CREATE POLICY "media owner delete" ON storage.objects FOR DELETE TO authenticated USING (bucket_id = 'property-media' AND ((storage.foldername(name))[1] = auth.uid()::text OR public.has_role(auth.uid(),'admin')));
+CREATE POLICY "docs seller upload" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'property-docs' AND (storage.foldername(name))[1] = auth.uid()::text);
+CREATE POLICY "docs admin read" ON storage.objects FOR SELECT TO authenticated USING (bucket_id = 'property-docs' AND public.has_role(auth.uid(),'admin'));
