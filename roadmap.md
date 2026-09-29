@@ -1,0 +1,3 @@
+- [ ] Build public marketplace, content pages, and account flow previews.
+- [ ] Build distinct buyer, seller, and admin UI panels and requested modules.
+- [ ] Verify key navigation and responsive layouts.
