@@ -43,16 +43,22 @@ async function createMember(m: Member, opts: { byAdmin: boolean; pendingPayment?
   return { ok: true as const, userId: id };
 }
 
-// Public signup. If the Master Admin has switched on Razorpay, the account starts in
-// 'pending_payment' and is activated only after server-side payment verification.
+// Public signup. Every self-registered account starts in 'pending_payment' and is
+// activated only by a verified payment (server-side signature/webhook or admin record).
 export const registerMember = createServerFn({ method: 'POST' })
   .inputValidator((d) => memberSchema.parse(d))
   .handler(async ({ data }) => {
-    const { loadGateway } = await import('./razorpay.server');
-    const cfg = await loadGateway();
-    const needsPay = cfg.enabled && !!cfg.keyId && !!cfg.keySecret;
-    const r = await createMember(data, { byAdmin: false, pendingPayment: needsPay });
-    return r.ok ? { ...r, needsPayment: needsPay } : r;
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const digits = data.mobile.replace(/\D/g, '').slice(-10);
+    const { data: existing } = await supabaseAdmin.from('profiles').select('status,email,mobile')
+      .or(`email.ilike.${data.email.replace(/[,()%*]/g, '')},mobile.ilike.%${digits}`).limit(5);
+    const dup = (existing ?? []).find((p) => p.email.toLowerCase() === data.email.toLowerCase() || (p.mobile ?? '').replace(/\D/g, '').slice(-10) === digits);
+    if (dup) {
+      const pending = dup.status === 'pending_payment';
+      return { ok: false as const, duplicate: pending ? 'pending' as const : 'active' as const, error: pending ? 'You already have an account. Please login to continue your registration.' : 'You already have an active account. Please login.' };
+    }
+    const r = await createMember(data, { byAdmin: false, pendingPayment: true });
+    return r.ok ? { ...r, needsPayment: true } : r;
   });
 
 export const adminCreateUser = createServerFn({ method: 'POST' })
