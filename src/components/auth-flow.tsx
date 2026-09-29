@@ -149,6 +149,8 @@ export function LoginPage({ kind }: { kind: 'login' | 'forgot-password' | 'reset
     if (kind === 'login') {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) { setBusy(false); setMsg('Incorrect email or password.'); return; }
+      const nextParam = new URLSearchParams(window.location.search).get('next');
+      if (nextParam && nextParam.startsWith('/') && !nextParam.startsWith('//')) { window.location.href = nextParam; return; }
       const to = await routeForUser(); setBusy(false); navigate({ to: to ?? '/' });
     } else if (kind === 'forgot-password') {
       await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` });
