@@ -80,18 +80,50 @@ export function RegisterFlow({ initialRole }: { initialRole?: string }) {
   const steps = ['Your details', 'Verify mobile', 'Activation payment'];
 
   const [dup, setDup] = useState(false);
-  const finish = async () => {
+  const send = useServerFn(sendOtp);
+  const verify = useServerFn(verifyOtp);
+  const [masked, setMasked] = useState('');
+  const [expiresAt, setExpiresAt] = useState(0);
+  const [resendAt, setResendAt] = useState(0);
+  const [now, setNow] = useState(0);
+  const [otpToken, setOtpToken] = useState('');
+  const [info, setInfo] = useState('');
+  useEffect(() => { if (step !== 1) return; setNow(Date.now()); const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, [step]);
+  const secsLeft = Math.max(0, Math.ceil((expiresAt - now) / 1000));
+  const resendLeft = Math.max(0, Math.ceil((resendAt - now) / 1000));
+  const requestOtp = async (mobile: string) => {
+    setBusy(true); setError(''); setInfo('');
+    const r = await send({ data: { mobile } }).catch(() => ({ ok: false as const, error: 'Please enter a valid 10-digit Indian mobile number.' }));
+    setBusy(false);
+    if (!r.ok) { setError(r.error); if ('retryAfter' in r && r.retryAfter) setResendAt(Date.now() + r.retryAfter * 1000); return false; }
+    setMasked(r.masked); setOtp(['', '', '', '', '', '']); setOtpToken('');
+    setExpiresAt(Date.now() + r.expiresIn * 1000); setResendAt(Date.now() + r.resendIn * 1000); setNow(Date.now());
+    setInfo(`OTP sent successfully to ${r.masked}`);
+    return true;
+  };
+  const finish = async (tokenArg?: string) => {
     if (!role) return;
+    const token = tokenArg ?? otpToken;
+    if (!token) { setError('Please verify your mobile number first.'); return; }
     setBusy(true); setError(''); setDup(false);
-    const res = await register({ data: { role, full_name: details['full_name'] ?? '', email: details['email'] ?? '', password: details['password'] ?? '', mobile: details['mobile'] ?? '', dob: details['dob'] ?? '', gender: details['gender'], country: details['country'], state: details['state'], city: details['city'], address: details['address'], pincode: details['pincode'], company_name: details['company_name'], business_type: details['business_type'] } }).catch(() => ({ ok: false as const, error: 'Please check your details and try again.' }));
-    if (!res.ok) { setBusy(false); setError(res.error); setDup('duplicate' in res && !!res.duplicate); return; }
+    const res = await register({ data: { otpToken: token, role, full_name: details['full_name'] ?? '', email: details['email'] ?? '', password: details['password'] ?? '', mobile: details['mobile'] ?? '', dob: details['dob'] ?? '', gender: details['gender'], country: details['country'], state: details['state'], city: details['city'], address: details['address'], pincode: details['pincode'], company_name: details['company_name'], business_type: details['business_type'] } }).catch(() => ({ ok: false as const, error: 'Please check your details and try again.' }));
+    if (!res.ok) { setBusy(false); setError(res.error); setDup('duplicate' in res && !!res.duplicate); if ('reverify' in res) { setOtpToken(''); setOtp(['', '', '', '', '', '']); } return; }
     const { error: signErr } = await supabase.auth.signInWithPassword({ email: details['email'] ?? '', password: details['password'] ?? '' });
     setBusy(false);
     if (signErr) { toast.error('Account created. Please log in to complete payment.'); navigate({ to: '/login' }); return; }
-    toast.success('Registration complete — one last step: activation payment');
+    toast.success('Mobile verified — one last step: activation payment');
     navigate({ to: '/activate', replace: true });
   };
-  const afterOtp = () => { void finish(); };
+  const afterOtp = async (code?: string) => {
+    const c = code ?? otp.join('');
+    if (busy || c.length !== 6) return;
+    setBusy(true); setError(''); setInfo('');
+    const r = await verify({ data: { mobile: details['mobile'] ?? '', otp: c } }).catch(() => ({ ok: false as const, error: 'Could not verify the OTP. Please try again.' }));
+    setBusy(false);
+    if (!r.ok) { setError(r.error); setOtp(['', '', '', '', '', '']); if ('expired' in r && r.expired) setExpiresAt(0); return; }
+    setOtpToken(r.token);
+    await finish(r.token);
+  };
 
   return <PageShell><div className="auth-wrap"><aside className="auth-image"><img src={hero} alt="Luxury residence" /><div className="auth-caption">A more considered<br />way to move.</div></aside><main className="auth-main"><div className="auth-panel">
     <span className="eyebrow">ELITEOZ MEMBERSHIP</span>
