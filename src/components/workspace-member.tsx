@@ -20,11 +20,13 @@ function useMyInterests(uid: string) { return useQuery({ queryKey: ['my-interest
 function useSellerProps(uid: string) { return useQuery({ queryKey: ['seller-properties', uid], queryFn: async () => { const { data } = await supabase.from('properties').select(cols + ',admin_note,created_at,category_id').eq('seller_id', uid).order('created_at', { ascending: false }); return (data ?? []) as unknown as (PropertyRow & { admin_note: string | null; created_at: string; category_id: string | null })[]; } }); }
 function useSellerInterests(uid: string) { return useQuery({ queryKey: ['seller-interests', uid], queryFn: async () => { const { data } = await supabase.from('interests').select('id,status,created_at,preferred_time,properties!inner(ref,title,seller_id)').eq('properties.seller_id', uid).order('created_at', { ascending: false }); return data ?? []; } }); }
 
+import { SavedProperties } from '@/components/workspace-extra';
 export function MemberBody({ role, section, me }: { role: 'buyer' | 'seller'; section: string; me: Me }) {
   if (!section) return role === 'buyer' ? <BuyerOverview me={me} /> : <SellerOverview me={me} />;
   switch (section) {
     case 'explore': return <Explore />;
     case 'compare': return <Compare />;
+    case 'saved': return <SavedProperties />;
     case 'interests': return role === 'buyer' ? <BuyerInterests me={me} /> : <SellerInterests me={me} />;
     case 'properties': return <SellerProperties me={me} />;
     case 'add-property': return <ListingForm me={me} />;
