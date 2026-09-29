@@ -37,7 +37,7 @@ export function SelectiveGrid() {
 export function PrincipleMark({ kind }: { kind: 0 | 1 | 2 | 3 }) {
   return (
     <svg className="nx-mark" viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke={G} strokeWidth="1">
-      {kind === 0 && <><rect x="12" y="12" width="40" height="40" /><rect x="24" y="4" width="36" height="36" fill="var(--nx-mark-bg,#0A0A0A)" /><line x1="24" y1="4" x2="60" y2="40" strokeOpacity=".4" /></>}
+      {kind === 0 && <><rect x="12" y="12" width="40" height="40" /><rect x="24" y="4" width="36" height="36" fill="var(--nx-black)" /><line x1="24" y1="4" x2="60" y2="40" strokeOpacity=".4" /></>}
       {kind === 1 && <><circle cx="32" cy="32" r="22" /><line x1="32" y1="4" x2="32" y2="60" /><line x1="4" y1="32" x2="60" y2="32" /><rect x="24" y="24" width="16" height="16" transform="rotate(45 32 32)" /></>}
       {kind === 2 && <><path d="M10 58V18a22 22 0 0 1 44 0v40" /><path d="M22 58V26a10 10 0 0 1 20 0v32" /><line x1="4" y1="58" x2="60" y2="58" /></>}
       {kind === 3 && <>{[12, 24, 36, 48].map((v) => <g key={v}><line x1={v} y1="8" x2={v} y2="56" /><line x1="8" y1={v} x2="56" y2={v} /></g>)}<rect x="24" y="24" width="12" height="12" fill={G} fillOpacity=".25" /></>}
