@@ -2,4 +2,4 @@
 - [x] Build distinct buyer, seller, and admin UI panels and requested modules.
 - [x] Verify key navigation and responsive layouts.
 - [ ] Master Admin: edit users, permissions, payment control, webhooks (brief uploaded 29 Sep)
-- [ ] Homepage visual graphics upgrade (brief 29 Sep 11:21)
+- [x] Homepage visual graphics upgrade (brief 29 Sep 11:21)
