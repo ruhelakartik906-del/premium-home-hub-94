@@ -69,18 +69,21 @@ export type Database = {
         Row: {
           id: number
           key_secret: string | null
+          msg91_auth_key: string | null
           updated_at: string
           webhook_secret: string | null
         }
         Insert: {
           id?: number
           key_secret?: string | null
+          msg91_auth_key?: string | null
           updated_at?: string
           webhook_secret?: string | null
         }
         Update: {
           id?: number
           key_secret?: string | null
+          msg91_auth_key?: string | null
           updated_at?: string
           webhook_secret?: string | null
         }
@@ -293,6 +296,10 @@ export type Database = {
           contact_email: string | null
           contact_phone: string | null
           id: number
+          manual_payment_enabled: boolean
+          msg91_enabled: boolean
+          msg91_sender_id: string | null
+          msg91_template_id: string | null
           notify_email: boolean
           notify_whatsapp: boolean
           otp_provider: string
@@ -307,6 +314,10 @@ export type Database = {
           contact_email?: string | null
           contact_phone?: string | null
           id?: number
+          manual_payment_enabled?: boolean
+          msg91_enabled?: boolean
+          msg91_sender_id?: string | null
+          msg91_template_id?: string | null
           notify_email?: boolean
           notify_whatsapp?: boolean
           otp_provider?: string
@@ -321,6 +332,10 @@ export type Database = {
           contact_email?: string | null
           contact_phone?: string | null
           id?: number
+          manual_payment_enabled?: boolean
+          msg91_enabled?: boolean
+          msg91_sender_id?: string | null
+          msg91_template_id?: string | null
           notify_email?: boolean
           notify_whatsapp?: boolean
           otp_provider?: string

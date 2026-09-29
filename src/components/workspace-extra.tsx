@@ -8,9 +8,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { useMe } from '@/hooks/use-auth';
 import { Panel, Table, Tabs, fmtDate } from '@/components/workspace';
 import { formatINR } from '@/lib/eliteoz-data';
+import { useServerFn } from '@tanstack/react-start';
+import { getSmsKeyStatus, saveSmsKey } from '@/lib/payments.functions';
 
 export function PlatformSettings() {
-  const qc = useQueryClient(); const [busy, setBusy] = useState(false);
+  const qc = useQueryClient(); const [busy, setBusy] = useState(false); const [smsKey, setSmsKey] = useState('');
+  const smsStatus = useServerFn(getSmsKeyStatus); const saveKey = useServerFn(saveSmsKey);
+  const sms = useQuery({ queryKey: ['sms-key'], queryFn: () => smsStatus() });
   const q = useQuery({ queryKey: ['platform-settings'], queryFn: async () => (await supabase.from('platform_settings').select('*').eq('id', 1).maybeSingle()).data });
   if (q.isLoading) return <Panel><p className="muted">Loading…</p></Panel>;
   const s = q.data;
@@ -20,8 +24,9 @@ export function PlatformSettings() {
       verification_days: Number(f.get('verification_days')) || 7, reminder_days_before: Number(f.get('reminder_days_before')) || 0,
       contact_email: t('contact_email'), contact_phone: t('contact_phone'), otp_provider: String(f.get('otp_provider')),
       smtp_host: t('smtp_host'), smtp_from: t('smtp_from'), whatsapp_webhook_url: t('whatsapp_webhook_url'),
-      notify_email: f.get('notify_email') === 'on', notify_whatsapp: f.get('notify_whatsapp') === 'on',
+      notify_email: f.get('notify_email') === 'on', manual_payment_enabled: f.get('manual_payment_enabled') === 'on', msg91_enabled: f.get('msg91_enabled') === 'on', msg91_sender_id: t('msg91_sender_id'), msg91_template_id: t('msg91_template_id'), notify_whatsapp: f.get('notify_whatsapp') === 'on',
     }).eq('id', 1);
+    if (!error && smsKey.trim()) { const r = await saveKey({ data: { authKey: smsKey.trim() } }).catch(() => ({ ok: false as const, error: 'Could not save the SMS key.' })); if (!r.ok) { setBusy(false); toast.error(r.error); return; } setSmsKey(''); qc.invalidateQueries({ queryKey: ['sms-key'] }); }
     setBusy(false); if (error) { toast.error('Could not save settings'); return; } toast.success('Settings saved'); qc.invalidateQueries({ queryKey: ['platform-settings'] });
   }}>
     <h2>Platform settings</h2>
@@ -38,13 +43,18 @@ export function PlatformSettings() {
     <div className="form-section"><h3>Messages</h3></div>
     <div className="form-grid">
       <div className="field"><label>OTP provider</label><select name="otp_provider" className="field-input" defaultValue={s?.otp_provider ?? 'demo'}><option value="demo">Demo code (no SMS sent)</option><option value="msg91">MSG91 (needs account setup)</option></select></div>
+      <div className="field"><label>MSG91 sender ID</label><input name="msg91_sender_id" maxLength={11} className="field-input" defaultValue={s?.msg91_sender_id ?? ''} placeholder="ELTOZ" /></div>
+      <div className="field"><label>MSG91 OTP template ID</label><input name="msg91_template_id" className="field-input" defaultValue={s?.msg91_template_id ?? ''} /></div>
+      <div className="field"><label>MSG91 auth key</label><input type="password" autoComplete="off" value={smsKey} onChange={(e) => setSmsKey(e.target.value)} className="field-input" placeholder={sms.data?.masked ?? 'Not configured'} /><small className="muted">{sms.data?.masked ? `Saved: ${sms.data.masked}. Leave blank to keep it.` : 'Not configured. Stored privately on the server, never shown again.'}</small></div>
       <div className="field"><label>Email server host</label><input name="smtp_host" className="field-input" defaultValue={s?.smtp_host ?? ''} placeholder="smtp.example.com" /></div>
       <div className="field"><label>Send emails from</label><input name="smtp_from" type="email" className="field-input" defaultValue={s?.smtp_from ?? ''} /></div>
       <div className="field"><label>WhatsApp webhook address</label><input name="whatsapp_webhook_url" type="url" className="field-input" defaultValue={s?.whatsapp_webhook_url ?? ''} /></div>
     </div>
+    <label className="gateway-toggle"><input type="checkbox" name="msg91_enabled" defaultChecked={s?.msg91_enabled} /> <span><strong>MSG91 SMS OTP</strong><small>{sms.data?.masked ? 'Key saved. SMS sending is not switched on in the app yet' : 'Not configured: registration uses a demo code and no SMS is sent'}</small></span></label>
+    <label className="gateway-toggle"><input type="checkbox" name="manual_payment_enabled" defaultChecked={s?.manual_payment_enabled ?? true} /> <span><strong>Manual / offline payments</strong><small>Allow recording bank transfer or cheque payments for admin approval</small></span></label>
     <label className="gateway-toggle"><input type="checkbox" name="notify_email" defaultChecked={s?.notify_email} /> <span><strong>Email notifications</strong><small>Not sending yet: email delivery isn't connected</small></span></label>
     <label className="gateway-toggle"><input type="checkbox" name="notify_whatsapp" defaultChecked={s?.notify_whatsapp} /> <span><strong>WhatsApp notifications</strong><small>Not sending yet: WhatsApp isn't connected</small></span></label>
-    <div className="preview-warning"><strong>Note:</strong> Passwords and API keys are never saved here. They're added separately as private keys when each service is connected.</div>
+    <div className="preview-warning"><strong>Note:</strong> Private keys are saved on the server only and are never shown again after saving.</div>
     <div className="form-actions"><Button type="submit" disabled={busy}>{busy ? 'Saving…' : 'Save settings'}</Button></div>
   </form>;
 }
