@@ -3,7 +3,7 @@ import { Link } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useServerFn } from '@tanstack/react-start';
 import { useMemo, useState } from 'react';
-import { BadgeCheck, Building2, CreditCard, Download, FileCheck, FileText, Heart, Pencil, Wallet, Plus, Send, Star, Trash2, Users, X } from 'lucide-react';
+import { BadgeCheck, Building2, CreditCard, Download, FileCheck, FileText, Heart, Pencil, Wallet, Plus, Send, Star, Trash2, Users, X, Eye, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
