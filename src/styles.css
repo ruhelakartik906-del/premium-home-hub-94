@@ -218,3 +218,4 @@
 .nx-gate{text-align:center}.nx-gate .nx-page-title{margin-inline:auto}.nx-gate .nx-page-intro{margin-inline:auto}
 .nx-legal-links{display:flex;flex-wrap:wrap;gap:.3rem}
 @media (max-width:760px){.nx-page-split{grid-template-columns:1fr}.nx-page-list article{grid-template-columns:1fr}.nx-page-list article h2,.nx-page-list .nx-page-body{grid-column:1}.nx-form{grid-template-columns:1fr}}
+@media (min-width:1024px){.nx-cols4{grid-template-columns:repeat(4,1fr);gap:2rem}}
