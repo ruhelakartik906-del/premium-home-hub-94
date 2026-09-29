@@ -3,6 +3,7 @@ import { ArrowRight, ArrowUpRight, BadgeCheck, Heart, MapPin, Menu, Search, Shie
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import type { Listing } from '@/lib/eliteoz-data';
+import logo from '@/assets/eliteoz-logo.webp.asset.json';
 
 export function Brand({ light = false }: { light?: boolean }) { return <Link to="/" className={`brand ${light ? 'brand-light' : ''}`} aria-label="Eliteoz home">ELITEOZ<span className="brand-dot">.</span></Link>; }
 export function PublicHeader() {
