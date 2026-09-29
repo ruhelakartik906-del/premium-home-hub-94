@@ -13,7 +13,7 @@ export type EditableUser = Profile & { mobile_verified?: boolean; payment_status
 
 const F = ({ label, children, full }: { label: string; children: React.ReactNode; full?: boolean }) => <div className={`field ${full ? 'full' : ''}`}><label>{label}</label>{children}</div>;
 
-export function EditUserDialog({ user, onClose, onDelete }: { user: EditableUser | null; onClose: () => void; onDelete?: (u: EditableUser) => void }) {
+export function EditUserDialog({ user, onClose, onDelete }: { user: EditableUser | null; onClose: () => void; onDelete?: ((u: EditableUser) => void) | undefined }) {
   const qc = useQueryClient();
   const save = useServerFn(adminUpdateUser); const setStatus = useServerFn(adminSetStatus); const setPay = useServerFn(adminSetPayment);
   const [busy, setBusy] = useState(false);

@@ -112,7 +112,7 @@ function UsersSection() {
         return open === u.id ? [row, [<div className="user-detail" style={{ gridColumn: '1/-1' }}>{([['Mobile', u.mobile], ['Date of birth', u.dob], ['Gender', u.gender], ['Country', u.country], ['State', u.state], ['City', u.city], ['Pincode', u.pincode], ['Address', u.address], ['Company', u.company_name], ['Business type', u.business_type], ['Activated', fmtDate(u.activated_at)], ['Verify by', fmtDate(u.verification_due_at)], ['Created by admin', u.created_by_admin ? 'Yes' : 'No'], ['Mobile OTP verified', (u as { mobile_verified?: boolean }).mobile_verified ? 'Yes' : 'No']] as [string, string | null][]).map(([l, v]) => <div key={l}><span>{l}</span><strong>{v || '—'}</strong></div>)}</div>, '', '', '', '', '', '']] : [row]; })} />
     </Panel>
     <DeleteUserDialog user={delUser} onClose={() => setDelUser(null)} />
-    <EditUserDialog user={editUser} onClose={() => setEditUser(null)} onDelete={isMaster ? (u) => { setEditUser(null); setDelUser(u); } : undefined} />
+    <EditUserDialog user={editUser} onClose={() => setEditUser(null)} onDelete={isMaster ? (u) => { setEditUser(null); setDelUser({ ...u, role: u.account_type } as DeleteTarget); } : undefined} />
   </>;
 }
 
