@@ -14,6 +14,7 @@ import { Panel, SectionLink, Stat, Status, Table, Tabs, fmtDate } from '@/compon
 import type { Me } from '@/components/workspace-member';
 import { AuditLog, PlatformSettings, OfflinePaymentForm, VerifyPaymentButton } from '@/components/workspace-extra';
 import { KYC_FIELD_LABELS } from '@/components/workspace-member';
+import { KycDocsViewer } from '@/components/kyc-documents';
 
 async function notify(userIds: string[], title: string, body: string) {
   if (!userIds.length) return;
@@ -116,7 +117,7 @@ function Kyc() {
     toast.success('Saved'); qc.invalidateQueries({ queryKey: ['admin-kyc'] }); qc.invalidateQueries({ queryKey: ['admin-users'] }); };
   const list = (q.data ?? []).filter((s) => tab === 'all' || s.status === tab);
   return <Panel><Tabs value={tab} onChange={setTab} options={[['submitted', 'Awaiting review'], ['approved', 'Approved'], ['rejected', 'Rejected'], ['all', 'All']]} />
-    <Table headers={['Member', 'PAN / ID', 'Bank', 'Submitted', 'Status', '']} empty="No submissions here." rows={list.map((s) => [<div><strong>{s.profile?.full_name}</strong><small className="block muted">{s.profile?.email} · {s.profile?.account_type}</small></div>, <div><code>{s.pan}</code><small className="block muted">{s.gov_id}{s.gst ? ` · GST ${s.gst}` : ''}</small></div>, <div>{s.bank_name}<small className="block muted">{s.account_holder} · {s.account_number} · {s.ifsc}</small></div>, fmtDate(s.created_at), <Status value={s.status} />, s.status === 'submitted' ? <div className="row-actions"><Button size="sm" onClick={() => review(s.id, s.user_id, 'approved')}>Approve</Button><Button size="sm" variant="outline" onClick={() => review(s.id, s.user_id, 'changes_required')}>Request changes</Button><Button size="sm" variant="ghost" onClick={() => review(s.id, s.user_id, 'rejected')}>Reject</Button></div> : <small>{s.admin_note ?? ''}{s.required_fields?.length ? <span className="block muted">Fields: {s.required_fields.map((f) => KYC_FIELD_LABELS[f] ?? f).join(', ')}</span> : null}</small>])} /></Panel>;
+    <Table headers={['Member', 'PAN / ID', 'Bank', 'Submitted', 'Status', '']} empty="No submissions here." rows={list.map((s) => [<div><strong>{s.profile?.full_name}</strong><small className="block muted">{s.profile?.email} · {s.profile?.account_type}</small></div>, <div><code>{s.pan}</code><small className="block muted">{s.gov_id}{s.gst ? ` · GST ${s.gst}` : ''}</small></div>, <div>{s.bank_name}<small className="block muted">{s.account_holder} · {s.account_number} · {s.ifsc}</small></div>, fmtDate(s.created_at), <Status value={s.status} />, s.status === 'submitted' ? <div className="row-actions"><KycDocsViewer submissionId={s.id} /><Button size="sm" onClick={() => review(s.id, s.user_id, 'approved')}>Approve</Button><Button size="sm" variant="outline" onClick={() => review(s.id, s.user_id, 'changes_required')}>Request changes</Button><Button size="sm" variant="ghost" onClick={() => review(s.id, s.user_id, 'rejected')}>Reject</Button></div> : <div className="row-actions"><KycDocsViewer submissionId={s.id} /><small>{s.admin_note ?? ''}{s.required_fields?.length ? <span className="block muted">Fields: {s.required_fields.map((f) => KYC_FIELD_LABELS[f] ?? f).join(', ')}</span> : null}</small></div>])} /></Panel>;
 }
 
 function PropertiesSection() {

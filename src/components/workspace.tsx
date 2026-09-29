@@ -17,7 +17,8 @@ const admin: NavItem[] = [{ label: 'Dashboard', slug: '', icon: LayoutDashboard 
 export const menu = { buyer, seller, admin };
 export const workspaceSections: Record<Role, string[]> = { buyer: buyer.map((x) => x.slug).filter(Boolean), seller: seller.map((x) => x.slug).filter(Boolean), admin: admin.map((x) => x.slug).filter(Boolean) };
 
-export function Status({ value }: { value: string }) { return <span className={`status ${value.toLowerCase().replaceAll(' ', '-').replaceAll('_', '-')}`}>{value.replaceAll('_', ' ')}</span>; }
+const STATUS_LABELS: Record<string, string> = { submitted: 'Pending', changes_required: 'Resubmission required', not_submitted: 'Not submitted' };
+export function Status({ value }: { value: string }) { return <span className={`status ${value.toLowerCase().replaceAll(' ', '-').replaceAll('_', '-')}`}>{STATUS_LABELS[value] ?? value.replaceAll('_', ' ')}</span>; }
 export function Table({ headers, rows, empty = 'Nothing here yet.' }: { headers: string[]; rows: ReactNode[][]; empty?: string }) { if (!rows.length) return <div className="empty-state"><p>{empty}</p></div>; return <div className="data-table-wrap"><table className="data-table"><thead><tr>{headers.map((x) => <th key={x}>{x}</th>)}</tr></thead><tbody>{rows.map((row, i) => <tr key={i}>{row.map((cell, j) => <td key={j}>{cell}</td>)}</tr>)}</tbody></table></div>; }
 export function Stat({ label, value, hint, icon: Icon }: { label: string; value: ReactNode; hint?: string; icon?: typeof Heart }) { return <div className="stat-card">{Icon && <span className="stat-icon"><Icon size={17} /></span>}<span>{label}</span><strong>{value}</strong>{hint && <small>{hint}</small>}</div>; }
 export function Panel({ title, action, children }: { title?: string; action?: ReactNode; children: ReactNode }) { return <section className="panel">{(title || action) && <div className="panel-head">{title && <h2>{title}</h2>}{action}</div>}{children}</section>; }
