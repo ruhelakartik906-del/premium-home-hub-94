@@ -29,7 +29,7 @@ async function createMember(m: Member, opts: { byAdmin: boolean; payment?: { met
   });
   if (error || !created.user) {
     console.error('createMember failed', error?.message);
-    const msg = error?.message?.toLowerCase().includes('already') ? 'An account with this email already exists.' : 'Could not create the account. Please try again.';
+    const m = error?.message?.toLowerCase() ?? ''; const msg = m.includes('already') ? 'An account with this email already exists.' : m.includes('weak') || m.includes('password') ? 'This password is too common. Please choose a stronger password.' : 'Could not create the account. Please try again.';
     return { ok: false as const, error: msg };
   }
   const id = created.user.id;
