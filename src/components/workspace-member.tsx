@@ -1,13 +1,14 @@
 import { Link } from '@tanstack/react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowUpRight, BadgeCheck, Bell, Building2, CheckCheck, CreditCard, Eye, FileCheck, Heart, MessageSquare, SlidersHorizontal, Trash2, X } from 'lucide-react';
+import { ArrowUpRight, BadgeCheck, Bell, Building2, CheckCheck, CreditCard, Eye, FileCheck, FileText, Heart, LifeBuoy, LockKeyhole, MessageSquare, Upload, SlidersHorizontal, Trash2, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { PropertyCard } from '@/components/eliteoz';
 import { supabase } from '@/integrations/supabase/client';
 import { daysLeft, type useMe } from '@/hooks/use-auth';
 import { coverOf, formatINR, toListing, type Listing, type PropertyRow } from '@/lib/eliteoz-data';
+import { DobInput } from '@/components/auth-flow';
 import { readCompare, writeCompare } from '@/lib/queries';
 import { Panel, SectionLink, Stat, Status, Table, Tabs, fmtDate } from '@/components/workspace';
 
@@ -111,23 +112,55 @@ function SellerProperties({ me }: { me: Me }) {
   </Panel>;
 }
 
+async function uploadFiles(bucket: 'property-media' | 'property-docs', uid: string, files: File[]) {
+  const out: string[] = [];
+  for (const file of files) {
+    const path = `${uid}/${crypto.randomUUID()}-${file.name.replace(/[^\w.-]+/g, '_').slice(-80)}`;
+    const { error } = await supabase.storage.from(bucket).upload(path, file, { contentType: file.type });
+    if (error) throw error;
+    if (bucket === 'property-docs') { out.push(path); continue; }
+    const { data } = await supabase.storage.from(bucket).createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
+    if (data?.signedUrl) out.push(data.signedUrl);
+  }
+  return out;
+}
+
+function FileDrop({ label, hint, accept, multiple, files, onChange, image }: { label: string; hint: string; accept: string; multiple?: boolean; files: File[]; onChange: (f: File[]) => void; image?: boolean }) {
+  const previews = useMemo(() => (image ? files.map((f) => URL.createObjectURL(f)) : []), [files, image]);
+  return <div className="field full"><label>{label}</label>
+    <label className="file-drop"><Upload size={20} /><span><strong>Click to choose {multiple ? 'files' : 'a file'}</strong><small>{hint}</small></span>
+      <input type="file" accept={accept} multiple={multiple} hidden onChange={(e) => { const list = Array.from(e.target.files ?? []).filter((f) => f.size <= 10 * 1024 * 1024); if (list.length < (e.target.files?.length ?? 0)) toast.error('Files larger than 10 MB were skipped.'); onChange(multiple ? [...files, ...list].slice(0, 12) : list.slice(0, 1)); e.target.value = ''; }} /></label>
+    {files.length > 0 && <div className="file-list">{files.map((f, i) => <div key={i} className="file-chip">{image ? <img src={previews[i]} alt="" /> : <FileText size={16} />}<span>{f.name}</span><button type="button" aria-label="Remove" onClick={() => onChange(files.filter((_, j) => j !== i))}><X size={13} /></button></div>)}</div>}
+  </div>;
+}
+
 function ListingForm({ me }: { me: Me }) {
   const qc = useQueryClient();
   const cats = useQuery({ queryKey: ['categories-active'], queryFn: async () => { const { data } = await supabase.from('categories').select('id,name').eq('active', true).order('name'); return data ?? []; } });
-  const [image, setImage] = useState<string>('villa'); const [busy, setBusy] = useState(false); const [done, setDone] = useState('');
+  const [cover, setCover] = useState<File[]>([]); const [gallery, setGallery] = useState<File[]>([]); const [docs, setDocs] = useState<File[]>([]);
+  const [busy, setBusy] = useState(false); const [done, setDone] = useState('');
   const save = async (form: HTMLFormElement, status: 'draft' | 'pending') => {
-    if (status === 'pending' && !form.reportValidity()) return;
+    if (status === 'pending') {
+      if (!form.reportValidity()) return;
+      if (!cover.length) { toast.error('Please add a cover image.'); return; }
+      if (!docs.length) { toast.error('Please upload at least one ownership / proof document.'); return; }
+    }
     const f = new FormData(form); setBusy(true);
-    const num = (k: string) => (f.get(k) ? Number(f.get(k)) : null);
-    const { error } = await supabase.from('properties').insert({ seller_id: me.user.id, status, image, title: String(f.get('title') || 'Untitled property').slice(0, 160), location: String(f.get('location') || '—').slice(0, 160), category_id: String(f.get('category') || '') || null, property_type: String(f.get('type') || 'Villa'), price: num('price') ?? 0, area_sqft: num('area'), beds: num('beds'), baths: num('baths'), description: String(f.get('description') ?? '').slice(0, 4000), amenities: String(f.get('amenities') ?? '').split(',').map((s) => s.trim()).filter(Boolean).slice(0, 20) });
+    try {
+      const [coverUrl] = await uploadFiles('property-media', me.user.id, cover);
+      const galleryUrls = await uploadFiles('property-media', me.user.id, gallery);
+      const docPaths = await uploadFiles('property-docs', me.user.id, docs);
+      const num = (k: string) => (f.get(k) ? Number(f.get(k)) : null);
+      const { error } = await supabase.from('properties').insert({ seller_id: me.user.id, status, image: 'villa', cover_url: coverUrl ?? null, gallery: galleryUrls, documents: docPaths, title: String(f.get('title') || 'Untitled property').slice(0, 160), location: String(f.get('location') || '—').slice(0, 160), category_id: String(f.get('category') || '') || null, property_type: String(f.get('type') || 'Villa'), price: num('price') ?? 0, area_sqft: num('area'), beds: num('beds'), baths: num('baths'), description: String(f.get('description') ?? '').slice(0, 4000), amenities: String(f.get('amenities') ?? '').split(',').map((s) => s.trim()).filter(Boolean).slice(0, 20) });
+      if (error) throw error;
+    } catch { setBusy(false); toast.error('Could not save the property. Please try again.'); return; }
     setBusy(false);
-    if (error) { toast.error('Could not save the property.'); return; }
-    qc.invalidateQueries({ queryKey: ['seller-properties'] }); form.reset(); setDone(status);
+    qc.invalidateQueries({ queryKey: ['seller-properties'] }); form.reset(); setCover([]); setGallery([]); setDocs([]); setDone(status);
     toast.success(status === 'draft' ? 'Saved as draft' : 'Submitted for admin review');
   };
-  if (done) return <Panel><div className="empty-state"><BadgeCheck /><h3>{done === 'draft' ? 'Draft saved.' : 'Submitted for review.'}</h3><p>{done === 'draft' ? 'You can submit it anytime from My Properties.' : 'The Eliteoz team will review it. You will get a notification once it is approved.'}</p><div className="form-actions"><Button variant="outline" onClick={() => setDone('')}>Add another</Button><Button asChild><SectionLink role="seller" slug="properties">My properties</SectionLink></Button></div></div></Panel>;
+  if (done) return <Panel><div className="empty-state"><BadgeCheck /><h3>{done === 'draft' ? 'Draft saved.' : 'Submitted for review.'}</h3><p>{done === 'draft' ? 'You can submit it anytime from My Properties.' : 'The Eliteoz team will check your documents. The property goes live only after approval — you will get a notification.'}</p><div className="form-actions"><Button variant="outline" onClick={() => setDone('')}>Add another</Button><Button asChild><SectionLink role="seller" slug="properties">My properties</SectionLink></Button></div></div></Panel>;
   return <form className="panel listing-form" onSubmit={(e) => { e.preventDefault(); save(e.currentTarget, 'pending'); }}>
-    <h2>Property details</h2>
+    <div className="form-section"><span className="eyebrow">STEP 1</span><h2>Property details</h2></div>
     <div className="form-grid">
       <div className="field full"><label>Property title *</label><input name="title" className="field-input" required maxLength={160} placeholder="e.g. The Solstice Residence" /></div>
       <div className="field"><label>Category *</label><select name="category" className="field-input" required defaultValue=""><option value="" disabled>Select category</option>{(cats.data ?? []).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
@@ -139,9 +172,15 @@ function ListingForm({ me }: { me: Me }) {
       <div className="field"><label>Bathrooms</label><input name="baths" type="number" min={0} className="field-input" /></div>
       <div className="field full"><label>Description</label><textarea name="description" rows={4} className="field-input" placeholder="What makes this property special?" /></div>
       <div className="field full"><label>Amenities (comma separated)</label><input name="amenities" className="field-input" placeholder="Private pool, Garden, Parking" /></div>
-      <div className="field full"><label>Cover image</label><div className="image-pick">{imageKeys.map((k) => <button type="button" key={k} className={image === k ? 'active' : ''} onClick={() => setImage(k)}><img src={propertyImages[k]} alt={k} /></button>)}</div><small className="muted">Photo uploads can be added once file storage is set up; choose a cover style for now.</small></div>
     </div>
-    <div className="form-actions"><Button type="button" variant="outline" disabled={busy} onClick={(e) => save(e.currentTarget.form!, 'draft')}>Save as draft</Button><Button type="submit" disabled={busy}>{busy ? 'Saving…' : 'Submit for review'}</Button></div>
+    <div className="form-section"><span className="eyebrow">STEP 2</span><h2>Photos</h2><p className="muted">These are shown to buyers once the property is approved.</p></div>
+    <div className="form-grid">
+      <FileDrop label="Cover image *" hint="JPG or PNG, up to 10 MB. This is the main photo." accept="image/*" files={cover} onChange={setCover} image />
+      <FileDrop label="Gallery photos" hint="Up to 12 photos — rooms, views, exterior." accept="image/*" multiple files={gallery} onChange={setGallery} image />
+    </div>
+    <div className="form-section"><span className="eyebrow">STEP 3</span><h2>Proof of ownership</h2><p className="muted"><LockKeyhole size={13} /> Private — visible only to the Eliteoz Master Admin for verification. Never shown to buyers.</p></div>
+    <div className="form-grid"><FileDrop label="Ownership documents *" hint="Sale deed, property tax receipt, title papers — PDF or image, up to 10 MB each." accept="application/pdf,image/*" multiple files={docs} onChange={setDocs} /></div>
+    <div className="form-actions"><Button type="button" variant="outline" disabled={busy} onClick={(e) => save(e.currentTarget.form!, 'draft')}>Save as draft</Button><Button type="submit" disabled={busy}>{busy ? 'Uploading…' : 'Submit for verification'}</Button></div>
   </form>;
 }
 
@@ -200,12 +239,38 @@ function Payments({ me }: { me: Me }) {
 
 function Profile({ me, role }: { me: Me; role: 'buyer' | 'seller' }) {
   const qc = useQueryClient(); const p = me.profile!; const [busy, setBusy] = useState(false);
-  const keys: [string, string][] = useMemo(() => [['full_name', 'Full name'], ['mobile', 'Mobile'], ['gender', 'Gender'], ['country', 'Country'], ['state', 'State'], ['city', 'City'], ['pincode', 'Pincode'], ['address', 'Address'], ...(role === 'seller' ? [['company_name', 'Company'], ['business_type', 'Business type']] as [string, string][] : [])], [role]);
-  return <form className="panel" onSubmit={async (e) => { e.preventDefault(); const f = new FormData(e.currentTarget); const patch: Record<string, string> = {}; keys.forEach(([k]) => { patch[k] = String(f.get(k) ?? '').slice(0, 300); }); setBusy(true); const { error } = await supabase.from('profiles').update(patch as never).eq('id', me.user.id); setBusy(false); if (error) toast.error('Could not save'); else { toast.success('Profile updated'); qc.invalidateQueries({ queryKey: ['me'] }); } }}>
+  const keys: [string, string][] = [['full_name', 'Full name'], ['mobile', 'Mobile'], ['gender', 'Gender'], ['country', 'Country'], ['state', 'State'], ['city', 'City'], ['pincode', 'Pincode'], ['address', 'Address']];
+  const val = (k: string) => (p as unknown as Record<string, string | null>)[k] ?? '';
+  const lockedCompany = role === 'seller' && (!!p.company_name || !!p.business_type);
+  return <form className="panel" onSubmit={async (e) => {
+    e.preventDefault(); const f = new FormData(e.currentTarget); const g = (k: string) => String(f.get(k) ?? '').trim().slice(0, 300) || null;
+    const patch: { full_name: string; mobile: string | null; gender: string | null; country: string | null; state: string | null; city: string | null; pincode: string | null; address: string | null; dob: string | null; company_name?: string | null; business_type?: string | null } = { full_name: g('full_name') ?? p.full_name, mobile: g('mobile'), gender: g('gender'), country: g('country'), state: g('state'), city: g('city'), pincode: g('pincode'), address: g('address'), dob: g('dob') };
+    if (role === 'seller' && !lockedCompany) { patch.company_name = g('company_name'); patch.business_type = g('business_type'); }
+    setBusy(true); const { error } = await supabase.from('profiles').update(patch).eq('id', me.user.id); setBusy(false);
+    if (error) toast.error('Could not save'); else { toast.success('Profile updated'); qc.invalidateQueries({ queryKey: ['me'] }); }
+  }}>
     <div className="profile-head"><div className="avatar lg">{p.full_name.slice(0, 2).toUpperCase()}</div><div><h2>{p.full_name}</h2><p className="muted">{p.email} · Member since {fmtDate(p.created_at)}</p></div></div>
-    <div className="form-grid">{keys.map(([k, l]) => <div key={k} className={`field ${k === 'address' ? 'full' : ''}`}><label>{l}</label><input name={k} className="field-input" defaultValue={(p as unknown as Record<string, string | null>)[k] ?? ''} /></div>)}</div>
+    <div className="form-grid">{keys.map(([k, l]) => <div key={k} className={`field ${k === 'address' ? 'full' : ''}`}><label>{l}</label><input name={k} className="field-input" defaultValue={val(k)} /></div>)}
+      <div className="field full"><label>Date of birth</label><DobInput name="dob" defaultValue={p.dob} /></div>
+      {role === 'seller' && <>
+        <div className="field"><label>Company / business name {lockedCompany && <LockKeyhole size={12} />}</label><input name="company_name" className="field-input" defaultValue={val('company_name')} readOnly={lockedCompany} /></div>
+        <div className="field"><label>Business type {lockedCompany && <LockKeyhole size={12} />}</label><input name="business_type" className="field-input" defaultValue={val('business_type')} readOnly={lockedCompany} /></div>
+        {lockedCompany && <p className="field full muted small">Company details are fixed once saved. To change them, <SectionLink role="seller" slug="support" className="text-link">raise a support ticket</SectionLink> and the Eliteoz team will update them.</p>}
+      </>}
+    </div>
     <div className="form-actions"><Button type="submit" disabled={busy}>Save changes</Button></div>
   </form>;
+}
+
+function Support({ me }: { me: Me }) {
+  const qc = useQueryClient(); const [busy, setBusy] = useState(false);
+  const q = useQuery({ queryKey: ['my-tickets', me.user.id], queryFn: async () => { const { data } = await supabase.from('support_tickets').select('*').eq('user_id', me.user.id).order('created_at', { ascending: false }); return data ?? []; } });
+  return <div className="dash-grid"><Panel title="Your tickets">{(q.data ?? []).length ? <div className="notif-list">{q.data!.map((t) => <article key={t.id} className="notif"><span className="notif-dot"><LifeBuoy size={15} /></span><div className="grow"><div className="flex items-center justify-between gap-3"><strong>{t.subject}</strong><Status value={t.status} /></div><p>{t.message}</p>{t.admin_reply && <p className="team-note"><MessageSquare size={14} /> Eliteoz team: {t.admin_reply}</p>}<small>{fmtDate(t.created_at)}</small></div></article>)}</div> : <div className="empty-state"><LifeBuoy /><p>No tickets yet.</p></div>}</Panel>
+    <form className="panel" onSubmit={async (e) => { e.preventDefault(); const form = e.currentTarget; const f = new FormData(form); setBusy(true); const { error } = await supabase.from('support_tickets').insert({ user_id: me.user.id, subject: String(f.get('subject')).slice(0, 120), message: String(f.get('message')).slice(0, 2000) }); setBusy(false); if (error) { toast.error('Could not submit'); return; } toast.success('Ticket raised — the team will respond soon'); form.reset(); qc.invalidateQueries({ queryKey: ['my-tickets'] }); }}>
+      <h2>Raise a ticket</h2><p className="muted">Need to change your company name, business type or other locked details? Tell us here.</p>
+      <div className="field"><label>Subject</label><select name="subject" className="field-input" required defaultValue=""><option value="" disabled>Select</option><option>Change company name / business type</option><option>Change email or mobile</option><option>Property listing help</option><option>Payment or activation</option><option>Other</option></select></div>
+      <div className="field"><label>Details</label><textarea name="message" required rows={5} maxLength={2000} className="field-input" placeholder="Describe what you need changed" /></div>
+      <div className="form-actions"><Button type="submit" disabled={busy}>Submit ticket</Button></div></form></div>;
 }
 
 function Security() {
