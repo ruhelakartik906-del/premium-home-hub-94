@@ -555,9 +555,11 @@ export type Database = {
       }
       transactions: {
         Row: {
+          account_role: string | null
           amount: number
           created_at: string
           currency: string
+          environment: string | null
           failure_reason: string | null
           id: string
           method: string
@@ -577,11 +579,14 @@ export type Database = {
           user_id: string | null
           verified_at: string | null
           verified_by: string | null
+          verified_via: string | null
         }
         Insert: {
+          account_role?: string | null
           amount: number
           created_at?: string
           currency?: string
+          environment?: string | null
           failure_reason?: string | null
           id?: string
           method?: string
@@ -601,11 +606,14 @@ export type Database = {
           user_id?: string | null
           verified_at?: string | null
           verified_by?: string | null
+          verified_via?: string | null
         }
         Update: {
+          account_role?: string | null
           amount?: number
           created_at?: string
           currency?: string
+          environment?: string | null
           failure_reason?: string | null
           id?: string
           method?: string
@@ -625,6 +633,7 @@ export type Database = {
           user_id?: string | null
           verified_at?: string | null
           verified_by?: string | null
+          verified_via?: string | null
         }
         Relationships: []
       }
