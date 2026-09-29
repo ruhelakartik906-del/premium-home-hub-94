@@ -148,6 +148,7 @@ export type Database = {
           id: string
           ifsc: string
           pan: string
+          required_fields: string[]
           reviewed_at: string | null
           status: string
           user_id: string
@@ -163,6 +164,7 @@ export type Database = {
           id?: string
           ifsc: string
           pan: string
+          required_fields?: string[]
           reviewed_at?: string | null
           status?: string
           user_id: string
@@ -178,6 +180,7 @@ export type Database = {
           id?: string
           ifsc?: string
           pan?: string
+          required_fields?: string[]
           reviewed_at?: string | null
           status?: string
           user_id?: string
@@ -514,16 +517,22 @@ export type Database = {
           failure_reason: string | null
           id: string
           method: string
+          notes: string | null
           order_id: string | null
           payer_email: string | null
           payer_name: string | null
+          payment_date: string | null
           payment_id: string | null
           provider: string | null
           purpose: string
+          receipt_path: string | null
+          recorded_by: string | null
           reference: string
           status: string
           updated_at: string
           user_id: string | null
+          verified_at: string | null
+          verified_by: string | null
         }
         Insert: {
           amount: number
@@ -532,16 +541,22 @@ export type Database = {
           failure_reason?: string | null
           id?: string
           method?: string
+          notes?: string | null
           order_id?: string | null
           payer_email?: string | null
           payer_name?: string | null
+          payment_date?: string | null
           payment_id?: string | null
           provider?: string | null
           purpose?: string
+          receipt_path?: string | null
+          recorded_by?: string | null
           reference?: string
           status?: string
           updated_at?: string
           user_id?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Update: {
           amount?: number
@@ -550,16 +565,22 @@ export type Database = {
           failure_reason?: string | null
           id?: string
           method?: string
+          notes?: string | null
           order_id?: string | null
           payer_email?: string | null
           payer_name?: string | null
+          payment_date?: string | null
           payment_id?: string | null
           provider?: string | null
           purpose?: string
+          receipt_path?: string | null
+          recorded_by?: string | null
           reference?: string
           status?: string
           updated_at?: string
           user_id?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Relationships: []
       }
