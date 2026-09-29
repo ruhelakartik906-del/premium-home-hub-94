@@ -43,6 +43,7 @@ import { Route as AuthenticatedBuyerIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedBuyerSectionRouteImport } from './routes/_authenticated/buyer.$section'
 import { Route as AuthenticatedSellerIndexRouteImport } from './routes/_authenticated/seller.index'
 import { Route as AuthenticatedSellerSectionRouteImport } from './routes/_authenticated/seller.$section'
+import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/public/razorpay-webhook'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -218,6 +219,12 @@ const AuthenticatedSellerSectionRoute =
     path: '/$section',
     getParentRoute: () => AuthenticatedSellerRoute,
   } as any)
+const ApiPublicRazorpayWebhookRoute =
+  ApiPublicRazorpayWebhookRouteImport.update({
+    id: '/api/public/razorpay-webhook',
+    path: '/api/public/razorpay-webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -250,6 +257,7 @@ export interface FileRoutesByFullPath {
   '/admin/$section': typeof AuthenticatedAdminSectionRoute
   '/buyer/$section': typeof AuthenticatedBuyerSectionRoute
   '/seller/$section': typeof AuthenticatedSellerSectionRoute
+  '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/buyer/': typeof AuthenticatedBuyerIndexRoute
   '/seller/': typeof AuthenticatedSellerIndexRoute
@@ -281,6 +289,7 @@ export interface FileRoutesByTo {
   '/admin/$section': typeof AuthenticatedAdminSectionRoute
   '/buyer/$section': typeof AuthenticatedBuyerSectionRoute
   '/seller/$section': typeof AuthenticatedSellerSectionRoute
+  '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/buyer': typeof AuthenticatedBuyerIndexRoute
   '/seller': typeof AuthenticatedSellerIndexRoute
@@ -318,6 +327,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/$section': typeof AuthenticatedAdminSectionRoute
   '/_authenticated/buyer/$section': typeof AuthenticatedBuyerSectionRoute
   '/_authenticated/seller/$section': typeof AuthenticatedSellerSectionRoute
+  '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/buyer/': typeof AuthenticatedBuyerIndexRoute
   '/_authenticated/seller/': typeof AuthenticatedSellerIndexRoute
@@ -355,6 +365,7 @@ export interface FileRouteTypes {
     | '/admin/$section'
     | '/buyer/$section'
     | '/seller/$section'
+    | '/api/public/razorpay-webhook'
     | '/admin/'
     | '/buyer/'
     | '/seller/'
@@ -386,6 +397,7 @@ export interface FileRouteTypes {
     | '/admin/$section'
     | '/buyer/$section'
     | '/seller/$section'
+    | '/api/public/razorpay-webhook'
     | '/admin'
     | '/buyer'
     | '/seller'
@@ -422,6 +434,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/$section'
     | '/_authenticated/buyer/$section'
     | '/_authenticated/seller/$section'
+    | '/api/public/razorpay-webhook'
     | '/_authenticated/admin/'
     | '/_authenticated/buyer/'
     | '/_authenticated/seller/'
@@ -451,6 +464,7 @@ export interface RootRouteChildren {
   VerificationPolicyRoute: typeof VerificationPolicyRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
+  ApiPublicRazorpayWebhookRoute: typeof ApiPublicRazorpayWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -693,6 +707,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSellerSectionRouteImport
       parentRoute: typeof AuthenticatedSellerRoute
     }
+    '/api/public/razorpay-webhook': {
+      id: '/api/public/razorpay-webhook'
+      path: '/api/public/razorpay-webhook'
+      fullPath: '/api/public/razorpay-webhook'
+      preLoaderRoute: typeof ApiPublicRazorpayWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -789,6 +810,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
+  ApiPublicRazorpayWebhookRoute: ApiPublicRazorpayWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
