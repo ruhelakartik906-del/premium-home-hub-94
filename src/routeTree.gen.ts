@@ -30,9 +30,13 @@ import { Route as SellerGuidelinesRouteImport } from './routes/seller-guidelines
 import { Route as SellersRouteImport } from './routes/sellers'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as VerificationPolicyRouteImport } from './routes/verification-policy'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminSectionRouteImport } from './routes/admin.$section'
+import { Route as BuyerIndexRouteImport } from './routes/buyer.index'
 import { Route as BuyerSectionRouteImport } from './routes/buyer.$section'
+import { Route as PropertiesIndexRouteImport } from './routes/properties.index'
 import { Route as PropertiesIdRouteImport } from './routes/properties.$id'
+import { Route as SellerIndexRouteImport } from './routes/seller.index'
 import { Route as SellerSectionRouteImport } from './routes/seller.$section'
 
 const IndexRoute = IndexRouteImport.update({
@@ -140,20 +144,40 @@ const VerificationPolicyRoute = VerificationPolicyRouteImport.update({
   path: '/verification-policy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminSectionRoute = AdminSectionRouteImport.update({
   id: '/$section',
   path: '/$section',
   getParentRoute: () => AdminRoute,
+} as any)
+const BuyerIndexRoute = BuyerIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => BuyerRoute,
 } as any)
 const BuyerSectionRoute = BuyerSectionRouteImport.update({
   id: '/$section',
   path: '/$section',
   getParentRoute: () => BuyerRoute,
 } as any)
+const PropertiesIndexRoute = PropertiesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PropertiesRoute,
+} as any)
 const PropertiesIdRoute = PropertiesIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => PropertiesRoute,
+} as any)
+const SellerIndexRoute = SellerIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SellerRoute,
 } as any)
 const SellerSectionRoute = SellerSectionRouteImport.update({
   id: '/$section',
@@ -187,12 +211,14 @@ export interface FileRoutesByFullPath {
   '/buyer/$section': typeof BuyerSectionRoute
   '/properties/$id': typeof PropertiesIdRoute
   '/seller/$section': typeof SellerSectionRoute
+  '/admin/': typeof AdminIndexRoute
+  '/buyer/': typeof BuyerIndexRoute
+  '/properties/': typeof PropertiesIndexRoute
+  '/seller/': typeof SellerIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/admin': typeof AdminRouteWithChildren
-  '/buyer': typeof BuyerRouteWithChildren
   '/buyer-guidelines': typeof BuyerGuidelinesRoute
   '/buyers': typeof BuyersRoute
   '/contact': typeof ContactRoute
@@ -202,10 +228,8 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/payment-policy': typeof PaymentPolicyRoute
   '/privacy': typeof PrivacyRoute
-  '/properties': typeof PropertiesRouteWithChildren
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/seller': typeof SellerRouteWithChildren
   '/seller-guidelines': typeof SellerGuidelinesRoute
   '/sellers': typeof SellersRoute
   '/terms': typeof TermsRoute
@@ -214,6 +238,10 @@ export interface FileRoutesByTo {
   '/buyer/$section': typeof BuyerSectionRoute
   '/properties/$id': typeof PropertiesIdRoute
   '/seller/$section': typeof SellerSectionRoute
+  '/admin': typeof AdminIndexRoute
+  '/buyer': typeof BuyerIndexRoute
+  '/properties': typeof PropertiesIndexRoute
+  '/seller': typeof SellerIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -242,6 +270,10 @@ export interface FileRoutesById {
   '/buyer/$section': typeof BuyerSectionRoute
   '/properties/$id': typeof PropertiesIdRoute
   '/seller/$section': typeof SellerSectionRoute
+  '/admin/': typeof AdminIndexRoute
+  '/buyer/': typeof BuyerIndexRoute
+  '/properties/': typeof PropertiesIndexRoute
+  '/seller/': typeof SellerIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -271,12 +303,14 @@ export interface FileRouteTypes {
     | '/buyer/$section'
     | '/properties/$id'
     | '/seller/$section'
+    | '/admin/'
+    | '/buyer/'
+    | '/properties/'
+    | '/seller/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
-    | '/admin'
-    | '/buyer'
     | '/buyer-guidelines'
     | '/buyers'
     | '/contact'
@@ -286,10 +320,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/payment-policy'
     | '/privacy'
-    | '/properties'
     | '/register'
     | '/reset-password'
-    | '/seller'
     | '/seller-guidelines'
     | '/sellers'
     | '/terms'
@@ -298,6 +330,10 @@ export interface FileRouteTypes {
     | '/buyer/$section'
     | '/properties/$id'
     | '/seller/$section'
+    | '/admin'
+    | '/buyer'
+    | '/properties'
+    | '/seller'
   id:
     | '__root__'
     | '/'
@@ -325,6 +361,10 @@ export interface FileRouteTypes {
     | '/buyer/$section'
     | '/properties/$id'
     | '/seller/$section'
+    | '/admin/'
+    | '/buyer/'
+    | '/properties/'
+    | '/seller/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -500,12 +540,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VerificationPolicyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/$section': {
       id: '/admin/$section'
       path: '/$section'
       fullPath: '/admin/$section'
       preLoaderRoute: typeof AdminSectionRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/buyer/': {
+      id: '/buyer/'
+      path: '/'
+      fullPath: '/buyer/'
+      preLoaderRoute: typeof BuyerIndexRouteImport
+      parentRoute: typeof BuyerRoute
     }
     '/buyer/$section': {
       id: '/buyer/$section'
@@ -514,12 +568,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BuyerSectionRouteImport
       parentRoute: typeof BuyerRoute
     }
+    '/properties/': {
+      id: '/properties/'
+      path: '/'
+      fullPath: '/properties/'
+      preLoaderRoute: typeof PropertiesIndexRouteImport
+      parentRoute: typeof PropertiesRoute
+    }
     '/properties/$id': {
       id: '/properties/$id'
       path: '/$id'
       fullPath: '/properties/$id'
       preLoaderRoute: typeof PropertiesIdRouteImport
       parentRoute: typeof PropertiesRoute
+    }
+    '/seller/': {
+      id: '/seller/'
+      path: '/'
+      fullPath: '/seller/'
+      preLoaderRoute: typeof SellerIndexRouteImport
+      parentRoute: typeof SellerRoute
     }
     '/seller/$section': {
       id: '/seller/$section'
@@ -533,30 +601,36 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteChildren {
   AdminSectionRoute: typeof AdminSectionRoute
+  AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminSectionRoute: AdminSectionRoute,
+  AdminIndexRoute: AdminIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface BuyerRouteChildren {
   BuyerSectionRoute: typeof BuyerSectionRoute
+  BuyerIndexRoute: typeof BuyerIndexRoute
 }
 
 const BuyerRouteChildren: BuyerRouteChildren = {
   BuyerSectionRoute: BuyerSectionRoute,
+  BuyerIndexRoute: BuyerIndexRoute,
 }
 
 const BuyerRouteWithChildren = BuyerRoute._addFileChildren(BuyerRouteChildren)
 
 interface PropertiesRouteChildren {
   PropertiesIdRoute: typeof PropertiesIdRoute
+  PropertiesIndexRoute: typeof PropertiesIndexRoute
 }
 
 const PropertiesRouteChildren: PropertiesRouteChildren = {
   PropertiesIdRoute: PropertiesIdRoute,
+  PropertiesIndexRoute: PropertiesIndexRoute,
 }
 
 const PropertiesRouteWithChildren = PropertiesRoute._addFileChildren(
@@ -565,10 +639,12 @@ const PropertiesRouteWithChildren = PropertiesRoute._addFileChildren(
 
 interface SellerRouteChildren {
   SellerSectionRoute: typeof SellerSectionRoute
+  SellerIndexRoute: typeof SellerIndexRoute
 }
 
 const SellerRouteChildren: SellerRouteChildren = {
   SellerSectionRoute: SellerSectionRoute,
+  SellerIndexRoute: SellerIndexRoute,
 }
 
 const SellerRouteWithChildren =
