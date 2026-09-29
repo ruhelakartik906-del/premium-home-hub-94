@@ -2,7 +2,8 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { Footer, PublicHeader } from '@/components/eliteoz';
 import logo from '@/assets/eliteoz-logo.webp.asset.json';
 import portrait from '@/assets/col-nk-yadav.webp.asset.json';
-import heroImg from '@/assets/home-estate-noir.jpg';
+import heroImg from '@/assets/home-hero-abstract.jpg';
+import { useReveal, SelectiveGrid, PrincipleMark, AssetSilhouettes, Horizon } from '@/components/nx-graphics';
 
 export const Route = createFileRoute('/')({
   errorComponent: () => <div className="section container"><h2>Something went wrong. Please refresh.</h2></div>,
@@ -43,42 +44,42 @@ const buyers = ['Serious investors', 'HNI / UHNI buyers', 'Industrial groups', '
 const notFor = ['Casual property browsing', 'Mass-market property enquiries', 'Unverified intermediaries', 'Low-value property searches', 'Unnecessary broker chains', 'Public marketplace-style transactions'];
 
 function Home() {
+  useReveal();
   return (
     <div className="nx">
       <NoirHeader />
       <main>
         <section className="nx-hero">
-          <img src={heroImg} alt="" width={1600} height={960} fetchPriority="high" decoding="async" />
+          <img src={heroImg} alt="" width={1920} height={1088} fetchPriority="high" decoding="async" />
           <div className="nx-wrap nx-hero-inner nx-fade">
             <span className="nx-om" lang="sa">ॐ गणेशाय नमः</span>
             <span className="nx-eyebrow">An Exclusive Network for Ultra-Premium Assets</span>
             <h1>Exceptional Assets.<br />Privately Connected.</h1>
             <span className="nx-rule" />
-            <p className="nx-lead">50 Crore+ Assets. Private Access. Complete Discretion.</p>
-            <p>Eliteoz is an invitation-based platform dedicated exclusively to properties, companies, industrial assets and other high-value holdings valued at INR 50 Crores and above.</p>
+            <span className="nx-hero-50">₹50 CRORE+</span>
+            <p className="nx-lead">Private access to exceptional assets, serious participants and discreet transactions.</p>
             <div className="nx-ctas">
               <Link to="/register" className="nx-btn">Request Private Access</Link>
-              <a href="#standard" className="nx-btn-ghost">Discover the Eliteoz Standard</a>
-            </div>
+                          </div>
           </div>
         </section>
 
-        <section className="nx-light nx-sec">
-          <div className="nx-wrap nx-split">
+        <section className="nx-dark nx-sec nx-grain">
+          <div className="nx-wrap nx-split" data-reveal>
             <div><span className="nx-eyebrow">Not a Property Portal.</span><h2>Not Listed.<br />Not Advertised.<br />Not Open to Everyone.</h2></div>
             <div className="nx-body">
               <p>Eliteoz is a private network — not a public marketplace.</p>
               <p>There are no public property listings, unnecessary enquiries or uncontrolled exposure.</p>
               <p>Access is restricted to registered, verified and appropriately activated participants.</p>
-              <span className="nx-rule" />
+              <SelectiveGrid />
             </div>
           </div>
         </section>
 
-        <section className="nx-dark nx-sec">
-          <div className="nx-wrap">
+        <section className="nx-dark nx-sec nx-threshold">
+          <div className="nx-wrap" data-reveal>
             <span className="nx-eyebrow">The Eliteoz Threshold</span>
-            <span className="nx-big">₹50 CRORE+</span>
+            <span className="nx-big nx-big-lit">₹50 CRORE+</span>
             <div className="nx-split">
               <h2>A Different Class of Asset.<br />A Different Standard of Access.</h2>
               <div className="nx-body">
@@ -111,11 +112,11 @@ function Home() {
           </div>
         </section>
 
-        <section className="nx-light nx-sec" id="standard">
+        <section className="nx-dark nx-sec" id="standard">
           <div className="nx-wrap">
             <span className="nx-eyebrow">Principles</span><h2>The Eliteoz Standard.</h2>
-            <div className="nx-cols3 nx-cols4">
-              {[['Discretion', 'No public exposure. No unnecessary visibility. No uncontrolled enquiries.'], ['Verification', 'Participants and mandates undergo appropriate verification before access is granted.'], ['Controlled Access', 'Private information is visible only according to account status, role and authorization.'], ['Professional Execution', 'A structured ecosystem supported by document experts, legal professionals and experienced oversight.']].map(([t, d], i) => <article key={t}><span className="nx-num">0{i + 1}</span><h3>{t}</h3><p>{d}</p></article>)}
+            <div className="nx-cols3 nx-cols4" data-reveal>
+              {[['Discretion', 'No public exposure. No unnecessary visibility. No uncontrolled enquiries.'], ['Verification', 'Participants and mandates undergo appropriate verification before access is granted.'], ['Controlled Access', 'Private information is visible only according to account status, role and authorization.'], ['Professional Execution', 'A structured ecosystem supported by document experts, legal professionals and experienced oversight.']].map(([t, d], i) => <article key={t}><PrincipleMark kind={i as 0 | 1 | 2 | 3} /><span className="nx-num">0{i + 1}</span><h3>{t}</h3><p>{d}</p></article>)}
             </div>
           </div>
         </section>
@@ -123,7 +124,7 @@ function Home() {
         <section className="nx-ivory nx-sec">
           <div className="nx-wrap">
             <span className="nx-eyebrow">How We Work</span><h2>The Eliteoz Way.</h2>
-            <div className="nx-cols3">
+            <div className="nx-cols3 nx-journey" data-reveal>
               <article><span className="nx-num">01</span><h3>Off-Market & Verified Mandates</h3><p>We deal only in genuine, private mandates. No public listings. No market noise.</p></article>
               <article><span className="nx-num">02</span><h3>No Unnecessary Queries</h3><p>We understand the value of time at this level. We aim to connect serious participants directly — without unnecessary broker chains or casual enquiries.</p></article>
               <article><span className="nx-num">03</span><h3>Confidentiality by Design</h3><p>Identity, asset information and transaction-related information are handled through controlled access and confidentiality-focused processes.</p></article>
@@ -136,14 +137,15 @@ function Home() {
             <div><span className="nx-eyebrow">Asset Categories</span><h2>Significant Assets.<br />Considered Broadly.</h2></div>
             <ul className="nx-assets">{assets.map((a) => <li key={a}>{a}</li>)}</ul>
           </div>
+          <div className="nx-wrap" data-reveal><AssetSilhouettes /></div>
         </section>
 
-        <section className="nx-ivory nx-sec">
-          <div className="nx-wrap nx-why">
+        <section className="nx-dark nx-sec nx-grain">
+          <div className="nx-wrap nx-why nx-why-dark" data-reveal>
             <figure><img src={portrait.url} alt="Col. N.K. Yadav (Retd.), Indian Army" width={560} height={700} loading="lazy" /><figcaption><strong>Col. N.K. Yadav (Retd.)</strong><span>Indian Army</span></figcaption></figure>
             <div>
-              <span className="nx-eyebrow">Leadership & Oversight</span>
-              <h2>Experienced Oversight.</h2>
+              <span className="nx-eyebrow">Eliteoz</span>
+              <h2>Leadership &amp;<br />Oversight.</h2>
               <div className="nx-body">
                 <p>At Eliteoz, every mandate is executed under the direct supervision of Col. N.K. Yadav (Retd.), Indian Army, supported by an elite panel of Retd. ACPs, certified document experts and legal professionals.</p>
                 <p>We are committed to secure, confidential and carefully verified execution with transparency and professional oversight.</p>
@@ -155,7 +157,7 @@ function Home() {
         <section className="nx-light nx-sec">
           <div className="nx-wrap">
             <span className="nx-eyebrow">The Process</span><h2>Private Access.<br />By Design.</h2>
-            <ol className="nx-steps">
+            <ol className="nx-steps nx-corridor" data-reveal>
               {[['Register', 'Create your Buyer or Seller account.'], ['Verify', 'Complete the required identity and account verification process.'], ['Activate', 'Complete the applicable activation/payment requirements.'], ['Access', 'Receive access according to your verified role and account status.']].map(([t, d], i) => <li key={t}><span className="nx-num">0{i + 1}</span><h3>{t}</h3><p>{d}</p></li>)}
             </ol>
           </div>
@@ -184,8 +186,9 @@ function Home() {
           </div>
         </section>
 
-        <section className="nx-dark nx-sec nx-final">
-          <div className="nx-wrap">
+        <section className="nx-dark nx-sec nx-final nx-final-h">
+          <Horizon />
+          <div className="nx-wrap" data-reveal>
             <h2>For Those Who Value<br />Privacy Over Publicity.</h2>
             <p className="nx-muted">If you own a trophy asset or are looking to acquire one in complete privacy, you have arrived at the right place.</p>
             <div className="nx-ctas nx-center"><Link to="/register" className="nx-btn">Request Private Access</Link><Link to="/how-it-works" className="nx-btn-ghost">Learn How Eliteoz Works</Link></div>
