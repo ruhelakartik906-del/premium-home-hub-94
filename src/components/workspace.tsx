@@ -53,7 +53,7 @@ export function Workspace({ role, section = '' }: { role: Role; section?: string
   const initials = name.split(' ').map((x) => x[0]).slice(0, 2).join('').toUpperCase();
   const status = p && role !== 'admin' ? effectiveStatus(p) : 'active';
   const needsKyc = p && role !== 'admin' && !['submitted', 'approved'].includes(p.verification_status);
-  const locked = status === 'suspended' && !['verification', 'payments', 'profile', 'notifications', 'security', 'support'].includes(section);
+  const locked = (status === 'suspended' || status === 'blocked') && !['verification', 'payments', 'profile', 'notifications', 'security', 'support'].includes(section);
   const signOut = async () => { await supabase.auth.signOut(); navigate({ to: '/login' }); };
   const hrefFor = (slug: string) => (slug ? `/${role}/${slug}` : `/${role}`);
 
@@ -62,15 +62,16 @@ export function Workspace({ role, section = '' }: { role: Role; section?: string
       <div><Brand light /><div className="workspace-role">{title.toUpperCase()}</div></div>
       <nav className="sidebar-nav">{menu[role].map((x) => { const Icon = x.icon; return <div key={x.slug}>{x.group && <div className="sidebar-group">{x.group}</div>}<SectionLink role={role} slug={x.slug} onClick={() => setOpen(false)} className={path === hrefFor(x.slug) ? 'active' : ''}><Icon size={15} />{x.label}{x.slug === 'notifications' && role !== 'admin' && (unread.data ?? 0) > 0 && <em className="nav-badge">{unread.data}</em>}</SectionLink></div>; })}
         <button className="sidebar-signout" onClick={signOut}><LogOut size={15} />Sign out</button></nav>
-      <div className="sidebar-card"><span>{role === 'admin' ? 'Signed in as' : 'Membership'}</span><strong>{role === 'admin' ? 'Master Admin' : status === 'suspended' ? 'Suspended' : p?.verification_status === 'approved' ? 'Verified member' : 'Active member'}</strong></div>
+      <div className="sidebar-card"><span>{role === 'admin' ? 'Signed in as' : 'Membership'}</span><strong>{role === 'admin' ? 'Master Admin' : status === 'blocked' ? 'Blocked' : status === 'suspended' ? 'Suspended' : p?.verification_status === 'approved' ? 'Verified member' : 'Active member'}</strong></div>
     </aside>
     {open && <div className="sidebar-scrim" onClick={() => setOpen(false)} />}
     <div className="workspace-main">
       <header className="workspace-header"><div className="flex min-w-0 items-center gap-2"><Button variant="ghost" size="icon" className="workspace-mobile-bar shrink-0" onClick={() => setOpen(!open)} aria-label="Toggle menu">{open ? <X /> : <Menu />}</Button><span className="crumb">{title} &nbsp;/&nbsp; {label}</span></div>
         <div className="right">{role !== 'admin' && <SectionLink role={role} slug="notifications" className="bell"><Bell size={17} />{(unread.data ?? 0) > 0 && <i>{unread.data}</i>}</SectionLink>}<div className="avatar">{initials}</div><span className="hidden text-xs sm:block">{name}</span></div></header>
       <main className="workspace-content">
+        {role !== 'admin' && status === 'blocked' && <div className="alert-band danger"><AlertTriangle size={18} /><div><strong>Account blocked.</strong> Your access has been restricted by Eliteoz. Please raise a support ticket.</div></div>}
         {role !== 'admin' && status === 'suspended' && <div className="alert-band danger"><AlertTriangle size={18} /><div><strong>Account suspended.</strong> Verification was not completed within 7 days. Submit your verification to request reactivation.</div><Button size="sm" asChild><SectionLink role={role} slug="verification">Complete verification</SectionLink></Button></div>}
-        {role !== 'admin' && status !== 'suspended' && needsKyc && p && <div className="alert-band"><Activity size={18} /><div><strong>{daysLeft(p.verification_due_at)} day{daysLeft(p.verification_due_at) === 1 ? '' : 's'} left to verify.</strong> Complete your verification within 7 days of activation, otherwise your account will be suspended.</div><Button size="sm" variant="outline" asChild><SectionLink role={role} slug="verification">Verify now</SectionLink></Button></div>}
+        {role !== 'admin' && status === 'active' && needsKyc && p && <div className="alert-band"><Activity size={18} /><div><strong>{daysLeft(p.verification_due_at)} day{daysLeft(p.verification_due_at) === 1 ? '' : 's'} left to verify.</strong> Complete your verification within 7 days of activation, otherwise your account will be suspended.</div><Button size="sm" variant="outline" asChild><SectionLink role={role} slug="verification">Verify now</SectionLink></Button></div>}
         <div className="workspace-top"><div><span className="eyebrow">{role === 'admin' ? 'PLATFORM OVERVIEW' : role === 'buyer' ? 'YOUR PRIVATE SPACE' : 'YOUR PROPERTY SPACE'}</span><h1>{section ? label : `Welcome back, ${name.split(' ')[0]}.`}</h1></div>
           {role === 'seller' && section !== 'add-property' && !locked && <Button asChild><SectionLink role="seller" slug="add-property"><Plus /> Add property</SectionLink></Button>}
           {role === 'buyer' && !section && <Button asChild variant="outline"><Link to="/properties">Browse collection</Link></Button>}</div>
