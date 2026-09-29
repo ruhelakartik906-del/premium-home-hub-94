@@ -1,5 +1,9 @@
 - [x] Build public marketplace, content pages, and account flow previews.
 - [x] Build distinct buyer, seller, and admin UI panels and requested modules.
 - [x] Verify key navigation and responsive layouts.
-- [ ] Master Admin: edit users, permissions, payment control, webhooks (brief uploaded 29 Sep)
+- [x] SMS OTP via APITXT; existing-account check before OTP; unique email/mobile in database
+- [ ] Master Admin: full user edit form (personal, account, payment, access)
+- [ ] Staff & Permissions (15 permissions, master-admin protection, last-master guard)
+- [ ] Permanent delete inside user edit, gated by permanently_delete_users
+- [ ] Audit Logs screen (read-only) + logging of admin actions
 - [x] Homepage visual graphics upgrade (brief 29 Sep 11:21)
