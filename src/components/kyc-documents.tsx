@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FileText, Trash2, Upload, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -21,9 +21,9 @@ export type KycDoc = { id: string; doc_type: string; file_path: string; file_nam
 function uploadWithProgress(path: string, file: File, token: string, onProgress: (n: number) => void) {
   return new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/kyc-docs/${path}`);
+    xhr.open('POST', `${import.meta.env['VITE_SUPABASE_URL']}/storage/v1/object/kyc-docs/${path}`);
     xhr.setRequestHeader('Authorization', `Bearer ${token}`);
-    xhr.setRequestHeader('apikey', import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
+    xhr.setRequestHeader('apikey', import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY']);
     xhr.setRequestHeader('x-upsert', 'false');
     xhr.setRequestHeader('Content-Type', file.type);
     xhr.upload.onprogress = (e) => e.lengthComputable && onProgress(Math.round((e.loaded / e.total) * 100));
@@ -57,7 +57,7 @@ export function KycDocumentsUploader({ userId, role, required, onReadyChange }: 
     if (required?.includes(t.key)) return !!draftOf(t.key);
     return !!draftOf(t.key) || !!prevOf(t.key);
   });
-  onReadyChange?.(ready);
+  useEffect(() => { onReadyChange?.(ready); }, [ready, onReadyChange]);
 
   const upload = async (docType: string, file: File) => {
     if (!ALLOWED.includes(file.type)) { toast.error('Only JPG, PNG, WEBP or PDF files are allowed'); return; }
