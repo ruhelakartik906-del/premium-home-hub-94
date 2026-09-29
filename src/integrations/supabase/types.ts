@@ -243,22 +243,46 @@ export type Database = {
       }
       platform_settings: {
         Row: {
+          contact_email: string | null
+          contact_phone: string | null
           id: number
+          notify_email: boolean
+          notify_whatsapp: boolean
+          otp_provider: string
           reminder_days_before: number
+          smtp_from: string | null
+          smtp_host: string | null
           updated_at: string
           verification_days: number
+          whatsapp_webhook_url: string | null
         }
         Insert: {
+          contact_email?: string | null
+          contact_phone?: string | null
           id?: number
+          notify_email?: boolean
+          notify_whatsapp?: boolean
+          otp_provider?: string
           reminder_days_before?: number
+          smtp_from?: string | null
+          smtp_host?: string | null
           updated_at?: string
           verification_days?: number
+          whatsapp_webhook_url?: string | null
         }
         Update: {
+          contact_email?: string | null
+          contact_phone?: string | null
           id?: number
+          notify_email?: boolean
+          notify_whatsapp?: boolean
+          otp_provider?: string
           reminder_days_before?: number
+          smtp_from?: string | null
+          smtp_host?: string | null
           updated_at?: string
           verification_days?: number
+          whatsapp_webhook_url?: string | null
         }
         Relationships: []
       }
@@ -420,6 +444,35 @@ export type Database = {
           },
         ]
       }
+      saved_properties: {
+        Row: {
+          created_at: string
+          id: string
+          property_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          property_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          property_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_properties_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       support_tickets: {
         Row: {
           admin_reply: string | null
@@ -457,37 +510,55 @@ export type Database = {
         Row: {
           amount: number
           created_at: string
+          currency: string
+          failure_reason: string | null
           id: string
           method: string
+          order_id: string | null
           payer_email: string | null
           payer_name: string | null
+          payment_id: string | null
+          provider: string | null
           purpose: string
           reference: string
           status: string
+          updated_at: string
           user_id: string | null
         }
         Insert: {
           amount: number
           created_at?: string
+          currency?: string
+          failure_reason?: string | null
           id?: string
           method?: string
+          order_id?: string | null
           payer_email?: string | null
           payer_name?: string | null
+          payment_id?: string | null
+          provider?: string | null
           purpose?: string
           reference?: string
           status?: string
+          updated_at?: string
           user_id?: string | null
         }
         Update: {
           amount?: number
           created_at?: string
+          currency?: string
+          failure_reason?: string | null
           id?: string
           method?: string
+          order_id?: string | null
           payer_email?: string | null
           payer_name?: string | null
+          payment_id?: string | null
+          provider?: string | null
           purpose?: string
           reference?: string
           status?: string
+          updated_at?: string
           user_id?: string | null
         }
         Relationships: []
