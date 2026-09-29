@@ -131,3 +131,34 @@ export const saveSmsKey = createServerFn({ method: 'POST' })
     await supabaseAdmin.from('audit_logs').insert({ actor_id: context.userId, action: 'settings_changed:sms_key', details: { updated: true } });
     return { ok: true as const };
   });
+
+const SECRET_FIELDS = ['smtp_password', 'whatsapp_access_token', 'whatsapp_verify_token', 'whatsapp_webhook_secret'] as const;
+
+export const getIntegrationSecretStatus = createServerFn({ method: 'GET' })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const { data } = await supabaseAdmin.from('gateway_secrets').select('smtp_password,whatsapp_access_token,whatsapp_verify_token,whatsapp_webhook_secret,msg91_auth_key,key_secret,webhook_secret').eq('id', 1).maybeSingle();
+    const d = (data ?? {}) as Record<string, string | null>;
+    return Object.fromEntries(['msg91_auth_key', 'key_secret', 'webhook_secret', ...SECRET_FIELDS].map((k) => [k, mask(d[k] ?? null)])) as Record<string, string | null>;
+  });
+
+export const saveIntegrationSecrets = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({
+    smtp_password: z.string().trim().min(4).max(256).optional(),
+    whatsapp_access_token: z.string().trim().min(10).max(1024).optional(),
+    whatsapp_verify_token: z.string().trim().min(8).max(256).optional(),
+    whatsapp_webhook_secret: z.string().trim().min(16).max(256).optional(),
+  }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const patch = Object.fromEntries(Object.entries(data).filter(([, v]) => v));
+    if (!Object.keys(patch).length) return { ok: true as const };
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const { error } = await supabaseAdmin.from('gateway_secrets').upsert({ id: 1, ...patch, updated_at: new Date().toISOString() });
+    if (error) return { ok: false as const, error: 'Could not save private keys.' };
+    await supabaseAdmin.from('audit_logs').insert({ actor_id: context.userId, action: 'settings_changed:secrets', details: { fields: Object.keys(patch) } });
+    return { ok: true as const };
+  });
