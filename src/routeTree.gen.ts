@@ -10,9 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AboutRouteImport } from './routes/about'
-import { Route as AdminRouteImport } from './routes/admin'
-import { Route as BuyerRouteImport } from './routes/buyer'
+import { Route as AdminSetupRouteImport } from './routes/admin-setup'
 import { Route as BuyerGuidelinesRouteImport } from './routes/buyer-guidelines'
 import { Route as BuyersRouteImport } from './routes/buyers'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -25,23 +25,29 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PropertiesRouteImport } from './routes/properties'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as SellerRouteImport } from './routes/seller'
 import { Route as SellerGuidelinesRouteImport } from './routes/seller-guidelines'
 import { Route as SellersRouteImport } from './routes/sellers'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as VerificationPolicyRouteImport } from './routes/verification-policy'
-import { Route as AdminIndexRouteImport } from './routes/admin.index'
-import { Route as AdminSectionRouteImport } from './routes/admin.$section'
-import { Route as BuyerIndexRouteImport } from './routes/buyer.index'
-import { Route as BuyerSectionRouteImport } from './routes/buyer.$section'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedBuyerRouteImport } from './routes/_authenticated/buyer'
+import { Route as AuthenticatedSellerRouteImport } from './routes/_authenticated/seller'
 import { Route as PropertiesIndexRouteImport } from './routes/properties.index'
 import { Route as PropertiesIdRouteImport } from './routes/properties.$id'
-import { Route as SellerIndexRouteImport } from './routes/seller.index'
-import { Route as SellerSectionRouteImport } from './routes/seller.$section'
+import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
+import { Route as AuthenticatedAdminSectionRouteImport } from './routes/_authenticated/admin.$section'
+import { Route as AuthenticatedBuyerIndexRouteImport } from './routes/_authenticated/buyer.index'
+import { Route as AuthenticatedBuyerSectionRouteImport } from './routes/_authenticated/buyer.$section'
+import { Route as AuthenticatedSellerIndexRouteImport } from './routes/_authenticated/seller.index'
+import { Route as AuthenticatedSellerSectionRouteImport } from './routes/_authenticated/seller.$section'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -49,14 +55,9 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BuyerRoute = BuyerRouteImport.update({
-  id: '/buyer',
-  path: '/buyer',
+const AdminSetupRoute = AdminSetupRouteImport.update({
+  id: '/admin-setup',
+  path: '/admin-setup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BuyerGuidelinesRoute = BuyerGuidelinesRouteImport.update({
@@ -119,11 +120,6 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SellerRoute = SellerRouteImport.update({
-  id: '/seller',
-  path: '/seller',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SellerGuidelinesRoute = SellerGuidelinesRouteImport.update({
   id: '/seller-guidelines',
   path: '/seller-guidelines',
@@ -144,25 +140,20 @@ const VerificationPolicyRoute = VerificationPolicyRouteImport.update({
   path: '/verification-policy',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminIndexRoute = AdminIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AdminRoute,
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AdminSectionRoute = AdminSectionRouteImport.update({
-  id: '/$section',
-  path: '/$section',
-  getParentRoute: () => AdminRoute,
+const AuthenticatedBuyerRoute = AuthenticatedBuyerRouteImport.update({
+  id: '/buyer',
+  path: '/buyer',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const BuyerIndexRoute = BuyerIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => BuyerRoute,
-} as any)
-const BuyerSectionRoute = BuyerSectionRouteImport.update({
-  id: '/$section',
-  path: '/$section',
-  getParentRoute: () => BuyerRoute,
+const AuthenticatedSellerRoute = AuthenticatedSellerRouteImport.update({
+  id: '/seller',
+  path: '/seller',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const PropertiesIndexRoute = PropertiesIndexRouteImport.update({
   id: '/',
@@ -174,22 +165,45 @@ const PropertiesIdRoute = PropertiesIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => PropertiesRoute,
 } as any)
-const SellerIndexRoute = SellerIndexRouteImport.update({
+const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => SellerRoute,
+  getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
-const SellerSectionRoute = SellerSectionRouteImport.update({
-  id: '/$section',
-  path: '/$section',
-  getParentRoute: () => SellerRoute,
+const AuthenticatedAdminSectionRoute =
+  AuthenticatedAdminSectionRouteImport.update({
+    id: '/$section',
+    path: '/$section',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedBuyerIndexRoute = AuthenticatedBuyerIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedBuyerRoute,
 } as any)
+const AuthenticatedBuyerSectionRoute =
+  AuthenticatedBuyerSectionRouteImport.update({
+    id: '/$section',
+    path: '/$section',
+    getParentRoute: () => AuthenticatedBuyerRoute,
+  } as any)
+const AuthenticatedSellerIndexRoute =
+  AuthenticatedSellerIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedSellerRoute,
+  } as any)
+const AuthenticatedSellerSectionRoute =
+  AuthenticatedSellerSectionRouteImport.update({
+    id: '/$section',
+    path: '/$section',
+    getParentRoute: () => AuthenticatedSellerRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/admin': typeof AdminRouteWithChildren
-  '/buyer': typeof BuyerRouteWithChildren
+  '/admin-setup': typeof AdminSetupRoute
   '/buyer-guidelines': typeof BuyerGuidelinesRoute
   '/buyers': typeof BuyersRoute
   '/contact': typeof ContactRoute
@@ -202,23 +216,26 @@ export interface FileRoutesByFullPath {
   '/properties': typeof PropertiesRouteWithChildren
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/seller': typeof SellerRouteWithChildren
   '/seller-guidelines': typeof SellerGuidelinesRoute
   '/sellers': typeof SellersRoute
   '/terms': typeof TermsRoute
   '/verification-policy': typeof VerificationPolicyRoute
-  '/admin/$section': typeof AdminSectionRoute
-  '/buyer/$section': typeof BuyerSectionRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/buyer': typeof AuthenticatedBuyerRouteWithChildren
+  '/seller': typeof AuthenticatedSellerRouteWithChildren
   '/properties/$id': typeof PropertiesIdRoute
-  '/seller/$section': typeof SellerSectionRoute
-  '/admin/': typeof AdminIndexRoute
-  '/buyer/': typeof BuyerIndexRoute
   '/properties/': typeof PropertiesIndexRoute
-  '/seller/': typeof SellerIndexRoute
+  '/admin/$section': typeof AuthenticatedAdminSectionRoute
+  '/buyer/$section': typeof AuthenticatedBuyerSectionRoute
+  '/seller/$section': typeof AuthenticatedSellerSectionRoute
+  '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/buyer/': typeof AuthenticatedBuyerIndexRoute
+  '/seller/': typeof AuthenticatedSellerIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin-setup': typeof AdminSetupRoute
   '/buyer-guidelines': typeof BuyerGuidelinesRoute
   '/buyers': typeof BuyersRoute
   '/contact': typeof ContactRoute
@@ -234,21 +251,21 @@ export interface FileRoutesByTo {
   '/sellers': typeof SellersRoute
   '/terms': typeof TermsRoute
   '/verification-policy': typeof VerificationPolicyRoute
-  '/admin/$section': typeof AdminSectionRoute
-  '/buyer/$section': typeof BuyerSectionRoute
   '/properties/$id': typeof PropertiesIdRoute
-  '/seller/$section': typeof SellerSectionRoute
-  '/admin': typeof AdminIndexRoute
-  '/buyer': typeof BuyerIndexRoute
   '/properties': typeof PropertiesIndexRoute
-  '/seller': typeof SellerIndexRoute
+  '/admin/$section': typeof AuthenticatedAdminSectionRoute
+  '/buyer/$section': typeof AuthenticatedBuyerSectionRoute
+  '/seller/$section': typeof AuthenticatedSellerSectionRoute
+  '/admin': typeof AuthenticatedAdminIndexRoute
+  '/buyer': typeof AuthenticatedBuyerIndexRoute
+  '/seller': typeof AuthenticatedSellerIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/about': typeof AboutRoute
-  '/admin': typeof AdminRouteWithChildren
-  '/buyer': typeof BuyerRouteWithChildren
+  '/admin-setup': typeof AdminSetupRoute
   '/buyer-guidelines': typeof BuyerGuidelinesRoute
   '/buyers': typeof BuyersRoute
   '/contact': typeof ContactRoute
@@ -261,27 +278,28 @@ export interface FileRoutesById {
   '/properties': typeof PropertiesRouteWithChildren
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/seller': typeof SellerRouteWithChildren
   '/seller-guidelines': typeof SellerGuidelinesRoute
   '/sellers': typeof SellersRoute
   '/terms': typeof TermsRoute
   '/verification-policy': typeof VerificationPolicyRoute
-  '/admin/$section': typeof AdminSectionRoute
-  '/buyer/$section': typeof BuyerSectionRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/_authenticated/buyer': typeof AuthenticatedBuyerRouteWithChildren
+  '/_authenticated/seller': typeof AuthenticatedSellerRouteWithChildren
   '/properties/$id': typeof PropertiesIdRoute
-  '/seller/$section': typeof SellerSectionRoute
-  '/admin/': typeof AdminIndexRoute
-  '/buyer/': typeof BuyerIndexRoute
   '/properties/': typeof PropertiesIndexRoute
-  '/seller/': typeof SellerIndexRoute
+  '/_authenticated/admin/$section': typeof AuthenticatedAdminSectionRoute
+  '/_authenticated/buyer/$section': typeof AuthenticatedBuyerSectionRoute
+  '/_authenticated/seller/$section': typeof AuthenticatedSellerSectionRoute
+  '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/_authenticated/buyer/': typeof AuthenticatedBuyerIndexRoute
+  '/_authenticated/seller/': typeof AuthenticatedSellerIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/about'
-    | '/admin'
-    | '/buyer'
+    | '/admin-setup'
     | '/buyer-guidelines'
     | '/buyers'
     | '/contact'
@@ -294,23 +312,26 @@ export interface FileRouteTypes {
     | '/properties'
     | '/register'
     | '/reset-password'
-    | '/seller'
     | '/seller-guidelines'
     | '/sellers'
     | '/terms'
     | '/verification-policy'
+    | '/admin'
+    | '/buyer'
+    | '/seller'
+    | '/properties/$id'
+    | '/properties/'
     | '/admin/$section'
     | '/buyer/$section'
-    | '/properties/$id'
     | '/seller/$section'
     | '/admin/'
     | '/buyer/'
-    | '/properties/'
     | '/seller/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
+    | '/admin-setup'
     | '/buyer-guidelines'
     | '/buyers'
     | '/contact'
@@ -326,20 +347,20 @@ export interface FileRouteTypes {
     | '/sellers'
     | '/terms'
     | '/verification-policy'
+    | '/properties/$id'
+    | '/properties'
     | '/admin/$section'
     | '/buyer/$section'
-    | '/properties/$id'
     | '/seller/$section'
     | '/admin'
     | '/buyer'
-    | '/properties'
     | '/seller'
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
     | '/about'
-    | '/admin'
-    | '/buyer'
+    | '/admin-setup'
     | '/buyer-guidelines'
     | '/buyers'
     | '/contact'
@@ -352,26 +373,28 @@ export interface FileRouteTypes {
     | '/properties'
     | '/register'
     | '/reset-password'
-    | '/seller'
     | '/seller-guidelines'
     | '/sellers'
     | '/terms'
     | '/verification-policy'
-    | '/admin/$section'
-    | '/buyer/$section'
+    | '/_authenticated/admin'
+    | '/_authenticated/buyer'
+    | '/_authenticated/seller'
     | '/properties/$id'
-    | '/seller/$section'
-    | '/admin/'
-    | '/buyer/'
     | '/properties/'
-    | '/seller/'
+    | '/_authenticated/admin/$section'
+    | '/_authenticated/buyer/$section'
+    | '/_authenticated/seller/$section'
+    | '/_authenticated/admin/'
+    | '/_authenticated/buyer/'
+    | '/_authenticated/seller/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AboutRoute: typeof AboutRoute
-  AdminRoute: typeof AdminRouteWithChildren
-  BuyerRoute: typeof BuyerRouteWithChildren
+  AdminSetupRoute: typeof AdminSetupRoute
   BuyerGuidelinesRoute: typeof BuyerGuidelinesRoute
   BuyersRoute: typeof BuyersRoute
   ContactRoute: typeof ContactRoute
@@ -384,7 +407,6 @@ export interface RootRouteChildren {
   PropertiesRoute: typeof PropertiesRouteWithChildren
   RegisterRoute: typeof RegisterRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
-  SellerRoute: typeof SellerRouteWithChildren
   SellerGuidelinesRoute: typeof SellerGuidelinesRoute
   SellersRoute: typeof SellersRoute
   TermsRoute: typeof TermsRoute
@@ -400,6 +422,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -407,18 +436,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/buyer': {
-      id: '/buyer'
-      path: '/buyer'
-      fullPath: '/buyer'
-      preLoaderRoute: typeof BuyerRouteImport
+    '/admin-setup': {
+      id: '/admin-setup'
+      path: '/admin-setup'
+      fullPath: '/admin-setup'
+      preLoaderRoute: typeof AdminSetupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/buyer-guidelines': {
@@ -505,13 +527,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/seller': {
-      id: '/seller'
-      path: '/seller'
-      fullPath: '/seller'
-      preLoaderRoute: typeof SellerRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/seller-guidelines': {
       id: '/seller-guidelines'
       path: '/seller-guidelines'
@@ -540,33 +555,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VerificationPolicyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/': {
-      id: '/admin/'
-      path: '/'
-      fullPath: '/admin/'
-      preLoaderRoute: typeof AdminIndexRouteImport
-      parentRoute: typeof AdminRoute
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/admin/$section': {
-      id: '/admin/$section'
-      path: '/$section'
-      fullPath: '/admin/$section'
-      preLoaderRoute: typeof AdminSectionRouteImport
-      parentRoute: typeof AdminRoute
+    '/_authenticated/buyer': {
+      id: '/_authenticated/buyer'
+      path: '/buyer'
+      fullPath: '/buyer'
+      preLoaderRoute: typeof AuthenticatedBuyerRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/buyer/': {
-      id: '/buyer/'
-      path: '/'
-      fullPath: '/buyer/'
-      preLoaderRoute: typeof BuyerIndexRouteImport
-      parentRoute: typeof BuyerRoute
-    }
-    '/buyer/$section': {
-      id: '/buyer/$section'
-      path: '/$section'
-      fullPath: '/buyer/$section'
-      preLoaderRoute: typeof BuyerSectionRouteImport
-      parentRoute: typeof BuyerRoute
+    '/_authenticated/seller': {
+      id: '/_authenticated/seller'
+      path: '/seller'
+      fullPath: '/seller'
+      preLoaderRoute: typeof AuthenticatedSellerRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/properties/': {
       id: '/properties/'
@@ -582,46 +590,104 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PropertiesIdRouteImport
       parentRoute: typeof PropertiesRoute
     }
-    '/seller/': {
-      id: '/seller/'
+    '/_authenticated/admin/': {
+      id: '/_authenticated/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/$section': {
+      id: '/_authenticated/admin/$section'
+      path: '/$section'
+      fullPath: '/admin/$section'
+      preLoaderRoute: typeof AuthenticatedAdminSectionRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/buyer/': {
+      id: '/_authenticated/buyer/'
+      path: '/'
+      fullPath: '/buyer/'
+      preLoaderRoute: typeof AuthenticatedBuyerIndexRouteImport
+      parentRoute: typeof AuthenticatedBuyerRoute
+    }
+    '/_authenticated/buyer/$section': {
+      id: '/_authenticated/buyer/$section'
+      path: '/$section'
+      fullPath: '/buyer/$section'
+      preLoaderRoute: typeof AuthenticatedBuyerSectionRouteImport
+      parentRoute: typeof AuthenticatedBuyerRoute
+    }
+    '/_authenticated/seller/': {
+      id: '/_authenticated/seller/'
       path: '/'
       fullPath: '/seller/'
-      preLoaderRoute: typeof SellerIndexRouteImport
-      parentRoute: typeof SellerRoute
+      preLoaderRoute: typeof AuthenticatedSellerIndexRouteImport
+      parentRoute: typeof AuthenticatedSellerRoute
     }
-    '/seller/$section': {
-      id: '/seller/$section'
+    '/_authenticated/seller/$section': {
+      id: '/_authenticated/seller/$section'
       path: '/$section'
       fullPath: '/seller/$section'
-      preLoaderRoute: typeof SellerSectionRouteImport
-      parentRoute: typeof SellerRoute
+      preLoaderRoute: typeof AuthenticatedSellerSectionRouteImport
+      parentRoute: typeof AuthenticatedSellerRoute
     }
   }
 }
 
-interface AdminRouteChildren {
-  AdminSectionRoute: typeof AdminSectionRoute
-  AdminIndexRoute: typeof AdminIndexRoute
+interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminSectionRoute: typeof AuthenticatedAdminSectionRoute
+  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
-const AdminRouteChildren: AdminRouteChildren = {
-  AdminSectionRoute: AdminSectionRoute,
-  AdminIndexRoute: AdminIndexRoute,
+const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminSectionRoute: AuthenticatedAdminSectionRoute,
+  AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
 
-const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+const AuthenticatedAdminRouteWithChildren =
+  AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
 
-interface BuyerRouteChildren {
-  BuyerSectionRoute: typeof BuyerSectionRoute
-  BuyerIndexRoute: typeof BuyerIndexRoute
+interface AuthenticatedBuyerRouteChildren {
+  AuthenticatedBuyerSectionRoute: typeof AuthenticatedBuyerSectionRoute
+  AuthenticatedBuyerIndexRoute: typeof AuthenticatedBuyerIndexRoute
 }
 
-const BuyerRouteChildren: BuyerRouteChildren = {
-  BuyerSectionRoute: BuyerSectionRoute,
-  BuyerIndexRoute: BuyerIndexRoute,
+const AuthenticatedBuyerRouteChildren: AuthenticatedBuyerRouteChildren = {
+  AuthenticatedBuyerSectionRoute: AuthenticatedBuyerSectionRoute,
+  AuthenticatedBuyerIndexRoute: AuthenticatedBuyerIndexRoute,
 }
 
-const BuyerRouteWithChildren = BuyerRoute._addFileChildren(BuyerRouteChildren)
+const AuthenticatedBuyerRouteWithChildren =
+  AuthenticatedBuyerRoute._addFileChildren(AuthenticatedBuyerRouteChildren)
+
+interface AuthenticatedSellerRouteChildren {
+  AuthenticatedSellerSectionRoute: typeof AuthenticatedSellerSectionRoute
+  AuthenticatedSellerIndexRoute: typeof AuthenticatedSellerIndexRoute
+}
+
+const AuthenticatedSellerRouteChildren: AuthenticatedSellerRouteChildren = {
+  AuthenticatedSellerSectionRoute: AuthenticatedSellerSectionRoute,
+  AuthenticatedSellerIndexRoute: AuthenticatedSellerIndexRoute,
+}
+
+const AuthenticatedSellerRouteWithChildren =
+  AuthenticatedSellerRoute._addFileChildren(AuthenticatedSellerRouteChildren)
+
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
+  AuthenticatedBuyerRoute: typeof AuthenticatedBuyerRouteWithChildren
+  AuthenticatedSellerRoute: typeof AuthenticatedSellerRouteWithChildren
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
+  AuthenticatedBuyerRoute: AuthenticatedBuyerRouteWithChildren,
+  AuthenticatedSellerRoute: AuthenticatedSellerRouteWithChildren,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 interface PropertiesRouteChildren {
   PropertiesIdRoute: typeof PropertiesIdRoute
@@ -637,24 +703,11 @@ const PropertiesRouteWithChildren = PropertiesRoute._addFileChildren(
   PropertiesRouteChildren,
 )
 
-interface SellerRouteChildren {
-  SellerSectionRoute: typeof SellerSectionRoute
-  SellerIndexRoute: typeof SellerIndexRoute
-}
-
-const SellerRouteChildren: SellerRouteChildren = {
-  SellerSectionRoute: SellerSectionRoute,
-  SellerIndexRoute: SellerIndexRoute,
-}
-
-const SellerRouteWithChildren =
-  SellerRoute._addFileChildren(SellerRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AboutRoute: AboutRoute,
-  AdminRoute: AdminRouteWithChildren,
-  BuyerRoute: BuyerRouteWithChildren,
+  AdminSetupRoute: AdminSetupRoute,
   BuyerGuidelinesRoute: BuyerGuidelinesRoute,
   BuyersRoute: BuyersRoute,
   ContactRoute: ContactRoute,
@@ -667,7 +720,6 @@ const rootRouteChildren: RootRouteChildren = {
   PropertiesRoute: PropertiesRouteWithChildren,
   RegisterRoute: RegisterRoute,
   ResetPasswordRoute: ResetPasswordRoute,
-  SellerRoute: SellerRouteWithChildren,
   SellerGuidelinesRoute: SellerGuidelinesRoute,
   SellersRoute: SellersRoute,
   TermsRoute: TermsRoute,
