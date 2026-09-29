@@ -82,7 +82,7 @@ function CreateUser({ onDone }: { onDone: () => void }) {
     <div className="form-grid">{fields.map(([k, l, t]) => <div key={k} className={`field ${k === 'address' ? 'full' : ''}`}><label>{l}</label><input name={k} type={t ?? 'text'} className="field-input" required={l.includes('*')} minLength={k === 'password' ? 8 : undefined} defaultValue={blank[k]} /></div>)}
       <div className="field full"><label>Date of birth</label><DobInput name="dob" /></div>
       {role === 'seller' && <><div className="field"><label>Company / business name</label><input name="company_name" className="field-input" /></div><div className="field"><label>Business type</label><input name="business_type" className="field-input" /></div></>}
-      <div className="field full"><label>Activation fee (₹50,000)</label><select className="field-input" value={pay} onChange={(e) => setPay(e.target.value as typeof pay)}><option value="offline_paid">Paid offline — record transaction</option><option value="waived">Waived — record as waived</option><option value="none">Do not record</option></select></div></div>
+      <div className="field full"><label>Activation fee</label><select className="field-input" value={pay} onChange={(e) => setPay(e.target.value as typeof pay)}><option value="offline_paid">Paid offline — record transaction</option><option value="waived">Waived — record as waived</option><option value="none">Do not record</option></select></div></div>
     {err && <p className="form-error">{err}</p>}
     <div className="form-actions"><Button type="submit" disabled={busy}>{busy ? 'Creating…' : 'Create account'}</Button></div>
   </form>;
