@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.property_submit_guard() FROM public, anon, authenticated;
