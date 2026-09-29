@@ -652,6 +652,39 @@ export type Database = {
           },
         ]
       }
+      staff_members: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          email: string
+          full_name: string
+          permissions: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          email: string
+          full_name: string
+          permissions?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          email?: string
+          full_name?: string
+          permissions?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       support_tickets: {
         Row: {
           admin_reply: string | null
@@ -826,6 +859,36 @@ export type Database = {
         }
         Relationships: []
       }
+      webhook_events: {
+        Row: {
+          event_id: string
+          event_type: string
+          id: string
+          payload: Json
+          received_at: string
+          source: string | null
+          status: string
+        }
+        Insert: {
+          event_id: string
+          event_type: string
+          id?: string
+          payload?: Json
+          received_at?: string
+          source?: string | null
+          status?: string
+        }
+        Update: {
+          event_id?: string
+          event_type?: string
+          id?: string
+          payload?: Json
+          received_at?: string
+          source?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -852,6 +915,10 @@ export type Database = {
       }
       claim_first_admin: { Args: never; Returns: boolean }
       enforce_verification_deadlines: { Args: never; Returns: number }
+      has_permission: {
+        Args: { _perm: string; _user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
