@@ -2,12 +2,13 @@ import { Link } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useServerFn } from '@tanstack/react-start';
 import { useMemo, useState } from 'react';
-import { BadgeCheck, Building2, CreditCard, Download, FileCheck, Heart, Plus, Send, Star, Trash2, Users, X } from 'lucide-react';
+import { BadgeCheck, Building2, CreditCard, Download, FileCheck, FileText, Heart, Pencil, Wallet, Plus, Send, Star, Trash2, Users, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { effectiveStatus, daysLeft, type Profile } from '@/hooks/use-auth';
-import { formatINR, propertyImages } from '@/lib/eliteoz-data';
+import { coverOf, formatINR } from '@/lib/eliteoz-data';
+import { DobInput } from '@/components/auth-flow';
 import { adminCreateUser } from '@/lib/members.functions';
 import { Panel, SectionLink, Stat, Status, Table, Tabs, fmtDate } from '@/components/workspace';
 import type { Me } from '@/components/workspace-member';
@@ -39,6 +40,8 @@ export function AdminBody({ section, me }: { section: string; me: Me }) {
     case 'payments': return <Transactions />;
     case 'notifications': return <SendNotification me={me} />;
     case 'integrations': return <Integrations />;
+    case 'tickets': return <Tickets />;
+    case 'gateway': return <Gateway />;
     default: return null;
   }
 }
@@ -59,7 +62,7 @@ const blank = { full_name: '', email: '', password: '', mobile: '', dob: '', gen
 function CreateUser({ onDone }: { onDone: () => void }) {
   const create = useServerFn(adminCreateUser); const qc = useQueryClient();
   const [role, setRole] = useState<'buyer' | 'seller'>('buyer'); const [pay, setPay] = useState<'none' | 'offline_paid' | 'waived'>('offline_paid'); const [busy, setBusy] = useState(false); const [err, setErr] = useState('');
-  const fields: [keyof typeof blank, string, string?][] = [['full_name', 'Full name *'], ['email', 'Email *', 'email'], ['mobile', 'Mobile *', 'tel'], ['password', 'Temporary password * (min 8)', 'text'], ['dob', 'Date of birth', 'date'], ['gender', 'Gender'], ['country', 'Country'], ['state', 'State'], ['city', 'City'], ['pincode', 'Pincode'], ['address', 'Full address']];
+  const fields: [keyof typeof blank, string, string?][] = [['full_name', 'Full name *'], ['email', 'Email *', 'email'], ['mobile', 'Mobile *', 'tel'], ['password', 'Temporary password * (min 8)', 'text'], ['gender', 'Gender'], ['country', 'Country'], ['state', 'State'], ['city', 'City'], ['pincode', 'Pincode'], ['address', 'Full address']];
   return <form className="panel create-user" onSubmit={async (e) => {
     e.preventDefault(); const f = new FormData(e.currentTarget); const d = { ...blank }; (Object.keys(blank) as (keyof typeof blank)[]).forEach((k) => { d[k] = String(f.get(k) ?? ''); }); setBusy(true); setErr('');
     const res = await create({ data: { ...d, role, recordPayment: pay } }).catch(() => ({ ok: false as const, error: 'Please check the details (valid email, mobile, password of 8+ characters).' }));
@@ -70,6 +73,7 @@ function CreateUser({ onDone }: { onDone: () => void }) {
     <p className="muted">Same details as registration. No OTP needed — the account is active immediately and the member can log in with this email and password.</p>
     <Tabs value={role} onChange={(v) => setRole(v as 'buyer' | 'seller')} options={[['buyer', 'Buyer'], ['seller', 'Seller']]} />
     <div className="form-grid">{fields.map(([k, l, t]) => <div key={k} className={`field ${k === 'address' ? 'full' : ''}`}><label>{l}</label><input name={k} type={t ?? 'text'} className="field-input" required={l.includes('*')} minLength={k === 'password' ? 8 : undefined} defaultValue={blank[k]} /></div>)}
+      <div className="field full"><label>Date of birth</label><DobInput name="dob" /></div>
       {role === 'seller' && <><div className="field"><label>Company / business name</label><input name="company_name" className="field-input" /></div><div className="field"><label>Business type</label><input name="business_type" className="field-input" /></div></>}
       <div className="field full"><label>Activation fee (₹50,000)</label><select className="field-input" value={pay} onChange={(e) => setPay(e.target.value as typeof pay)}><option value="offline_paid">Paid offline — record transaction</option><option value="waived">Waived — record as waived</option><option value="none">Do not record</option></select></div></div>
     {err && <p className="form-error">{err}</p>}
@@ -82,13 +86,14 @@ function UsersSection() {
   const [role, setRole] = useState('all'); const [status, setStatus] = useState(''); const [kyc, setKyc] = useState(''); const [q, setQ] = useState(''); const [creating, setCreating] = useState(false); const [open, setOpen] = useState<string | null>(null);
   const list = (users.data ?? []).filter((u) => (role === 'all' || u.role === role) && (!status || (u.role !== 'admin' ? effectiveStatus(u) : 'active') === status) && (!kyc || u.verification_status === kyc) && `${u.full_name} ${u.email} ${u.mobile ?? ''}`.toLowerCase().includes(q.toLowerCase()));
   const setUserStatus = async (id: string, s: 'active' | 'suspended') => { const patch = s === 'active' ? { status: 'active', verification_due_at: new Date(Date.now() + 7 * 86400000).toISOString() } : { status: 'suspended' }; const { error } = await supabase.from('profiles').update(patch).eq('id', id); if (error) { toast.error('Update failed'); return; } await notify([id], s === 'active' ? 'Account reactivated' : 'Account suspended', s === 'active' ? 'Your account is active again. Please complete verification within 7 days.' : 'Your account has been suspended. Please contact support or complete verification.'); toast.success(s === 'active' ? 'User activated' : 'User suspended'); qc.invalidateQueries({ queryKey: ['admin-users'] }); };
+  const editCompany = async (u: { id: string; company_name: string | null; business_type: string | null }) => { const c = prompt('Company / business name:', u.company_name ?? ''); if (c === null) return; const b = prompt('Business type:', u.business_type ?? ''); if (b === null) return; const { error } = await supabase.from('profiles').update({ company_name: c.trim() || null, business_type: b.trim() || null }).eq('id', u.id); if (error) { toast.error('Update failed'); return; } await notify([u.id], 'Company details updated', 'The Eliteoz team has updated your company details.'); toast.success('Company details updated'); qc.invalidateQueries({ queryKey: ['admin-users'] }); };
   const count = (r: string) => (users.data ?? []).filter((u) => r === 'all' || u.role === r).length;
   return <>
     {creating ? <CreateUser onDone={() => setCreating(false)} /> : null}
     <Panel action={!creating && <Button onClick={() => setCreating(true)}><Plus /> Create user</Button>}>
       <Tabs value={role} onChange={setRole} options={[['all', `All (${count('all')})`], ['buyer', `Buyers (${count('buyer')})`], ['seller', `Sellers (${count('seller')})`], ['admin', `Admins (${count('admin')})`]]} />
       <div className="toolbar"><input className="field-input" placeholder="Search name, email or mobile" value={q} onChange={(e) => setQ(e.target.value)} /><select className="field-input" value={status} onChange={(e) => setStatus(e.target.value)}><option value="">Any status</option><option value="active">Active</option><option value="suspended">Suspended</option></select><select className="field-input" value={kyc} onChange={(e) => setKyc(e.target.value)}><option value="">Any verification</option><option value="not_submitted">Not submitted</option><option value="submitted">Submitted</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select></div>
-      <Table headers={['Member', 'Role', 'Verification', 'Status', 'Joined', '']} empty="No users match these filters." rows={list.flatMap((u) => { const st = u.role === 'admin' ? 'active' : effectiveStatus(u); const row = [<button className="cell-user" onClick={() => setOpen(open === u.id ? null : u.id)}><span className="avatar sm">{(u.full_name || u.email).slice(0, 2).toUpperCase()}</span><div><strong>{u.full_name || '—'}</strong><small>{u.email}</small></div></button>, <Status value={u.role} />, <div><Status value={u.verification_status} />{u.role !== 'admin' && !['submitted', 'approved'].includes(u.verification_status) && st !== 'suspended' && <small className="block muted">{daysLeft(u.verification_due_at)}d left</small>}</div>, <Status value={st} />, fmtDate(u.created_at), u.role === 'admin' ? '' : <div className="row-actions"><Button size="sm" variant="ghost" onClick={() => setOpen(open === u.id ? null : u.id)}>{open === u.id ? 'Hide' : 'Details'}</Button>{st === 'suspended' ? <Button size="sm" variant="outline" onClick={() => setUserStatus(u.id, 'active')}>Activate</Button> : <Button size="sm" variant="ghost" onClick={() => confirm('Suspend this user?') && setUserStatus(u.id, 'suspended')}>Suspend</Button>}</div>];
+      <Table headers={['Member', 'Role', 'Verification', 'Status', 'Joined', '']} empty="No users match these filters." rows={list.flatMap((u) => { const st = u.role === 'admin' ? 'active' : effectiveStatus(u); const row = [<button className="cell-user" onClick={() => setOpen(open === u.id ? null : u.id)}><span className="avatar sm">{(u.full_name || u.email).slice(0, 2).toUpperCase()}</span><div><strong>{u.full_name || '—'}</strong><small>{u.email}</small></div></button>, <Status value={u.role} />, <div><Status value={u.verification_status} />{u.role !== 'admin' && !['submitted', 'approved'].includes(u.verification_status) && st !== 'suspended' && <small className="block muted">{daysLeft(u.verification_due_at)}d left</small>}</div>, <Status value={st} />, fmtDate(u.created_at), u.role === 'admin' ? '' : <div className="row-actions"><Button size="sm" variant="ghost" onClick={() => setOpen(open === u.id ? null : u.id)}>{open === u.id ? 'Hide' : 'Details'}</Button>{u.role === 'seller' && <Button size="sm" variant="ghost" aria-label="Edit company" onClick={() => editCompany(u)}><Pencil size={14} /></Button>}{st === 'suspended' ? <Button size="sm" variant="outline" onClick={() => setUserStatus(u.id, 'active')}>Activate</Button> : <Button size="sm" variant="ghost" onClick={() => confirm('Suspend this user?') && setUserStatus(u.id, 'suspended')}>Suspend</Button>}</div>];
         return open === u.id ? [row, [<div className="user-detail" style={{ gridColumn: '1/-1' }}>{([['Mobile', u.mobile], ['Date of birth', u.dob], ['Gender', u.gender], ['Country', u.country], ['State', u.state], ['City', u.city], ['Pincode', u.pincode], ['Address', u.address], ['Company', u.company_name], ['Business type', u.business_type], ['Activated', fmtDate(u.activated_at)], ['Verify by', fmtDate(u.verification_due_at)], ['Created by admin', u.created_by_admin ? 'Yes' : 'No']] as [string, string | null][]).map(([l, v]) => <div key={l}><span>{l}</span><strong>{v || '—'}</strong></div>)}</div>, '', '', '', '', '']] : [row]; })} />
     </Panel>
   </>;
@@ -110,7 +115,7 @@ function PropertiesSection() {
   const list = (props.data ?? []).filter((p) => (tab === 'all' || (tab === 'featured' ? p.featured : p.status === tab)) && (!cat || p.categories?.name === cat));
   return <Panel><Tabs value={tab} onChange={setTab} options={[['pending', 'Pending review'], ['approved', 'Approved'], ['rejected', 'Rejected'], ['draft', 'Drafts'], ['featured', 'Featured'], ['all', 'All']]} />
     <div className="toolbar"><select className="field-input" value={cat} onChange={(e) => setCat(e.target.value)}><option value="">All categories</option>{cats.map((c) => <option key={c}>{c}</option>)}</select></div>
-    <Table headers={['Property', 'Category', 'Price', 'Status', 'Added', '']} empty="No properties here." rows={list.map((p) => [<div className="cell-prop"><img src={propertyImages[p.image]} alt="" /><div><strong>{p.title}</strong><small>{p.ref} · {p.location}</small></div></div>, p.categories?.name ?? '—', formatINR(Number(p.price)), <Status value={p.status} />, fmtDate(p.created_at), <div className="row-actions">{p.status !== 'approved' && <Button size="sm" onClick={() => update(p, { status: 'approved', admin_note: null })}>Approve</Button>}{p.status !== 'rejected' && <Button size="sm" variant="outline" onClick={() => { const n = prompt('Reason for rejection:'); if (n) update(p, { status: 'rejected', admin_note: n }); }}>Reject</Button>}<Button size="sm" variant="ghost" aria-label="Toggle featured" onClick={() => update(p, { featured: !p.featured })}><Star size={15} fill={p.featured ? 'currentColor' : 'none'} /></Button>{p.status === 'approved' && <Button size="sm" variant="ghost" asChild><Link to="/properties/$id" params={{ id: p.ref }}>View</Link></Button>}</div>])} /></Panel>;
+    <Table headers={['Property', 'Category', 'Price', 'Status', 'Added', '']} empty="No properties here." rows={list.map((p) => [<div className="cell-prop"><img src={coverOf(p)} alt="" /><div><strong>{p.title}</strong><small>{p.ref} · {p.location}</small></div></div>, p.categories?.name ?? '—', formatINR(Number(p.price)), <Status value={p.status} />, fmtDate(p.created_at), <div className="row-actions"><DocsButton docs={p.documents ?? []} gallery={p.gallery ?? []} />{p.status !== 'approved' && <Button size="sm" onClick={() => update(p, { status: 'approved', admin_note: null })}>Approve</Button>}{p.status !== 'rejected' && <Button size="sm" variant="outline" onClick={() => { const n = prompt('Reason for rejection:'); if (n) update(p, { status: 'rejected', admin_note: n }); }}>Reject</Button>}<Button size="sm" variant="ghost" aria-label="Toggle featured" onClick={() => update(p, { featured: !p.featured })}><Star size={15} fill={p.featured ? 'currentColor' : 'none'} /></Button>{p.status === 'approved' && <Button size="sm" variant="ghost" asChild><Link to="/properties/$id" params={{ id: p.ref }}>View</Link></Button>}</div>])} /></Panel>;
 }
 
 function Categories() {
@@ -179,4 +184,55 @@ function Integrations() {
     { title: 'In-app notifications', state: 'active', body: 'Approvals, verification results, interest updates and admin broadcasts are delivered to member dashboards.', icon: Heart },
   ];
   return <div className="integration-grid">{items.map(({ title, state, body, icon: I }) => <article key={title} className="integration"><div className="flex items-center justify-between"><span className="stat-icon"><I size={17} /></span><Status value={state} /></div><h3>{title}</h3><p>{body}</p></article>)}</div>;
+}
+
+function DocsButton({ docs, gallery }: { docs: string[]; gallery: string[] }) {
+  const [open, setOpen] = useState(false); const [links, setLinks] = useState<string[]>([]);
+  const load = async () => { setOpen(!open); if (links.length || !docs.length) return; const { data } = await supabase.storage.from('property-docs').createSignedUrls(docs, 600); setLinks((data ?? []).map((d) => d.signedUrl ?? '').filter(Boolean)); };
+  return <><Button size="sm" variant="outline" onClick={load}><FileText size={14} /> Review ({docs.length})</Button>
+    {open && <div className="doc-pop"><div className="panel-head"><strong>Ownership documents</strong><Button size="icon" variant="ghost" onClick={() => setOpen(false)} aria-label="Close"><X /></Button></div>
+      {docs.length ? docs.map((d, i) => <a key={d} className="text-link block" href={links[i]} target="_blank" rel="noreferrer"><FileText size={13} /> {d.split('/').pop()?.replace(/^[0-9a-f-]{36}-/, '')}</a>) : <p className="muted">No documents uploaded.</p>}
+      {gallery.length > 0 && <><strong className="block" style={{ marginTop: 12 }}>Photos</strong><div className="doc-thumbs">{gallery.map((g) => <a key={g} href={g} target="_blank" rel="noreferrer"><img src={g} alt="" /></a>)}</div></>}
+      <small className="muted">Links expire after 10 minutes. Visible only to Master Admin.</small></div>}</>;
+}
+
+function Tickets() {
+  const qc = useQueryClient(); const users = useUsers(); const [tab, setTab] = useState('open');
+  const q = useQuery({ queryKey: ['admin-tickets'], queryFn: async () => { const { data } = await supabase.from('support_tickets').select('*').order('created_at', { ascending: false }); return data ?? []; } });
+  const who = new Map((users.data ?? []).map((u) => [u.id, u]));
+  const reply = async (t: { id: string; user_id: string; subject: string }, status: 'in_progress' | 'resolved') => { const r = prompt('Reply to the member:'); if (r === null) return; const { error } = await supabase.from('support_tickets').update({ status, admin_reply: r || null, updated_at: new Date().toISOString() }).eq('id', t.id); if (error) { toast.error('Update failed'); return; } await notify([t.user_id], `Ticket update: ${t.subject}`, r || `Your ticket is now ${status.replace('_', ' ')}.`); toast.success('Saved'); qc.invalidateQueries({ queryKey: ['admin-tickets'] }); };
+  const list = (q.data ?? []).filter((t) => tab === 'all' || t.status === tab);
+  return <Panel><Tabs value={tab} onChange={setTab} options={[['open', 'Open'], ['in_progress', 'In progress'], ['resolved', 'Resolved'], ['all', 'All']]} />
+    <p className="muted small">To change a seller’s locked company details, open All Users → Details → Edit company.</p>
+    <Table headers={['Member', 'Subject', 'Message', 'Status', 'Date', '']} empty="No tickets here." rows={list.map((t) => { const u = who.get(t.user_id); return [<div><strong>{u?.full_name ?? '—'}</strong><small className="block muted">{u?.email} · {u?.role}</small></div>, <strong>{t.subject}</strong>, <small>{t.message}{t.admin_reply ? <span className="block muted">Reply: {t.admin_reply}</span> : null}</small>, <Status value={t.status} />, fmtDate(t.created_at), <div className="row-actions">{t.status !== 'resolved' && <><Button size="sm" variant="outline" onClick={() => reply(t, 'in_progress')}>Reply</Button><Button size="sm" onClick={() => reply(t, 'resolved')}>Resolve</Button></>}</div>]; })} /></Panel>;
+}
+
+function Gateway() {
+  const qc = useQueryClient(); const [busy, setBusy] = useState(false);
+  const q = useQuery({ queryKey: ['pay-settings'], queryFn: async () => { const [{ data: s }, { data: sec }] = await Promise.all([supabase.from('payment_settings').select('*').eq('id', 1).maybeSingle(), supabase.from('gateway_secrets').select('key_secret,webhook_secret').eq('id', 1).maybeSingle()]); return { s, hasSecret: !!sec?.key_secret, hasWebhook: !!sec?.webhook_secret }; } });
+  if (!q.data) return <Panel><p className="muted">Loading…</p></Panel>;
+  const s = q.data.s;
+  return <form className="panel" onSubmit={async (e) => {
+    e.preventDefault(); const f = new FormData(e.currentTarget); setBusy(true);
+    const enabled = f.get('enabled') === 'on';
+    const { error } = await supabase.from('payment_settings').update({ enabled, provider: String(f.get('provider')), mode: String(f.get('mode')), key_id: String(f.get('key_id') ?? '').trim() || null, activation_fee: Number(f.get('fee')) || 0, updated_at: new Date().toISOString() }).eq('id', 1);
+    const secret = String(f.get('key_secret') ?? '').trim(); const hook = String(f.get('webhook_secret') ?? '').trim();
+    const secPatch: { key_secret?: string; webhook_secret?: string; updated_at: string } = { updated_at: new Date().toISOString() }; if (secret) secPatch.key_secret = secret; if (hook) secPatch.webhook_secret = hook;
+    const { error: e2 } = await supabase.from('gateway_secrets').update(secPatch).eq('id', 1);
+    setBusy(false); if (error || e2) { toast.error('Could not save'); return; } toast.success(enabled ? 'Payment step is now ON for new registrations' : 'Payment step is OFF — registrations skip payment'); qc.invalidateQueries({ queryKey: ['pay-settings'] });
+  }}>
+    <h2>Payment gateway</h2>
+    <p className="muted">When switched off, new buyers and sellers skip the payment step and go straight to their dashboard. Switch it on once your gateway account is ready.</p>
+    <label className="gateway-toggle"><input type="checkbox" name="enabled" defaultChecked={s?.enabled} /> <span><strong>Collect activation fee at registration</strong><small>Currently {s?.enabled ? 'ON' : 'OFF (payment skipped)'}</small></span></label>
+    <div className="form-grid">
+      <div className="field"><label>Provider</label><select name="provider" className="field-input" defaultValue={s?.provider ?? 'razorpay'}><option value="razorpay">Razorpay</option><option value="stripe">Stripe</option><option value="cashfree">Cashfree</option><option value="payu">PayU</option></select></div>
+      <div className="field"><label>Mode</label><select name="mode" className="field-input" defaultValue={s?.mode ?? 'test'}><option value="test">Test</option><option value="live">Live</option></select></div>
+      <div className="field"><label>Activation fee (₹)</label><input name="fee" type="number" min={0} className="field-input" defaultValue={Number(s?.activation_fee ?? 50000)} /></div>
+      <div className="field"><label>Key ID / Publishable key</label><input name="key_id" className="field-input" defaultValue={s?.key_id ?? ''} placeholder="rzp_test_…" /></div>
+      <div className="field"><label>Key secret {q.data.hasSecret && <small className="muted">(saved — leave blank to keep)</small>}</label><input name="key_secret" type="password" autoComplete="off" className="field-input" /></div>
+      <div className="field"><label>Webhook secret {q.data.hasWebhook && <small className="muted">(saved — leave blank to keep)</small>}</label><input name="webhook_secret" type="password" autoComplete="off" className="field-input" /></div>
+    </div>
+    <div className="preview-warning"><strong>Note:</strong> Keys are stored privately (admin-only). Until the live checkout for your chosen provider is connected, an enabled payment step records test transactions and no real money is charged.</div>
+    <div className="form-actions"><Button type="submit" disabled={busy}><Wallet /> Save gateway settings</Button></div>
+  </form>;
 }

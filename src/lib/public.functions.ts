@@ -18,7 +18,7 @@ function publicClient() {
     },
   });
 }
-const cols = 'id,ref,title,location,price,area_sqft,beds,baths,property_type,description,image,amenities,featured,status,categories(name)';
+const cols = 'id,ref,title,location,price,area_sqft,beds,baths,property_type,description,image,cover_url,gallery,amenities,featured,status,categories(name)';
 
 export const listPublicProperties = createServerFn({ method: 'GET' }).handler(async () => {
   const sb = publicClient();

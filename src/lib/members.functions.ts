@@ -43,12 +43,16 @@ async function createMember(m: Member, opts: { byAdmin: boolean; payment?: { met
   return { ok: true as const, userId: id };
 }
 
-// Public signup: test-mode activation payment is recorded as successful.
+// Public signup. When the admin has not enabled a payment gateway, the payment step is skipped
+// and no transaction is recorded. When enabled (test mode until a live checkout is wired), a test transaction is recorded.
 export const registerMember = createServerFn({ method: 'POST' })
-  .inputValidator((d) => memberSchema.extend({ paymentMethod: z.enum(['test_card', 'test_upi', 'test_netbanking']) }).parse(d))
+  .inputValidator((d) => memberSchema.extend({ paymentMethod: z.enum(['test_card', 'test_upi', 'test_netbanking']).optional() }).parse(d))
   .handler(async ({ data }) => {
     const { paymentMethod, ...m } = data;
-    return createMember(m, { byAdmin: false, payment: { method: paymentMethod, status: 'success' } });
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const { data: s } = await supabaseAdmin.from('payment_settings').select('enabled').eq('id', 1).maybeSingle();
+    if (s?.enabled && !paymentMethod) return { ok: false as const, error: 'Please choose a payment method.' };
+    return createMember(m, s?.enabled && paymentMethod ? { byAdmin: false, payment: { method: paymentMethod, status: 'success' } } : { byAdmin: false });
   });
 
 export const adminCreateUser = createServerFn({ method: 'POST' })

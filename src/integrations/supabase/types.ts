@@ -38,6 +38,27 @@ export type Database = {
         }
         Relationships: []
       }
+      gateway_secrets: {
+        Row: {
+          id: number
+          key_secret: string | null
+          updated_at: string
+          webhook_secret: string | null
+        }
+        Insert: {
+          id?: number
+          key_secret?: string | null
+          updated_at?: string
+          webhook_secret?: string | null
+        }
+        Update: {
+          id?: number
+          key_secret?: string | null
+          updated_at?: string
+          webhook_secret?: string | null
+        }
+        Relationships: []
+      }
       interests: {
         Row: {
           admin_note: string | null
@@ -163,6 +184,36 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_settings: {
+        Row: {
+          activation_fee: number
+          enabled: boolean
+          id: number
+          key_id: string | null
+          mode: string
+          provider: string
+          updated_at: string
+        }
+        Insert: {
+          activation_fee?: number
+          enabled?: boolean
+          id?: number
+          key_id?: string | null
+          mode?: string
+          provider?: string
+          updated_at?: string
+        }
+        Update: {
+          activation_fee?: number
+          enabled?: boolean
+          id?: number
+          key_id?: string | null
+          mode?: string
+          provider?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           account_type: string
@@ -243,9 +294,12 @@ export type Database = {
           baths: number | null
           beds: number | null
           category_id: string | null
+          cover_url: string | null
           created_at: string
           description: string | null
+          documents: string[]
           featured: boolean
+          gallery: string[]
           id: string
           image: string
           location: string
@@ -264,9 +318,12 @@ export type Database = {
           baths?: number | null
           beds?: number | null
           category_id?: string | null
+          cover_url?: string | null
           created_at?: string
           description?: string | null
+          documents?: string[]
           featured?: boolean
+          gallery?: string[]
           id?: string
           image?: string
           location: string
@@ -285,9 +342,12 @@ export type Database = {
           baths?: number | null
           beds?: number | null
           category_id?: string | null
+          cover_url?: string | null
           created_at?: string
           description?: string | null
+          documents?: string[]
           featured?: boolean
+          gallery?: string[]
           id?: string
           image?: string
           location?: string
@@ -308,6 +368,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      support_tickets: {
+        Row: {
+          admin_reply: string | null
+          created_at: string
+          id: string
+          message: string
+          status: string
+          subject: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_reply?: string | null
+          created_at?: string
+          id?: string
+          message: string
+          status?: string
+          subject: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_reply?: string | null
+          created_at?: string
+          id?: string
+          message?: string
+          status?: string
+          subject?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       transactions: {
         Row: {
