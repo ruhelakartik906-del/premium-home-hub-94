@@ -7,15 +7,15 @@ import { Button } from '@/components/ui/button';
 import { PropertyCard } from '@/components/eliteoz';
 import { supabase } from '@/integrations/supabase/client';
 import { daysLeft, type useMe } from '@/hooks/use-auth';
-import { formatINR, imageKeys, propertyImages, toListing, type Listing, type PropertyRow } from '@/lib/eliteoz-data';
+import { coverOf, formatINR, toListing, type Listing, type PropertyRow } from '@/lib/eliteoz-data';
 import { readCompare, writeCompare } from '@/lib/queries';
 import { Panel, SectionLink, Stat, Status, Table, Tabs, fmtDate } from '@/components/workspace';
 
 export type Me = NonNullable<ReturnType<typeof useMe>['data']>;
-const cols = 'id,ref,title,location,price,area_sqft,beds,baths,property_type,description,image,amenities,featured,status,categories(name)';
+const cols = 'id,ref,title,location,price,area_sqft,beds,baths,property_type,description,image,cover_url,gallery,amenities,featured,status,categories(name)';
 
 function useApproved() { return useQuery({ queryKey: ['approved-properties'], queryFn: async () => { const { data } = await supabase.from('properties').select(cols).eq('status', 'approved').order('featured', { ascending: false }); return ((data ?? []) as unknown as PropertyRow[]).map(toListing); } }); }
-function useMyInterests(uid: string) { return useQuery({ queryKey: ['my-interests', uid], queryFn: async () => { const { data } = await supabase.from('interests').select('id,status,message,preferred_time,admin_note,created_at,properties(ref,title,location,price,image)').eq('buyer_id', uid).order('created_at', { ascending: false }); return data ?? []; } }); }
+function useMyInterests(uid: string) { return useQuery({ queryKey: ['my-interests', uid], queryFn: async () => { const { data } = await supabase.from('interests').select('id,status,message,preferred_time,admin_note,created_at,properties(ref,title,location,price,image,cover_url)').eq('buyer_id', uid).order('created_at', { ascending: false }); return data ?? []; } }); }
 function useSellerProps(uid: string) { return useQuery({ queryKey: ['seller-properties', uid], queryFn: async () => { const { data } = await supabase.from('properties').select(cols + ',admin_note,created_at,category_id').eq('seller_id', uid).order('created_at', { ascending: false }); return (data ?? []) as unknown as (PropertyRow & { admin_note: string | null; created_at: string; category_id: string | null })[]; } }); }
 function useSellerInterests(uid: string) { return useQuery({ queryKey: ['seller-interests', uid], queryFn: async () => { const { data } = await supabase.from('interests').select('id,status,created_at,preferred_time,properties!inner(ref,title,seller_id)').eq('properties.seller_id', uid).order('created_at', { ascending: false }); return data ?? []; } }); }
 
@@ -32,6 +32,7 @@ export function MemberBody({ role, section, me }: { role: 'buyer' | 'seller'; se
     case 'payments': return <Payments me={me} />;
     case 'profile': return <Profile me={me} role={role} />;
     case 'security': return <Security />;
+    case 'support': return <Support me={me} />;
     default: return null;
   }
 }
@@ -86,7 +87,7 @@ function Compare() {
 function BuyerInterests({ me }: { me: Me }) {
   const ints = useMyInterests(me.user.id);
   return <Panel title="Properties you have enquired about" action={<Button asChild size="sm" variant="outline"><Link to="/properties">Find more</Link></Button>}>
-    {(ints.data ?? []).length ? <div className="interest-list">{ints.data!.map((i) => <article key={i.id} className="interest-item"><img src={propertyImages[i.properties?.image ?? 'villa']} alt="" /><div className="grow"><div className="flex items-center justify-between gap-3"><Link to="/properties/$id" params={{ id: i.properties?.ref ?? '' }} className="interest-title">{i.properties?.title}</Link><Status value={i.status} /></div><small className="muted">{i.properties?.location} · {formatINR(Number(i.properties?.price ?? 0))} · Sent {fmtDate(i.created_at)}</small>{i.message && <p>“{i.message}”</p>}{i.admin_note && <p className="team-note"><MessageSquare size={14} /> Eliteoz team: {i.admin_note}</p>}</div></article>)}</div>
+    {(ints.data ?? []).length ? <div className="interest-list">{ints.data!.map((i) => <article key={i.id} className="interest-item"><img src={coverOf({ image: i.properties?.image ?? 'villa', cover_url: i.properties?.cover_url ?? null })} alt="" /><div className="grow"><div className="flex items-center justify-between gap-3"><Link to="/properties/$id" params={{ id: i.properties?.ref ?? '' }} className="interest-title">{i.properties?.title}</Link><Status value={i.status} /></div><small className="muted">{i.properties?.location} · {formatINR(Number(i.properties?.price ?? 0))} · Sent {fmtDate(i.created_at)}</small>{i.message && <p>“{i.message}”</p>}{i.admin_note && <p className="team-note"><MessageSquare size={14} /> Eliteoz team: {i.admin_note}</p>}</div></article>)}</div>
       : <div className="empty-state"><Heart /><h3>No interests yet.</h3><p>Open any property and fill in the contact form — the Eliteoz team will reach out and it will show here.</p><Button asChild><Link to="/properties">Explore properties</Link></Button></div>}
   </Panel>;
 }
@@ -96,7 +97,7 @@ function SellerOverview({ me }: { me: Me }) {
   const list = props.data ?? []; const c = (s: string) => list.filter((p) => p.status === s).length;
   return <>
     <div className="stats-grid"><Stat icon={Building2} label="Total properties" value={list.length} /><Stat icon={BadgeCheck} label="Live & approved" value={c('approved')} /><Stat icon={Eye} label="Under review" value={c('pending')} /><Stat icon={Heart} label="Buyer interests" value={ints.data?.length ?? 0} /></div>
-    <div className="dash-grid"><Panel title="Your listings" action={<SectionLink role="seller" slug="properties" className="text-link">Manage</SectionLink>}>{list.length ? <div className="listing-rows">{list.slice(0, 5).map((p) => <div className="listing-row" key={p.id}><img src={propertyImages[p.image]} alt="" /><div className="grow"><strong>{p.title}</strong><small>{p.location} · {formatINR(Number(p.price))}</small></div><Status value={p.status} /></div>)}</div> : <div className="empty-state"><p>No properties yet.</p><Button asChild><SectionLink role="seller" slug="add-property">Add your first property</SectionLink></Button></div>}</Panel>
+    <div className="dash-grid"><Panel title="Your listings" action={<SectionLink role="seller" slug="properties" className="text-link">Manage</SectionLink>}>{list.length ? <div className="listing-rows">{list.slice(0, 5).map((p) => <div className="listing-row" key={p.id}><img src={coverOf(p)} alt="" /><div className="grow"><strong>{p.title}</strong><small>{p.location} · {formatINR(Number(p.price))}</small></div><Status value={p.status} /></div>)}</div> : <div className="empty-state"><p>No properties yet.</p><Button asChild><SectionLink role="seller" slug="add-property">Add your first property</SectionLink></Button></div>}</Panel>
       <div className="dash-side"><VerificationCard me={me} role="seller" /><Panel title="Latest interest">{(ints.data ?? []).slice(0, 4).map((i) => <div className="mini-row" key={i.id}><div><strong>{i.properties?.title}</strong><small>{fmtDate(i.created_at)}</small></div><Status value={i.status} /></div>)}{!ints.data?.length && <p className="muted">Buyer interest in your properties will appear here.</p>}</Panel></div></div>
   </>;
 }
@@ -106,7 +107,7 @@ function SellerProperties({ me }: { me: Me }) {
   const list = (props.data ?? []).filter((p) => tab === 'all' || p.status === tab);
   const act = async (id: string, patch: { status?: string } | 'delete') => { const { error } = patch === 'delete' ? await supabase.from('properties').delete().eq('id', id) : await supabase.from('properties').update(patch).eq('id', id); if (error) toast.error('Action failed'); else { toast.success(patch === 'delete' ? 'Property deleted' : 'Submitted for review'); qc.invalidateQueries({ queryKey: ['seller-properties'] }); } };
   return <Panel><Tabs value={tab} onChange={setTab} options={[['all', `All (${props.data?.length ?? 0})`], ['draft', 'Drafts'], ['pending', 'Pending'], ['approved', 'Approved'], ['rejected', 'Rejected']]} />
-    <Table headers={['Property', 'Category', 'Price', 'Status', 'Added', '']} empty="No properties in this view." rows={list.map((p) => [<div className="cell-prop"><img src={propertyImages[p.image]} alt="" /><div><strong>{p.title}</strong><small>{p.ref} · {p.location}</small>{p.status === 'rejected' && p.admin_note && <small className="danger-text">Reason: {p.admin_note}</small>}</div></div>, p.categories?.name ?? '—', formatINR(Number(p.price)), <Status value={p.status} />, fmtDate(p.created_at), <div className="row-actions">{p.status === 'approved' && <Button size="sm" variant="ghost" asChild><Link to="/properties/$id" params={{ id: p.ref }}>View</Link></Button>}{['draft', 'rejected'].includes(p.status) && <Button size="sm" variant="outline" onClick={() => act(p.id, { status: 'pending' })}>Submit</Button>}<Button size="sm" variant="ghost" aria-label="Delete" onClick={() => confirm('Delete this property?') && act(p.id, 'delete')}><Trash2 size={15} /></Button></div>])} />
+    <Table headers={['Property', 'Category', 'Price', 'Status', 'Added', '']} empty="No properties in this view." rows={list.map((p) => [<div className="cell-prop"><img src={coverOf(p)} alt="" /><div><strong>{p.title}</strong><small>{p.ref} · {p.location}</small>{p.status === 'rejected' && p.admin_note && <small className="danger-text">Reason: {p.admin_note}</small>}</div></div>, p.categories?.name ?? '—', formatINR(Number(p.price)), <Status value={p.status} />, fmtDate(p.created_at), <div className="row-actions">{p.status === 'approved' && <Button size="sm" variant="ghost" asChild><Link to="/properties/$id" params={{ id: p.ref }}>View</Link></Button>}{['draft', 'rejected'].includes(p.status) && <Button size="sm" variant="outline" onClick={() => act(p.id, { status: 'pending' })}>Submit</Button>}<Button size="sm" variant="ghost" aria-label="Delete" onClick={() => confirm('Delete this property?') && act(p.id, 'delete')}><Trash2 size={15} /></Button></div>])} />
   </Panel>;
 }
 

@@ -1,7 +1,7 @@
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useState, type ReactNode } from 'react';
-import { Activity, AlertTriangle, Bell, BookOpen, Building2, CreditCard, FileCheck, Heart, LayoutDashboard, LockKeyhole, LogOut, Menu, MessageSquare, Plug, Plus, Search, Send, SlidersHorizontal, Users, X } from 'lucide-react';
+import { Activity, AlertTriangle, Bell, BookOpen, Building2, CreditCard, FileCheck, Heart, LayoutDashboard, LifeBuoy, LockKeyhole, Wallet, LogOut, Menu, MessageSquare, Plug, Plus, Search, Send, SlidersHorizontal, Users, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Brand } from '@/components/eliteoz';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,9 +11,9 @@ import { AdminBody } from '@/components/workspace-admin';
 
 export type Role = 'buyer' | 'seller' | 'admin';
 type NavItem = { label: string; slug: string; icon: typeof Heart; group?: string };
-const buyer: NavItem[] = [{ label: 'Dashboard', slug: '', icon: LayoutDashboard }, { label: 'Explore Properties', slug: 'explore', icon: Search }, { label: 'Compare', slug: 'compare', icon: SlidersHorizontal }, { label: 'My Interests', slug: 'interests', icon: Heart }, { label: 'Notifications', slug: 'notifications', icon: Bell, group: 'ACCOUNT' }, { label: 'Verification', slug: 'verification', icon: FileCheck }, { label: 'Payments', slug: 'payments', icon: CreditCard }, { label: 'Profile', slug: 'profile', icon: Users }, { label: 'Security', slug: 'security', icon: LockKeyhole }];
-const seller: NavItem[] = [{ label: 'Dashboard', slug: '', icon: LayoutDashboard }, { label: 'My Properties', slug: 'properties', icon: Building2 }, { label: 'Add Property', slug: 'add-property', icon: Plus }, { label: 'Buyer Interests', slug: 'interests', icon: MessageSquare }, { label: 'Notifications', slug: 'notifications', icon: Bell, group: 'ACCOUNT' }, { label: 'Verification', slug: 'verification', icon: FileCheck }, { label: 'Payments', slug: 'payments', icon: CreditCard }, { label: 'Profile', slug: 'profile', icon: Users }, { label: 'Security', slug: 'security', icon: LockKeyhole }];
-const admin: NavItem[] = [{ label: 'Dashboard', slug: '', icon: LayoutDashboard }, { label: 'All Users', slug: 'users', icon: Users, group: 'PEOPLE' }, { label: 'KYC Verification', slug: 'kyc', icon: FileCheck }, { label: 'Properties', slug: 'properties', icon: Building2, group: 'LISTINGS' }, { label: 'Categories', slug: 'categories', icon: BookOpen }, { label: 'Buyer Interests', slug: 'leads', icon: Heart }, { label: 'Transactions', slug: 'payments', icon: CreditCard, group: 'OPERATIONS' }, { label: 'Send Notification', slug: 'notifications', icon: Send }, { label: 'Integrations', slug: 'integrations', icon: Plug }];
+const buyer: NavItem[] = [{ label: 'Dashboard', slug: '', icon: LayoutDashboard }, { label: 'Explore Properties', slug: 'explore', icon: Search }, { label: 'Compare', slug: 'compare', icon: SlidersHorizontal }, { label: 'My Interests', slug: 'interests', icon: Heart }, { label: 'Notifications', slug: 'notifications', icon: Bell, group: 'ACCOUNT' }, { label: 'Verification', slug: 'verification', icon: FileCheck }, { label: 'Payments', slug: 'payments', icon: CreditCard }, { label: 'Profile', slug: 'profile', icon: Users }, { label: 'Security', slug: 'security', icon: LockKeyhole }, { label: 'Support Tickets', slug: 'support', icon: LifeBuoy }];
+const seller: NavItem[] = [{ label: 'Dashboard', slug: '', icon: LayoutDashboard }, { label: 'My Properties', slug: 'properties', icon: Building2 }, { label: 'Add Property', slug: 'add-property', icon: Plus }, { label: 'Buyer Interests', slug: 'interests', icon: MessageSquare }, { label: 'Notifications', slug: 'notifications', icon: Bell, group: 'ACCOUNT' }, { label: 'Verification', slug: 'verification', icon: FileCheck }, { label: 'Payments', slug: 'payments', icon: CreditCard }, { label: 'Profile', slug: 'profile', icon: Users }, { label: 'Security', slug: 'security', icon: LockKeyhole }, { label: 'Support Tickets', slug: 'support', icon: LifeBuoy }];
+const admin: NavItem[] = [{ label: 'Dashboard', slug: '', icon: LayoutDashboard }, { label: 'All Users', slug: 'users', icon: Users, group: 'PEOPLE' }, { label: 'KYC Verification', slug: 'kyc', icon: FileCheck }, { label: 'Properties', slug: 'properties', icon: Building2, group: 'LISTINGS' }, { label: 'Categories', slug: 'categories', icon: BookOpen }, { label: 'Buyer Interests', slug: 'leads', icon: Heart }, { label: 'Transactions', slug: 'payments', icon: CreditCard, group: 'OPERATIONS' }, { label: 'Send Notification', slug: 'notifications', icon: Send }, { label: 'Support Tickets', slug: 'tickets', icon: LifeBuoy }, { label: 'Payment Gateway', slug: 'gateway', icon: Wallet, group: 'SETTINGS' }, { label: 'Integrations', slug: 'integrations', icon: Plug }];
 export const menu = { buyer, seller, admin };
 export const workspaceSections: Record<Role, string[]> = { buyer: buyer.map((x) => x.slug).filter(Boolean), seller: seller.map((x) => x.slug).filter(Boolean), admin: admin.map((x) => x.slug).filter(Boolean) };
 
@@ -53,7 +53,7 @@ export function Workspace({ role, section = '' }: { role: Role; section?: string
   const initials = name.split(' ').map((x) => x[0]).slice(0, 2).join('').toUpperCase();
   const status = p && role !== 'admin' ? effectiveStatus(p) : 'active';
   const needsKyc = p && role !== 'admin' && !['submitted', 'approved'].includes(p.verification_status);
-  const locked = status === 'suspended' && !['verification', 'payments', 'profile', 'notifications', 'security'].includes(section);
+  const locked = status === 'suspended' && !['verification', 'payments', 'profile', 'notifications', 'security', 'support'].includes(section);
   const signOut = async () => { await supabase.auth.signOut(); navigate({ to: '/login' }); };
   const hrefFor = (slug: string) => (slug ? `/${role}/${slug}` : `/${role}`);
 

@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { effectiveStatus, daysLeft, type Profile } from '@/hooks/use-auth';
-import { formatINR, propertyImages } from '@/lib/eliteoz-data';
+import { coverOf, formatINR } from '@/lib/eliteoz-data';
 import { adminCreateUser } from '@/lib/members.functions';
 import { Panel, SectionLink, Stat, Status, Table, Tabs, fmtDate } from '@/components/workspace';
 import type { Me } from '@/components/workspace-member';
@@ -110,7 +110,7 @@ function PropertiesSection() {
   const list = (props.data ?? []).filter((p) => (tab === 'all' || (tab === 'featured' ? p.featured : p.status === tab)) && (!cat || p.categories?.name === cat));
   return <Panel><Tabs value={tab} onChange={setTab} options={[['pending', 'Pending review'], ['approved', 'Approved'], ['rejected', 'Rejected'], ['draft', 'Drafts'], ['featured', 'Featured'], ['all', 'All']]} />
     <div className="toolbar"><select className="field-input" value={cat} onChange={(e) => setCat(e.target.value)}><option value="">All categories</option>{cats.map((c) => <option key={c}>{c}</option>)}</select></div>
-    <Table headers={['Property', 'Category', 'Price', 'Status', 'Added', '']} empty="No properties here." rows={list.map((p) => [<div className="cell-prop"><img src={propertyImages[p.image]} alt="" /><div><strong>{p.title}</strong><small>{p.ref} · {p.location}</small></div></div>, p.categories?.name ?? '—', formatINR(Number(p.price)), <Status value={p.status} />, fmtDate(p.created_at), <div className="row-actions">{p.status !== 'approved' && <Button size="sm" onClick={() => update(p, { status: 'approved', admin_note: null })}>Approve</Button>}{p.status !== 'rejected' && <Button size="sm" variant="outline" onClick={() => { const n = prompt('Reason for rejection:'); if (n) update(p, { status: 'rejected', admin_note: n }); }}>Reject</Button>}<Button size="sm" variant="ghost" aria-label="Toggle featured" onClick={() => update(p, { featured: !p.featured })}><Star size={15} fill={p.featured ? 'currentColor' : 'none'} /></Button>{p.status === 'approved' && <Button size="sm" variant="ghost" asChild><Link to="/properties/$id" params={{ id: p.ref }}>View</Link></Button>}</div>])} /></Panel>;
+    <Table headers={['Property', 'Category', 'Price', 'Status', 'Added', '']} empty="No properties here." rows={list.map((p) => [<div className="cell-prop"><img src={coverOf(p)} alt="" /><div><strong>{p.title}</strong><small>{p.ref} · {p.location}</small></div></div>, p.categories?.name ?? '—', formatINR(Number(p.price)), <Status value={p.status} />, fmtDate(p.created_at), <div className="row-actions">{p.status !== 'approved' && <Button size="sm" onClick={() => update(p, { status: 'approved', admin_note: null })}>Approve</Button>}{p.status !== 'rejected' && <Button size="sm" variant="outline" onClick={() => { const n = prompt('Reason for rejection:'); if (n) update(p, { status: 'rejected', admin_note: n }); }}>Reject</Button>}<Button size="sm" variant="ghost" aria-label="Toggle featured" onClick={() => update(p, { featured: !p.featured })}><Star size={15} fill={p.featured ? 'currentColor' : 'none'} /></Button>{p.status === 'approved' && <Button size="sm" variant="ghost" asChild><Link to="/properties/$id" params={{ id: p.ref }}>View</Link></Button>}</div>])} /></Panel>;
 }
 
 function Categories() {
