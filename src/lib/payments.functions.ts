@@ -90,3 +90,20 @@ export const reportPaymentFailure = createServerFn({ method: 'POST' })
     await supabaseAdmin.from('transactions').update({ status: 'failed', failure_reason: data.reason }).eq('order_id', data.orderId).eq('user_id', context.userId).in('status', ['created', 'pending']);
     return { ok: true as const };
   });
+
+/** Permanently deactivates a member: terminal status, sign-in disabled, audited with reason. */
+export const adminDeactivateUser = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ userId: z.string().uuid(), reason: z.string().trim().min(3).max(500) }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    if (data.userId === context.userId) return { ok: false as const, error: 'You cannot deactivate your own account.' };
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const { data: isTargetAdmin } = await supabaseAdmin.from('user_roles').select('id').eq('user_id', data.userId).eq('role', 'admin').maybeSingle();
+    if (isTargetAdmin) return { ok: false as const, error: 'Admin accounts cannot be deactivated here.' };
+    const { error } = await supabaseAdmin.from('profiles').update({ status: 'deactivated' }).eq('id', data.userId);
+    if (error) return { ok: false as const, error: 'Could not deactivate this account.' };
+    await supabaseAdmin.auth.admin.updateUserById(data.userId, { ban_duration: '876000h' });
+    await supabaseAdmin.from('audit_logs').insert({ actor_id: context.userId, target_user_id: data.userId, action: 'account_deactivated', details: { reason: data.reason } });
+    return { ok: true as const };
+  });

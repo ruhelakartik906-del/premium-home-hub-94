@@ -49,7 +49,7 @@ export function PlatformSettings() {
   </form>;
 }
 
-const actionLabel = (a: string) => a.startsWith('settings_changed') ? 'Settings changed' : ({ profile_updated: 'Account updated', role_insert: 'Role granted', role_delete: 'Role removed', auto_suspended: 'Auto-suspended', property_status: 'Property status', kyc_status: 'Verification status', payment_status: 'Payment status' } as Record<string, string>)[a] ?? a;
+const actionLabel = (a: string) => a.startsWith('settings_changed') ? 'Settings changed' : ({ profile_updated: 'Account updated', role_insert: 'Role granted', role_delete: 'Role removed', account_deactivated: 'Account deactivated', auto_suspended: 'Auto-suspended', property_status: 'Property status', kyc_status: 'Verification status', payment_status: 'Payment status' } as Record<string, string>)[a] ?? a;
 
 export function AuditLog() {
   const [tab, setTab] = useState('all');

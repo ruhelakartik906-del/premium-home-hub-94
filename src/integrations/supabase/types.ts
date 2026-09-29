@@ -660,7 +660,25 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      account_state: {
+        Args: {
+          _due: string
+          _last_payment: string
+          _status: string
+          _verification: string
+        }
+        Returns: string
+      }
       admin_exists: { Args: never; Returns: boolean }
+      admin_list_members: {
+        Args: never
+        Returns: {
+          id: string
+          last_sign_in_at: string
+          lifecycle: string
+          payment_status: string
+        }[]
+      }
       claim_first_admin: { Args: never; Returns: boolean }
       enforce_verification_deadlines: { Args: never; Returns: number }
       has_role: {
