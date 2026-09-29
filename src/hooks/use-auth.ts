@@ -9,6 +9,7 @@ export type Profile = {
 export function effectiveStatus(p: Pick<Profile, 'status' | 'verification_status' | 'verification_due_at'>) {
   if (p.status === 'blocked') return 'blocked';
   if (p.status === 'suspended') return 'suspended';
+  if (p.status === 'pending_payment') return 'pending_payment';
   if (!['submitted', 'approved'].includes(p.verification_status) && new Date(p.verification_due_at).getTime() < Date.now()) return 'suspended';
   return 'active';
 }

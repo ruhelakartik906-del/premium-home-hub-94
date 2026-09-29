@@ -22,7 +22,7 @@ const memberSchema = z.object({
 });
 type Member = z.infer<typeof memberSchema>;
 
-async function createMember(m: Member, opts: { byAdmin: boolean; payment?: { method: string; status: string } | undefined }) {
+async function createMember(m: Member, opts: { byAdmin: boolean; pendingPayment?: boolean; payment?: { method: string; status: string } | undefined }) {
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
   const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
     email: m.email, password: m.password, email_confirm: true, user_metadata: { full_name: m.full_name, role: m.role },
@@ -35,24 +35,24 @@ async function createMember(m: Member, opts: { byAdmin: boolean; payment?: { met
   const id = created.user.id;
   await supabaseAdmin.from('user_roles').insert({ user_id: id, role: m.role });
   const n = (v?: string) => (v && v.trim() ? v.trim() : null);
-  await supabaseAdmin.from('profiles').insert({ id, full_name: m.full_name, email: m.email, mobile: m.mobile, dob: n(m.dob), gender: n(m.gender), country: n(m.country), state: n(m.state), city: n(m.city), address: n(m.address), pincode: n(m.pincode), company_name: n(m.company_name), business_type: n(m.business_type), account_type: m.role, created_by_admin: opts.byAdmin });
+  await supabaseAdmin.from('profiles').insert({ id, full_name: m.full_name, email: m.email, mobile: m.mobile, dob: n(m.dob), gender: n(m.gender), country: n(m.country), state: n(m.state), city: n(m.city), address: n(m.address), pincode: n(m.pincode), company_name: n(m.company_name), business_type: n(m.business_type), account_type: m.role, created_by_admin: opts.byAdmin, ...(opts.pendingPayment ? { status: 'pending_payment' } : {}) });
   if (opts.payment) {
-    await supabaseAdmin.from('transactions').insert({ user_id: id, amount: Number((await supabaseAdmin.from('payment_settings').select('activation_fee').eq('id', 1).maybeSingle()).data?.activation_fee ?? ACTIVATION_FEE), purpose: 'activation', method: opts.payment.method, status: opts.payment.status, payer_name: m.full_name, payer_email: m.email });
+    await supabaseAdmin.from('transactions').insert({ user_id: id, amount: Number((await supabaseAdmin.from('payment_settings').select('activation_fee').eq('id', 1).maybeSingle()).data?.activation_fee ?? ACTIVATION_FEE), purpose: 'activation', method: opts.payment.method, status: opts.payment.status, provider: 'offline', verified_via: 'offline', account_role: m.role, notes: 'Recorded by Master Admin (offline/manual payment)', payer_name: m.full_name, payer_email: m.email });
   }
-  await supabaseAdmin.from('notifications').insert({ user_id: id, title: 'Welcome to Eliteoz', body: 'Your membership is active. Please complete verification within 7 days to keep your account active.' });
+  await supabaseAdmin.from('notifications').insert({ user_id: id, title: 'Welcome to Eliteoz', body: opts.pendingPayment ? 'Complete your activation payment to open your membership.' : 'Your membership is active. Please complete verification within 7 days to keep your account active.' });
   return { ok: true as const, userId: id };
 }
 
-// Public signup. When the admin has not enabled a payment gateway, the payment step is skipped
-// and no transaction is recorded. When enabled (test mode until a live checkout is wired), a test transaction is recorded.
+// Public signup. If the Master Admin has switched on Razorpay, the account starts in
+// 'pending_payment' and is activated only after server-side payment verification.
 export const registerMember = createServerFn({ method: 'POST' })
-  .inputValidator((d) => memberSchema.extend({ paymentMethod: z.enum(['test_card', 'test_upi', 'test_netbanking']).optional() }).parse(d))
+  .inputValidator((d) => memberSchema.parse(d))
   .handler(async ({ data }) => {
-    const { paymentMethod, ...m } = data;
-    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
-    const { data: s } = await supabaseAdmin.from('payment_settings').select('enabled').eq('id', 1).maybeSingle();
-    if (s?.enabled && !paymentMethod) return { ok: false as const, error: 'Please choose a payment method.' };
-    return createMember(m, s?.enabled && paymentMethod ? { byAdmin: false, payment: { method: paymentMethod, status: 'pending' } } : { byAdmin: false });
+    const { loadGateway } = await import('./razorpay.server');
+    const cfg = await loadGateway();
+    const needsPay = cfg.enabled && !!cfg.keyId && !!cfg.keySecret;
+    const r = await createMember(data, { byAdmin: false, pendingPayment: needsPay });
+    return r.ok ? { ...r, needsPayment: needsPay } : r;
   });
 
 export const adminCreateUser = createServerFn({ method: 'POST' })

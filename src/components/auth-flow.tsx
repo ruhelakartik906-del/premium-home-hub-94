@@ -1,7 +1,7 @@
 import { Link, useNavigate } from '@tanstack/react-router';
 import { useServerFn } from '@tanstack/react-start';
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, ArrowRight, BriefcaseBusiness, CheckCircle2, CreditCard, Landmark, LockKeyhole, Smartphone, UserRound } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BriefcaseBusiness, CheckCircle2, LockKeyhole, UserRound } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Notice, PageShell } from '@/components/eliteoz';
@@ -60,6 +60,7 @@ export function DobInput({ name, defaultValue, required }: { name: string; defau
 
 type PaySettings = { enabled: boolean; activation_fee: number; provider: string; mode: string };
 
+import { usePayActivation } from '@/components/activation-banner';
 export function RegisterFlow({ initialRole }: { initialRole?: string }) {
   const navigate = useNavigate();
   const register = useServerFn(registerMember);
@@ -67,7 +68,7 @@ export function RegisterFlow({ initialRole }: { initialRole?: string }) {
   const [step, setStep] = useState(0);
   const [details, setDetails] = useState<Details>({});
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
-  const [method, setMethod] = useState<'test_card' | 'test_upi' | 'test_netbanking'>('test_card');
+  const payActivation = usePayActivation();
   const [agree, setAgree] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -81,12 +82,15 @@ export function RegisterFlow({ initialRole }: { initialRole?: string }) {
     if (!role) return;
     if (gateway && !agree) { setError('Please accept the activation terms to continue.'); return; }
     setBusy(true); setError('');
-    const res = await register({ data: { role, ...(gateway ? { paymentMethod: method } : {}), full_name: details['full_name'] ?? '', email: details['email'] ?? '', password: details['password'] ?? '', mobile: details['mobile'] ?? '', dob: details['dob'] ?? '', gender: details['gender'], country: details['country'], state: details['state'], city: details['city'], address: details['address'], pincode: details['pincode'], company_name: details['company_name'], business_type: details['business_type'] } }).catch(() => ({ ok: false as const, error: 'Please check your details and try again.' }));
+    const res = await register({ data: { role, full_name: details['full_name'] ?? '', email: details['email'] ?? '', password: details['password'] ?? '', mobile: details['mobile'] ?? '', dob: details['dob'] ?? '', gender: details['gender'], country: details['country'], state: details['state'], city: details['city'], address: details['address'], pincode: details['pincode'], company_name: details['company_name'], business_type: details['business_type'] } }).catch(() => ({ ok: false as const, error: 'Please check your details and try again.' }));
     if (!res.ok) { setBusy(false); setError(res.error); return; }
     const { error: signErr } = await supabase.auth.signInWithPassword({ email: details['email'] ?? '', password: details['password'] ?? '' });
-    setBusy(false);
-    if (signErr) { toast.error('Account created. Please log in.'); navigate({ to: '/login' }); return; }
-    toast.success(gateway ? 'Payment successful — welcome to Eliteoz' : 'Welcome to Eliteoz — your account is ready');
+    if (signErr) { setBusy(false); toast.error('Account created. Please log in.'); navigate({ to: '/login' }); return; }
+    if ('needsPayment' in res && res.needsPayment) {
+      const r = await payActivation(); setBusy(false);
+      if (r.status === 'paid') toast.success('Payment confirmed — welcome to Eliteoz');
+      else toast.error(`${r.reason} Your account is saved — retry payment from your dashboard.`);
+    } else { setBusy(false); toast.success('Welcome to Eliteoz — your account is ready'); }
     navigate({ to: role === 'buyer' ? '/buyer' : '/seller' });
   };
   const afterOtp = () => { if (gateway) setStep(2); else void finish(); };
@@ -113,10 +117,10 @@ export function RegisterFlow({ initialRole }: { initialRole?: string }) {
         <OtpInput value={otp} onChange={setOtp} onComplete={() => { setTimeout(afterOtp, 350); }} />
         <div className="flex gap-2"><Button variant="link" onClick={() => { setOtp(['', '', '', '', '', '']); toast('A new code would be sent here once SMS is connected.'); }}>Resend OTP</Button><Button variant="link" onClick={() => setStep(0)}>Change number</Button></div></>}
 
-      {step === 2 && gateway && <><div className="panel pay-panel"><div className="pay-head"><div><span className="eyebrow">ACTIVATION FEE</span><div className="payment-total">₹{fee.toLocaleString('en-IN')}</div></div><span className="status pending">{pay?.mode === 'live' ? pay.provider.toUpperCase() : 'TEST MODE'}</span></div>
-        <div className="pay-methods">{([['test_card', 'Card', CreditCard], ['test_upi', 'UPI', Smartphone], ['test_netbanking', 'Net banking', Landmark]] as const).map(([k, l, I]) => <button type="button" key={k} className={`pay-method ${method === k ? 'active' : ''}`} onClick={() => setMethod(k)}><I size={20} />{l}</button>)}</div>
+      {step === 2 && gateway && <><div className="panel pay-panel"><div className="pay-head"><div><span className="eyebrow">ACTIVATION FEE</span><div className="payment-total">₹{fee.toLocaleString('en-IN')}</div></div><span className="status pending">{pay?.mode === 'live' ? 'RAZORPAY' : 'TEST MODE'}</span></div>
+        <p className="muted">You'll pay securely via Razorpay (card, UPI or net banking). Your account activates only after Razorpay confirms the payment.</p>
         <label className="filter-check"><input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} /> I agree to the activation terms and <Link className="text-link" to="/payment-policy">payment policy</Link>.</label></div>
-        <div className="preview-warning"><strong>Test payment.</strong> No real money is charged until the live checkout is connected.</div></>}
+        {pay?.mode !== 'live' && <div className="preview-warning"><strong>Razorpay test mode.</strong> Use Razorpay test cards — no real money is charged.</div>}</>}
 
       {busy && step === 1 && <p className="muted">Creating your account…</p>}
       {error && <p role="alert" className="form-error">{error}</p>}
