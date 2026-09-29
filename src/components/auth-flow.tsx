@@ -11,8 +11,9 @@ import { createFirstAdmin } from '@/lib/admin-setup.functions';
 import { supabase } from '@/integrations/supabase/client';
 
 type Role = 'buyer' | 'seller';
-type Details = Record<string, string>;
-const fields: { key: string; label: string; type?: string; required?: boolean; full?: boolean; seller?: boolean }[] = [
+type FieldKey = 'full_name' | 'email' | 'password' | 'mobile' | 'dob' | 'gender' | 'country' | 'state' | 'city' | 'address' | 'pincode' | 'company_name' | 'business_type';
+type Details = Partial<Record<FieldKey, string>>;
+const fields: { key: FieldKey; label: string; type?: string; required?: boolean; full?: boolean; seller?: boolean }[] = [
   { key: 'full_name', label: 'Full name', required: true },
   { key: 'email', label: 'Email address', type: 'email', required: true },
   { key: 'mobile', label: 'Mobile number', type: 'tel', required: true },
@@ -74,7 +75,7 @@ export function RegisterFlow({ initialRole }: { initialRole?: string }) {
       <p>{step === 0 ? 'Tell us a little about yourself. Identity documents are collected later in Verification.' : step === 1 ? `Enter the 6-digit code sent to ${details.mobile ?? 'your mobile'}.` : 'One final step and your dashboard opens automatically.'}</p>
       <div className="steps">{steps.map((x, i) => <div className={`step ${i === step ? 'active' : ''} ${i < step ? 'done' : ''}`} key={x}><span>{i < step ? '✓' : i + 1}</span>{x}</div>)}</div>
 
-      {step === 0 && <form id="details-form" className="form-grid" onSubmit={(e) => { e.preventDefault(); const f = new FormData(e.currentTarget); const d: Details = {}; f.forEach((v, k) => { d[k] = String(v); }); if ((d.password ?? '').length < 8) { setError('Password must be at least 8 characters.'); return; } setDetails(d); setError(''); setStep(1); }}>
+      {step === 0 && <form id="details-form" className="form-grid" onSubmit={(e) => { e.preventDefault(); const f = new FormData(e.currentTarget); const d: Record<string, string> = {}; f.forEach((v, k) => { d[k] = String(v); }); if ((d['password'] ?? '').length < 8) { setError('Password must be at least 8 characters.'); return; } setDetails(d as Details); setError(''); setStep(1); }}>
         {fields.filter((x) => !x.seller || role === 'seller').map((x) => <div key={x.key} className={`field ${x.full ? 'full' : ''}`}><label htmlFor={x.key}>{x.label}{x.required && ' *'}</label>
           {x.key === 'gender' ? <select id={x.key} name={x.key} className="field-input" defaultValue={details[x.key] ?? ''}><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select>
             : <input id={x.key} name={x.key} className="field-input" type={x.type ?? 'text'} required={x.required} defaultValue={details[x.key] ?? ''} minLength={x.key === 'password' ? 8 : undefined} placeholder={x.label} />}</div>)}
