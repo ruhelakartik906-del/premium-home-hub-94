@@ -1,14 +1,62 @@
-# Welcome to your Lovable project
+# Elite Horizon
+
+Use the provided Eliteoz reference images as a visual and UX reference for the project.
+
+Study the images to understand:
+
+Overall premium visual style
+
+Homepage structure
+
+Buyer and Seller registration flow
+
+OTP verification
+
+Payment/activation flow
+
+Login screens
+
+Buyer dashboard
+
+Seller dashboard
+
+Master Admin panel
+
+Property listing and verification flow
+
+Forms, cards, tables, navigation and notifications
+
+Spacing, typography, hierarchy and responsive behavior
+
+Use these references to understand the intended product experience, but DO NOT copy the designs pixel-for-pixel.
+
+Create an original Eliteoz interface with:
+
+Premium real-estate aesthetic
+
+Consistent design system
+
+Better UX
+
+Clean navigation
+
+Modern responsive layouts
+
+Consistent components across all panels
+
+Clear Buyer, Seller and Master Admin separation
+
+The reference images are only for visual direction and product-flow understanding. Preserve the Eliteoz functionality and workflows defined in the project specification.
 
 This project was built with [Lovable](https://lovable.dev).
 
 ## Build with Lovable
 
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
+Continue developing this project in the [Lovable editor](https://lovable.dev/projects/cfa383e2-fad6-44bd-aa68-50b3293761a6).
 
 - **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
+- **Stay in sync**: every change made in Lovable is committed straight to this repository.
+- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
 
 ## Development
 
@@ -20,10 +68,3 @@ cd <repository-name>
 npm i
 npm run dev
 ```
-
-## Built with
-
-- TanStack Start
-- TypeScript
-- React
-- Tailwind CSS
