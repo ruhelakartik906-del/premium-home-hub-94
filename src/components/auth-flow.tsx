@@ -8,6 +8,7 @@ import { Notice, PageShell } from '@/components/eliteoz';
 import { hero } from '@/lib/eliteoz-data';
 import { registerMember, ACTIVATION_FEE } from '@/lib/members.functions';
 import { sendOtp, verifyOtp } from '@/lib/otp.functions';
+import { recordAuthEvent } from '@/lib/admin-users.functions';
 import { createFirstAdmin } from '@/lib/admin-setup.functions';
 import { supabase } from '@/integrations/supabase/client';
 import { accountAccess } from '@/lib/access';
@@ -174,6 +175,7 @@ export async function routeForUser() {
 
 export function LoginPage({ kind }: { kind: 'login' | 'forgot-password' | 'reset-password' }) {
   const navigate = useNavigate();
+  const recordAuth = useServerFn(recordAuthEvent);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -182,6 +184,7 @@ export function LoginPage({ kind }: { kind: 'login' | 'forgot-password' | 'reset
     if (kind === 'login') {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) { setBusy(false); setMsg('Incorrect email or password.'); return; }
+      void recordAuth({ data: { event: 'login' } }).catch(() => null);
       const nextParam = new URLSearchParams(window.location.search).get('next');
       if (nextParam && nextParam.startsWith('/') && !nextParam.startsWith('//')) { window.location.href = nextParam; return; }
       const to = await routeForUser(); setBusy(false); navigate({ to: to ?? '/' });

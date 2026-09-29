@@ -48,6 +48,7 @@ import { Route as AuthenticatedBuyerSectionRouteImport } from './routes/_authent
 import { Route as AuthenticatedSellerIndexRouteImport } from './routes/_authenticated/seller.index'
 import { Route as AuthenticatedSellerSectionRouteImport } from './routes/_authenticated/seller.$section'
 import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/public/razorpay-webhook'
+import { Route as ApiPublicWebhooksN8nRouteImport } from './routes/api/public/webhooks/n8n'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -249,6 +250,11 @@ const ApiPublicRazorpayWebhookRoute =
     path: '/api/public/razorpay-webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicWebhooksN8nRoute = ApiPublicWebhooksN8nRouteImport.update({
+  id: '/api/public/webhooks/n8n',
+  path: '/api/public/webhooks/n8n',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -289,6 +295,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/buyer/': typeof AuthenticatedBuyerIndexRoute
   '/seller/': typeof AuthenticatedSellerIndexRoute
+  '/api/public/webhooks/n8n': typeof ApiPublicWebhooksN8nRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -325,6 +332,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/buyer': typeof AuthenticatedBuyerIndexRoute
   '/seller': typeof AuthenticatedSellerIndexRoute
+  '/api/public/webhooks/n8n': typeof ApiPublicWebhooksN8nRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -367,6 +375,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/buyer/': typeof AuthenticatedBuyerIndexRoute
   '/_authenticated/seller/': typeof AuthenticatedSellerIndexRoute
+  '/api/public/webhooks/n8n': typeof ApiPublicWebhooksN8nRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -409,6 +418,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/buyer/'
     | '/seller/'
+    | '/api/public/webhooks/n8n'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -445,6 +455,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/buyer'
     | '/seller'
+    | '/api/public/webhooks/n8n'
   id:
     | '__root__'
     | '/'
@@ -486,6 +497,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/'
     | '/_authenticated/buyer/'
     | '/_authenticated/seller/'
+    | '/api/public/webhooks/n8n'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -516,6 +528,7 @@ export interface RootRouteChildren {
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   ApiPublicRazorpayWebhookRoute: typeof ApiPublicRazorpayWebhookRoute
+  ApiPublicWebhooksN8nRoute: typeof ApiPublicWebhooksN8nRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -793,6 +806,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicRazorpayWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/webhooks/n8n': {
+      id: '/api/public/webhooks/n8n'
+      path: '/api/public/webhooks/n8n'
+      fullPath: '/api/public/webhooks/n8n'
+      preLoaderRoute: typeof ApiPublicWebhooksN8nRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -895,6 +915,7 @@ const rootRouteChildren: RootRouteChildren = {
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   ApiPublicRazorpayWebhookRoute: ApiPublicRazorpayWebhookRoute,
+  ApiPublicWebhooksN8nRoute: ApiPublicWebhooksN8nRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

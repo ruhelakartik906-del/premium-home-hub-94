@@ -45,6 +45,7 @@ async function createMember(m: Member, opts: { byAdmin: boolean; pendingPayment?
     await supabaseAdmin.from('transactions').insert({ user_id: id, amount: Number((await supabaseAdmin.from('payment_settings').select('activation_fee').eq('id', 1).maybeSingle()).data?.activation_fee ?? ACTIVATION_FEE), purpose: 'activation', method: opts.payment.method, status: opts.payment.status, provider: 'offline', verified_via: 'offline', account_role: m.role, notes: 'Recorded by Master Admin (offline/manual payment)', payer_name: m.full_name, payer_email: m.email });
   }
   await supabaseAdmin.from('notifications').insert({ user_id: id, title: 'Welcome to Eliteoz', body: opts.pendingPayment ? 'Complete your activation payment to open your membership.' : 'Your membership is active. Please complete verification within 7 days to keep your account active.' });
+  await supabaseAdmin.from('audit_logs').insert({ actor_id: null, target_user_id: id, action: 'user_created', details: { role: m.role, by_admin: opts.byAdmin } });
   return { ok: true as const, userId: id };
 }
 

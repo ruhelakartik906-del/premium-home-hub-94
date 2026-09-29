@@ -2,8 +2,11 @@
 - [x] Build distinct buyer, seller, and admin UI panels and requested modules.
 - [x] Verify key navigation and responsive layouts.
 - [x] SMS OTP via APITXT; existing-account check before OTP; unique email/mobile in database
-- [ ] Master Admin: full user edit form (personal, account, payment, access)
-- [ ] Staff & Permissions (15 permissions, master-admin protection, last-master guard)
-- [ ] Permanent delete inside user edit, gated by permanently_delete_users
-- [ ] Audit Logs screen (read-only) + logging of admin actions
+- [x] Master Admin: full user edit form (personal, account, payment, access)
+- [x] Staff & Permissions (15 permissions, master-admin protection, last-master guard)
+- [x] Permanent delete inside user edit, gated by permanently_delete_users
+- [x] Audit Logs screen (read-only) + logging of admin actions
 - [x] Homepage visual graphics upgrade (brief 29 Sep 11:21)
+- [x] n8n webhook endpoint + events log
+- [ ] n8n shared secret (waiting on user)
+- [ ] Full sign-up → payment → suspend → delete run-through with a real test account

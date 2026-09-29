@@ -93,6 +93,7 @@ export const verifyOtp = createServerFn({ method: 'POST' })
     const token = randomToken();
     const { data: upd } = await supabaseAdmin.from('otp_verifications').update({ status: 'verified', verified_at: new Date().toISOString(), verify_token_hash: await sha256(token) }).eq('id', row.id).eq('status', 'pending').select('id');
     if (!upd?.length) return { ok: false as const, error: 'This OTP has already been used. Please request a new OTP.' };
+    await supabaseAdmin.from('audit_logs').insert({ actor_id: null, target_user_id: null, action: 'otp_verified', details: { mobile: `XXXXXX${data.mobile.slice(-4)}` } });
     return { ok: true as const, token };
   });
 
