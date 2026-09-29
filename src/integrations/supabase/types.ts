@@ -136,6 +136,50 @@ export type Database = {
           },
         ]
       }
+      kyc_documents: {
+        Row: {
+          created_at: string
+          doc_type: string
+          file_name: string
+          file_path: string
+          id: string
+          mime_type: string
+          size_bytes: number
+          submission_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          doc_type: string
+          file_name: string
+          file_path: string
+          id?: string
+          mime_type: string
+          size_bytes: number
+          submission_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          doc_type?: string
+          file_name?: string
+          file_path?: string
+          id?: string
+          mime_type?: string
+          size_bytes?: number
+          submission_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kyc_documents_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "kyc_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kyc_submissions: {
         Row: {
           account_holder: string
@@ -618,6 +662,7 @@ export type Database = {
         Returns: boolean
       }
       is_account_active: { Args: { _uid: string }; Returns: boolean }
+      kyc_is_open: { Args: { _uid: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "buyer" | "seller"
