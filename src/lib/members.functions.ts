@@ -28,6 +28,7 @@ async function createMember(m: Member, opts: { byAdmin: boolean; payment?: { met
     email: m.email, password: m.password, email_confirm: true, user_metadata: { full_name: m.full_name, role: m.role },
   });
   if (error || !created.user) {
+    console.error('createMember failed', error?.message);
     const msg = error?.message?.toLowerCase().includes('already') ? 'An account with this email already exists.' : 'Could not create the account. Please try again.';
     return { ok: false as const, error: msg };
   }
