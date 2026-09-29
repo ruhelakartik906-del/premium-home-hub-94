@@ -47,7 +47,8 @@ function Details() {
   const p = data.listing!;
   return <PageShell><main>
     <div className="container" style={{ paddingTop: 25, paddingBottom: 25 }}><Link className="text-link" to="/properties"><ArrowLeft size={15} /> All properties</Link></div>
-    <div className="detail-gallery"><img src={p.image} alt={p.name} /><div className="detail-gallery-side"><img src={data.related[0]?.image ?? p.image} alt="Property view" /><img src={data.related[1]?.image ?? p.image} alt="Architectural detail" /></div></div>
+    <div className="detail-gallery"><img src={p.image} alt={p.name} /><div className="detail-gallery-side"><img src={p.gallery[0] ?? p.image} alt="Property view" /><img src={p.gallery[1] ?? p.gallery[0] ?? p.image} alt="Property detail" /></div></div>
+    {p.gallery.length > 2 && <div className="container detail-thumbs">{p.gallery.slice(2).map((g) => <a key={g} href={g} target="_blank" rel="noreferrer"><img src={g} alt="Property photo" /></a>)}</div>}
     <div className="section container detail-layout"><div>
       <span className="eyebrow">{p.category.toUpperCase()} / {p.id}</span><h1 className="detail-title">{p.name}</h1><p className="property-location"><MapPin size={15} />{p.location}</p>
       <div className="detail-stats">{[['TYPE', p.type], ['AREA', p.area], ['BEDROOMS', String(p.beds)], ['BATHROOMS', String(p.baths)]].map(([l, v]) => <div key={l}><span>{l}</span><strong>{v}</strong></div>)}</div>
