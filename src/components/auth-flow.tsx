@@ -1,10 +1,167 @@
-import { Link } from '@tanstack/react-router';
-import { useState } from 'react';
-import { ArrowLeft, ArrowRight, BriefcaseBusiness, LockKeyhole, ShieldCheck, UserRound } from 'lucide-react';
+import { Link, useNavigate } from '@tanstack/react-router';
+import { useServerFn } from '@tanstack/react-start';
+import { useRef, useState } from 'react';
+import { ArrowLeft, ArrowRight, BriefcaseBusiness, CheckCircle2, CreditCard, Landmark, LockKeyhole, Smartphone, UserRound } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Notice, PageShell } from '@/components/eliteoz';
 import { hero } from '@/lib/eliteoz-data';
-const personal=['Full Name','Email Address','Mobile Number','Date of Birth','Gender','Country','State','City','Full Address','Pincode'];
-function Field({label,type='text',required=false}:{label:string;type?:string;required?:boolean}){return <div className="field"><label htmlFor={label.replaceAll(' ','-')}>{label}{required&&' *'}</label><input id={label.replaceAll(' ','-')} className="field-input" type={type} required={required} placeholder={`Enter ${label.toLowerCase()}`}/></div>}
-export function RegisterFlow({initialRole}:{initialRole?:string}){const [role,setRole]=useState<'buyer'|'seller'|null>(initialRole==='buyer'||initialRole==='seller'?initialRole:null);const [step,setStep]=useState(0);const [otp,setOtp]=useState(['','','','','','']);const [message,setMessage]=useState('');const steps=['Personal details','Mobile OTP','KYC & bank','Activation'];const advance=()=>{if(step===1&&otp.join('').length!==6){setMessage('Enter all six digits to preview the next step. No OTP is actually sent or checked.');return}setMessage('');setStep(x=>Math.min(4,x+1))};return <PageShell><div className="auth-wrap"><aside className="auth-image"><img src={hero} alt="Luxury residence"/><div className="auth-caption">A more considered<br/>way to move.</div></aside><main className="auth-main"><div className="auth-panel"><span className="eyebrow">ELITEOZ MEMBERSHIP</span>{!role?<><h1>Choose your account type.</h1><p>Your journey starts with the right perspective.</p><div className="role-grid"><button className="role-card" onClick={()=>setRole('buyer')}><UserRound size={27}/><strong>Buyer</strong><span>Discover verified high-value properties and manage your interests privately.</span></button><button className="role-card" onClick={()=>setRole('seller')}><BriefcaseBusiness size={27}/><strong>Seller</strong><span>Present and manage high-value properties for a considered audience.</span></button></div></>:step===4?<><h1>Ready for activation.</h1><p>Your details have been entered in this preview. No information has been submitted or saved.</p><Notice>Account verification and payment require a secure backend and payment gateway. This preview cannot activate an account.</Notice><div className="form-actions"><Button variant="outline" onClick={()=>setStep(3)}>Back to payment</Button><Button asChild><Link to={role==='buyer'?'/buyer':'/seller'}>Preview {role} dashboard <ArrowRight/></Link></Button></div></>:<><h1>{step===0?`${role==='buyer'?'Buyer':'Seller'} registration`:step===1?'Verify your mobile':step===2?'Identity & verification':'Eliteoz activation'}</h1><p>{step===0?'Tell us a little about yourself.':step===1?'Enter the code sent to your mobile number.':step===2?'Your information is handled with care.':'A final step before your membership can be activated.'}</p><div className="steps">{steps.map((x,i)=><div className={`step ${i===step?'active':''}`} key={x}><span>{i+1}</span>{x}</div>)}</div>{step===0&&<div id="registration-step"><div className="form-grid">{personal.map(x=><Field key={x} label={x} type={x==='Email Address'?'email':x==='Date of Birth'?'date':'text'} required={['Full Name','Email Address','Mobile Number'].includes(x)}/>)}{role==='seller'&&<><Field label="Company / Business Name"/><Field label="Business Type"/></>}</div></div>}{step===1&&<><Notice>No OTP is sent in this frontend preview. Enter any six digits to explore the next screen.</Notice><div className="otp-inputs">{otp.map((digit,i)=><input key={i} aria-label={`OTP digit ${i+1}`} inputMode="numeric" maxLength={1} value={digit} onChange={e=>setOtp(v=>v.map((x,j)=>j===i?e.target.value.replace(/\D/g,''):x))}/>)}</div><Button variant="link" onClick={()=>setMessage('OTP delivery requires backend integration.')}>Resend OTP</Button><Button variant="link" onClick={()=>setStep(0)}>Change number</Button></>}{step===2&&<><div className="form-grid"><Field label="PAN Number"/><Field label="Government ID Number"/>{role==='seller'&&<Field label="GST Number (if applicable)"/>}<Field label="Account Holder Name"/><Field label="Bank Name"/><Field label="Bank Account Number"/><Field label="IFSC Code"/><Field label="Full Address"/><div className="field full"><label>Identity & address documents</label><div className="upload-field"><input type="file" multiple accept="image/*,.pdf"/><small>Government ID, address proof and photograph. Files are not uploaded in this preview.</small></div></div></div><Notice><LockKeyhole size={18}/> Sensitive documents are confidential and reserved for authorized review. This preview does not store files.</Notice></>}{step===3&&<><div className="panel"><span className="eyebrow">MEMBERSHIP ACTIVATION</span><div className="payment-total">₹50,000</div><p>Activation fee shown according to the Eliteoz platform specification.</p><div className="field"><label>Payment method</label><select className="field-input"><option>Online payment</option><option>Bank transfer</option></select></div><label className="filter-check"><input type="checkbox"/> I agree to the activation terms and payment policy.</label></div><div className="preview-warning"><strong>Payment not connected.</strong> No payment will be collected. Do not enter real card or bank payment credentials.</div></>}{message&&<p role="alert" className="auth-note">{message}</p>}<div className="form-actions"><Button variant="outline" onClick={()=>{if(step===0)setRole(null);else setStep(step-1)}}><ArrowLeft/> Back</Button><Button onClick={advance}>{step===3?'Continue to preview':'Continue'} <ArrowRight/></Button></div></>}<p className="auth-note">Already a member? <Link className="text-link" to="/login">Log in</Link> · <Link className="text-link" to="/payment-policy">Payment policy</Link></p></div></main></div></PageShell>}
-export function LoginPage({kind}:{kind:'login'|'forgot-password'|'reset-password'}){const [submitted,setSubmitted]=useState(false);return <PageShell><div className="auth-wrap"><aside className="auth-image"><img src={hero} alt="Luxury residence"/><div className="auth-caption">Your next move<br/>starts here.</div></aside><main className="auth-main"><div className="auth-panel"><span className="eyebrow">MEMBER ACCESS</span><h1>{kind==='login'?'Welcome back.':kind==='forgot-password'?'Reset your password.':'Choose a new password.'}</h1><p>{kind==='login'?'Access your private Eliteoz workspace.':'Password recovery requires a connected authentication service.'}</p><form className="form-grid" onSubmit={e=>{e.preventDefault();setSubmitted(true)}}><div className="field full"><label>Email address</label><input type="email" className="field-input" required placeholder="you@example.com"/></div>{kind!=='forgot-password'&&<div className="field full"><label>{kind==='login'?'Password':'New password'}</label><input type="password" className="field-input" required placeholder="Enter password"/></div>}<div className="field full"><Button type="submit">{kind==='login'?'Log in':'Continue'} <ArrowRight/></Button></div></form>{submitted&&<div className="preview-warning">{kind==='login'?'Sign-in is not connected yet. Use the preview links below to explore the workspaces.':'Password recovery is not connected yet. No email was sent and no password was changed.'}</div>}<p className="auth-note"><Link className="text-link" to="/forgot-password">Forgot password?</Link> · New here? <Link className="text-link" to="/register">Create an account</Link></p><div className="panel" style={{marginTop:40}}><h2>Explore the preview</h2><div className="form-actions"><Button variant="outline" asChild><Link to="/buyer">Buyer</Link></Button><Button variant="outline" asChild><Link to="/seller">Seller</Link></Button><Button variant="outline" asChild><Link to="/admin">Admin</Link></Button></div><p className="auth-note">Preview access only. These panels contain sample information, not live accounts.</p></div></div></main></div></PageShell>}
+import { registerMember, ACTIVATION_FEE } from '@/lib/members.functions';
+import { createFirstAdmin } from '@/lib/admin-setup.functions';
+import { supabase } from '@/integrations/supabase/client';
+
+type Role = 'buyer' | 'seller';
+type Details = Record<string, string>;
+const fields: { key: string; label: string; type?: string; required?: boolean; full?: boolean; seller?: boolean }[] = [
+  { key: 'full_name', label: 'Full name', required: true },
+  { key: 'email', label: 'Email address', type: 'email', required: true },
+  { key: 'mobile', label: 'Mobile number', type: 'tel', required: true },
+  { key: 'password', label: 'Create password (min 8 characters)', type: 'password', required: true },
+  { key: 'dob', label: 'Date of birth', type: 'date' },
+  { key: 'gender', label: 'Gender' },
+  { key: 'country', label: 'Country' },
+  { key: 'state', label: 'State' },
+  { key: 'city', label: 'City' },
+  { key: 'pincode', label: 'Pincode' },
+  { key: 'address', label: 'Full address', full: true },
+  { key: 'company_name', label: 'Company / business name', seller: true },
+  { key: 'business_type', label: 'Business type', seller: true },
+];
+
+export function OtpInput({ value, onChange, onComplete }: { value: string[]; onChange: (v: string[]) => void; onComplete?: (code: string) => void }) {
+  const refs = useRef<(HTMLInputElement | null)[]>([]);
+  const set = (next: string[]) => { onChange(next); if (next.every((d) => d) && onComplete) onComplete(next.join('')); };
+  return <div className="otp-inputs" onPaste={(e) => { const digits = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6).split(''); if (!digits.length) return; e.preventDefault(); const next = [...value]; digits.forEach((d, i) => { next[i] = d; }); set(next); refs.current[Math.min(digits.length, 5)]?.focus(); }}>
+    {value.map((digit, i) => <input key={i} ref={(el) => { refs.current[i] = el; }} aria-label={`OTP digit ${i + 1}`} inputMode="numeric" autoComplete="one-time-code" maxLength={1} value={digit} autoFocus={i === 0}
+      onChange={(e) => { const d = e.target.value.replace(/\D/g, '').slice(-1); const next = value.map((x, j) => (j === i ? d : x)); set(next); if (d && i < 5) refs.current[i + 1]?.focus(); }}
+      onKeyDown={(e) => { if (e.key === 'Backspace' && !value[i] && i > 0) { refs.current[i - 1]?.focus(); onChange(value.map((x, j) => (j === i - 1 ? '' : x))); } if (e.key === 'ArrowLeft' && i > 0) refs.current[i - 1]?.focus(); if (e.key === 'ArrowRight' && i < 5) refs.current[i + 1]?.focus(); }} />)}
+  </div>;
+}
+
+export function RegisterFlow({ initialRole }: { initialRole?: string }) {
+  const navigate = useNavigate();
+  const register = useServerFn(registerMember);
+  const [role, setRole] = useState<Role | null>(initialRole === 'buyer' || initialRole === 'seller' ? initialRole : null);
+  const [step, setStep] = useState(0);
+  const [details, setDetails] = useState<Details>({});
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [method, setMethod] = useState<'test_card' | 'test_upi' | 'test_netbanking'>('test_card');
+  const [agree, setAgree] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const steps = ['Your details', 'Verify mobile', 'Activation payment'];
+
+  const pay = async () => {
+    if (!role) return;
+    if (!agree) { setError('Please accept the activation terms to continue.'); return; }
+    setBusy(true); setError('');
+    const res = await register({ data: { role, paymentMethod: method, full_name: details.full_name ?? '', email: details.email ?? '', password: details.password ?? '', mobile: details.mobile ?? '', dob: details.dob ?? '', gender: details.gender, country: details.country, state: details.state, city: details.city, address: details.address, pincode: details.pincode, company_name: details.company_name, business_type: details.business_type } }).catch(() => ({ ok: false as const, error: 'Please check your details and try again.' }));
+    if (!res.ok) { setBusy(false); setError(res.error); return; }
+    const { error: signErr } = await supabase.auth.signInWithPassword({ email: details.email!, password: details.password! });
+    setBusy(false);
+    if (signErr) { toast.error('Account created. Please log in.'); navigate({ to: '/login' }); return; }
+    toast.success('Payment successful — welcome to Eliteoz');
+    navigate({ to: role === 'buyer' ? '/buyer' : '/seller' });
+  };
+
+  return <PageShell><div className="auth-wrap"><aside className="auth-image"><img src={hero} alt="Luxury residence" /><div className="auth-caption">A more considered<br />way to move.</div></aside><main className="auth-main"><div className="auth-panel">
+    <span className="eyebrow">ELITEOZ MEMBERSHIP</span>
+    {!role ? <><h1>Choose your account type.</h1><p>Your journey starts with the right perspective.</p><div className="role-grid">
+      <button className="role-card" onClick={() => setRole('buyer')}><UserRound size={27} /><strong>Buyer</strong><span>Discover verified high-value properties and manage your interests privately.</span></button>
+      <button className="role-card" onClick={() => setRole('seller')}><BriefcaseBusiness size={27} /><strong>Seller</strong><span>Present and manage high-value properties for a considered audience.</span></button>
+    </div></> : <>
+      <h1>{step === 0 ? `${role === 'buyer' ? 'Buyer' : 'Seller'} registration` : step === 1 ? 'Verify your mobile' : 'Activate your membership'}</h1>
+      <p>{step === 0 ? 'Tell us a little about yourself. Identity documents are collected later in Verification.' : step === 1 ? `Enter the 6-digit code sent to ${details.mobile ?? 'your mobile'}.` : 'One final step and your dashboard opens automatically.'}</p>
+      <div className="steps">{steps.map((x, i) => <div className={`step ${i === step ? 'active' : ''} ${i < step ? 'done' : ''}`} key={x}><span>{i < step ? '✓' : i + 1}</span>{x}</div>)}</div>
+
+      {step === 0 && <form id="details-form" className="form-grid" onSubmit={(e) => { e.preventDefault(); const f = new FormData(e.currentTarget); const d: Details = {}; f.forEach((v, k) => { d[k] = String(v); }); if ((d.password ?? '').length < 8) { setError('Password must be at least 8 characters.'); return; } setDetails(d); setError(''); setStep(1); }}>
+        {fields.filter((x) => !x.seller || role === 'seller').map((x) => <div key={x.key} className={`field ${x.full ? 'full' : ''}`}><label htmlFor={x.key}>{x.label}{x.required && ' *'}</label>
+          {x.key === 'gender' ? <select id={x.key} name={x.key} className="field-input" defaultValue={details[x.key] ?? ''}><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select>
+            : <input id={x.key} name={x.key} className="field-input" type={x.type ?? 'text'} required={x.required} defaultValue={details[x.key] ?? ''} minLength={x.key === 'password' ? 8 : undefined} placeholder={x.label} />}</div>)}
+      </form>}
+
+      {step === 1 && <><Notice>Demo mode: SMS is not sent yet. Enter any 6 digits — the cursor moves automatically and you continue once all digits are filled.</Notice>
+        <OtpInput value={otp} onChange={setOtp} onComplete={() => { setTimeout(() => setStep(2), 350); }} />
+        <div className="flex gap-2"><Button variant="link" onClick={() => { setOtp(['', '', '', '', '', '']); toast('A new code would be sent here once SMS is connected.'); }}>Resend OTP</Button><Button variant="link" onClick={() => setStep(0)}>Change number</Button></div></>}
+
+      {step === 2 && <><div className="panel pay-panel"><div className="pay-head"><div><span className="eyebrow">ACTIVATION FEE</span><div className="payment-total">₹{ACTIVATION_FEE.toLocaleString('en-IN')}</div></div><span className="status pending">TEST MODE</span></div>
+        <div className="pay-methods">{([['test_card', 'Card', CreditCard], ['test_upi', 'UPI', Smartphone], ['test_netbanking', 'Net banking', Landmark]] as const).map(([k, l, I]) => <button type="button" key={k} className={`pay-method ${method === k ? 'active' : ''}`} onClick={() => setMethod(k)}><I size={20} />{l}</button>)}</div>
+        <label className="filter-check"><input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} /> I agree to the activation terms and <Link className="text-link" to="/payment-policy">payment policy</Link>.</label></div>
+        <div className="preview-warning"><strong>Test payment.</strong> No real money is charged. A real payment gateway can be connected later.</div></>}
+
+      {error && <p role="alert" className="form-error">{error}</p>}
+      <div className="form-actions">
+        <Button variant="outline" disabled={busy} onClick={() => { setError(''); if (step === 0) setRole(null); else setStep(step - 1); }}><ArrowLeft /> Back</Button>
+        {step === 0 && <Button type="submit" form="details-form">Continue <ArrowRight /></Button>}
+        {step === 1 && <Button disabled={otp.join('').length !== 6} onClick={() => setStep(2)}>Verify <ArrowRight /></Button>}
+        {step === 2 && <Button disabled={busy} onClick={pay}>{busy ? 'Processing…' : <>Pay ₹{ACTIVATION_FEE.toLocaleString('en-IN')} <LockKeyhole /></>}</Button>}
+      </div>
+    </>}
+    <p className="auth-note">Already a member? <Link className="text-link" to="/login">Log in</Link></p>
+  </div></main></div></PageShell>;
+}
+
+export async function routeForUser(): Promise<'/admin' | '/buyer' | '/seller' | null> {
+  const { data: u } = await supabase.auth.getUser();
+  if (!u.user) return null;
+  const { data } = await supabase.from('user_roles').select('role').eq('user_id', u.user.id);
+  const roles = (data ?? []).map((r) => r.role);
+  return roles.includes('admin') ? '/admin' : roles.includes('seller') ? '/seller' : '/buyer';
+}
+
+export function LoginPage({ kind }: { kind: 'login' | 'forgot-password' | 'reset-password' }) {
+  const navigate = useNavigate();
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState('');
+  const submit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault(); const f = new FormData(e.currentTarget); setBusy(true); setMsg('');
+    const email = String(f.get('email') ?? ''); const password = String(f.get('password') ?? '');
+    if (kind === 'login') {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) { setBusy(false); setMsg('Incorrect email or password.'); return; }
+      const to = await routeForUser(); setBusy(false); navigate({ to: to ?? '/' });
+    } else if (kind === 'forgot-password') {
+      await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` });
+      setBusy(false); setMsg('If an account exists for this email, a reset link has been sent.');
+    } else {
+      const { error } = await supabase.auth.updateUser({ password });
+      setBusy(false); if (error) { setMsg('This reset link is invalid or has expired.'); return; }
+      toast.success('Password updated'); const to = await routeForUser(); navigate({ to: to ?? '/login' });
+    }
+  };
+  return <PageShell><div className="auth-wrap"><aside className="auth-image"><img src={hero} alt="Luxury residence" /><div className="auth-caption">Your next move<br />starts here.</div></aside><main className="auth-main"><div className="auth-panel">
+    <span className="eyebrow">MEMBER ACCESS</span>
+    <h1>{kind === 'login' ? 'Welcome back.' : kind === 'forgot-password' ? 'Reset your password.' : 'Choose a new password.'}</h1>
+    <p>{kind === 'login' ? 'Access your private Eliteoz workspace. You will be taken to the right dashboard automatically.' : kind === 'forgot-password' ? 'We will email you a secure reset link.' : 'Enter a new password for your account.'}</p>
+    <form className="form-grid" onSubmit={submit}>
+      {kind !== 'reset-password' && <div className="field full"><label htmlFor="email">Email address</label><input id="email" name="email" type="email" className="field-input" required placeholder="you@example.com" /></div>}
+      {kind !== 'forgot-password' && <div className="field full"><label htmlFor="password">{kind === 'login' ? 'Password' : 'New password'}</label><input id="password" name="password" type="password" minLength={kind === 'login' ? undefined : 8} className="field-input" required placeholder="Enter password" /></div>}
+      <div className="field full"><Button type="submit" disabled={busy}>{busy ? 'Please wait…' : kind === 'login' ? 'Log in' : 'Continue'} <ArrowRight /></Button></div>
+    </form>
+    {msg && <p role="alert" className="form-error">{msg}</p>}
+    <p className="auth-note"><Link className="text-link" to="/forgot-password">Forgot password?</Link> · New here? <Link className="text-link" to="/register">Create an account</Link></p>
+  </div></main></div></PageShell>;
+}
+
+export function AdminSetup({ available }: { available: boolean }) {
+  const navigate = useNavigate();
+  const create = useServerFn(createFirstAdmin);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+  return <PageShell><div className="auth-wrap"><aside className="auth-image"><img src={hero} alt="" /><div className="auth-caption">Master Admin<br />setup.</div></aside><main className="auth-main"><div className="auth-panel">
+    <span className="eyebrow">ONE-TIME SETUP</span><h1>Create the Master Admin.</h1>
+    {!available ? <><p>A Master Admin already exists. Please log in.</p><Button asChild><Link to="/login">Log in</Link></Button></> : <form className="form-grid" onSubmit={async (e) => {
+      e.preventDefault(); const f = new FormData(e.currentTarget); setBusy(true); setErr('');
+      const d = { full_name: String(f.get('full_name')), email: String(f.get('email')), password: String(f.get('password')) };
+      const res = await create({ data: d }).catch(() => ({ ok: false as const, error: 'Please check the details.' }));
+      if (!res.ok) { setBusy(false); setErr(res.error); return; }
+      await supabase.auth.signInWithPassword({ email: d.email, password: d.password }); setBusy(false); navigate({ to: '/admin' });
+    }}>
+      <div className="field full"><label>Full name</label><input name="full_name" className="field-input" required /></div>
+      <div className="field full"><label>Email</label><input name="email" type="email" className="field-input" required /></div>
+      <div className="field full"><label>Password (min 8)</label><input name="password" type="password" minLength={8} className="field-input" required /></div>
+      <div className="field full"><Button type="submit" disabled={busy}><CheckCircle2 /> {busy ? 'Creating…' : 'Create Master Admin'}</Button></div>
+      {err && <p className="form-error">{err}</p>}
+    </form>}
+  </div></main></div></PageShell>;
+}
