@@ -255,7 +255,7 @@ function Profile({ me, role }: { me: Me; role: 'buyer' | 'seller' }) {
       {role === 'seller' && <>
         <div className="field"><label>Company / business name {lockedCompany && <LockKeyhole size={12} />}</label><input name="company_name" className="field-input" defaultValue={val('company_name')} readOnly={lockedCompany} /></div>
         <div className="field"><label>Business type {lockedCompany && <LockKeyhole size={12} />}</label><input name="business_type" className="field-input" defaultValue={val('business_type')} readOnly={lockedCompany} /></div>
-        {lockedCompany && <p className="field full muted small">Company details are fixed once saved. To change them, <SectionLink role="seller" slug="support" className="text-link">raise a support ticket</SectionLink> and the Eliteoz team will update them.</p>}
+        {lockedCompany && <p className="muted small" style={{ gridColumn: "1/-1" }}>Company details are fixed once saved. To change them, <SectionLink role="seller" slug="support" className="text-link">raise a support ticket</SectionLink> and the Eliteoz team will update them.</p>}
       </>}
     </div>
     <div className="form-actions"><Button type="submit" disabled={busy}>Save changes</Button></div>
