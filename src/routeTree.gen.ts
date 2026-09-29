@@ -20,6 +20,7 @@ import { Route as FaqRouteImport } from './routes/faq'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as McpRouteImport } from './routes/mcp'
 import { Route as PaymentPolicyRouteImport } from './routes/payment-policy'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PropertiesRouteImport } from './routes/properties'
@@ -29,11 +30,13 @@ import { Route as SellerGuidelinesRouteImport } from './routes/seller-guidelines
 import { Route as SellersRouteImport } from './routes/sellers'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as VerificationPolicyRouteImport } from './routes/verification-policy'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedBuyerRouteImport } from './routes/_authenticated/buyer'
 import { Route as AuthenticatedSellerRouteImport } from './routes/_authenticated/seller'
 import { Route as PropertiesIndexRouteImport } from './routes/properties.index'
 import { Route as PropertiesIdRouteImport } from './routes/properties.$id'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedAdminSectionRouteImport } from './routes/_authenticated/admin.$section'
 import { Route as AuthenticatedBuyerIndexRouteImport } from './routes/_authenticated/buyer.index'
@@ -95,6 +98,11 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PaymentPolicyRoute = PaymentPolicyRouteImport.update({
   id: '/payment-policy',
   path: '/payment-policy',
@@ -140,6 +148,12 @@ const VerificationPolicyRoute = VerificationPolicyRouteImport.update({
   path: '/verification-policy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -164,6 +178,11 @@ const PropertiesIdRoute = PropertiesIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => PropertiesRoute,
+} as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/',
@@ -211,6 +230,7 @@ export interface FileRoutesByFullPath {
   '/forgot-password': typeof ForgotPasswordRoute
   '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
+  '/mcp': typeof McpRoute
   '/payment-policy': typeof PaymentPolicyRoute
   '/privacy': typeof PrivacyRoute
   '/properties': typeof PropertiesRouteWithChildren
@@ -220,11 +240,13 @@ export interface FileRoutesByFullPath {
   '/sellers': typeof SellersRoute
   '/terms': typeof TermsRoute
   '/verification-policy': typeof VerificationPolicyRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/buyer': typeof AuthenticatedBuyerRouteWithChildren
   '/seller': typeof AuthenticatedSellerRouteWithChildren
   '/properties/$id': typeof PropertiesIdRoute
   '/properties/': typeof PropertiesIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/admin/$section': typeof AuthenticatedAdminSectionRoute
   '/buyer/$section': typeof AuthenticatedBuyerSectionRoute
   '/seller/$section': typeof AuthenticatedSellerSectionRoute
@@ -243,6 +265,7 @@ export interface FileRoutesByTo {
   '/forgot-password': typeof ForgotPasswordRoute
   '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
+  '/mcp': typeof McpRoute
   '/payment-policy': typeof PaymentPolicyRoute
   '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
@@ -251,8 +274,10 @@ export interface FileRoutesByTo {
   '/sellers': typeof SellersRoute
   '/terms': typeof TermsRoute
   '/verification-policy': typeof VerificationPolicyRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/properties/$id': typeof PropertiesIdRoute
   '/properties': typeof PropertiesIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/admin/$section': typeof AuthenticatedAdminSectionRoute
   '/buyer/$section': typeof AuthenticatedBuyerSectionRoute
   '/seller/$section': typeof AuthenticatedSellerSectionRoute
@@ -273,6 +298,7 @@ export interface FileRoutesById {
   '/forgot-password': typeof ForgotPasswordRoute
   '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
+  '/mcp': typeof McpRoute
   '/payment-policy': typeof PaymentPolicyRoute
   '/privacy': typeof PrivacyRoute
   '/properties': typeof PropertiesRouteWithChildren
@@ -282,11 +308,13 @@ export interface FileRoutesById {
   '/sellers': typeof SellersRoute
   '/terms': typeof TermsRoute
   '/verification-policy': typeof VerificationPolicyRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/buyer': typeof AuthenticatedBuyerRouteWithChildren
   '/_authenticated/seller': typeof AuthenticatedSellerRouteWithChildren
   '/properties/$id': typeof PropertiesIdRoute
   '/properties/': typeof PropertiesIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/_authenticated/admin/$section': typeof AuthenticatedAdminSectionRoute
   '/_authenticated/buyer/$section': typeof AuthenticatedBuyerSectionRoute
   '/_authenticated/seller/$section': typeof AuthenticatedSellerSectionRoute
@@ -307,6 +335,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/how-it-works'
     | '/login'
+    | '/mcp'
     | '/payment-policy'
     | '/privacy'
     | '/properties'
@@ -316,11 +345,13 @@ export interface FileRouteTypes {
     | '/sellers'
     | '/terms'
     | '/verification-policy'
+    | '/.well-known/oauth-protected-resource'
     | '/admin'
     | '/buyer'
     | '/seller'
     | '/properties/$id'
     | '/properties/'
+    | '/.lovable/oauth/consent'
     | '/admin/$section'
     | '/buyer/$section'
     | '/seller/$section'
@@ -339,6 +370,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/how-it-works'
     | '/login'
+    | '/mcp'
     | '/payment-policy'
     | '/privacy'
     | '/register'
@@ -347,8 +379,10 @@ export interface FileRouteTypes {
     | '/sellers'
     | '/terms'
     | '/verification-policy'
+    | '/.well-known/oauth-protected-resource'
     | '/properties/$id'
     | '/properties'
+    | '/.lovable/oauth/consent'
     | '/admin/$section'
     | '/buyer/$section'
     | '/seller/$section'
@@ -368,6 +402,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/how-it-works'
     | '/login'
+    | '/mcp'
     | '/payment-policy'
     | '/privacy'
     | '/properties'
@@ -377,11 +412,13 @@ export interface FileRouteTypes {
     | '/sellers'
     | '/terms'
     | '/verification-policy'
+    | '/.well-known/oauth-protected-resource'
     | '/_authenticated/admin'
     | '/_authenticated/buyer'
     | '/_authenticated/seller'
     | '/properties/$id'
     | '/properties/'
+    | '/.lovable/oauth/consent'
     | '/_authenticated/admin/$section'
     | '/_authenticated/buyer/$section'
     | '/_authenticated/seller/$section'
@@ -402,6 +439,7 @@ export interface RootRouteChildren {
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   HowItWorksRoute: typeof HowItWorksRoute
   LoginRoute: typeof LoginRoute
+  McpRoute: typeof McpRoute
   PaymentPolicyRoute: typeof PaymentPolicyRoute
   PrivacyRoute: typeof PrivacyRoute
   PropertiesRoute: typeof PropertiesRouteWithChildren
@@ -411,6 +449,8 @@ export interface RootRouteChildren {
   SellersRoute: typeof SellersRoute
   TermsRoute: typeof TermsRoute
   VerificationPolicyRoute: typeof VerificationPolicyRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -492,6 +532,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/payment-policy': {
       id: '/payment-policy'
       path: '/payment-policy'
@@ -555,6 +602,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VerificationPolicyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
       path: '/admin'
@@ -589,6 +643,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/properties/$id'
       preLoaderRoute: typeof PropertiesIdRouteImport
       parentRoute: typeof PropertiesRoute
+    }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin/': {
       id: '/_authenticated/admin/'
@@ -715,6 +776,7 @@ const rootRouteChildren: RootRouteChildren = {
   ForgotPasswordRoute: ForgotPasswordRoute,
   HowItWorksRoute: HowItWorksRoute,
   LoginRoute: LoginRoute,
+  McpRoute: McpRoute,
   PaymentPolicyRoute: PaymentPolicyRoute,
   PrivacyRoute: PrivacyRoute,
   PropertiesRoute: PropertiesRouteWithChildren,
@@ -724,6 +786,9 @@ const rootRouteChildren: RootRouteChildren = {
   SellersRoute: SellersRoute,
   TermsRoute: TermsRoute,
   VerificationPolicyRoute: VerificationPolicyRoute,
+  Char91DotwellKnownChar93OauthProtectedResourceRoute:
+    Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
