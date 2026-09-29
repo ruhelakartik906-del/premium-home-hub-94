@@ -87,7 +87,7 @@ function Home() {
             <div><span className="nx-eyebrow">Welcome to Eliteoz</span><h2>Privacy Is Paramount.</h2></div>
             <div className="nx-body">
               <p>Eliteoz — an exclusive, invitation-based platform dedicated to properties and assets valued at ₹50 Crore and above.</p>
-              <p>In the world of high-value transactions, privacy is paramount. Eliteoz provides a secure, confidential and meticulously curated ecosystem where owners of prestigious assets connect directly with verified, qualified buyers.</p>
+              <p>In the world of high-value transactions, privacy is paramount. Eliteoz provides a secure, confidential and meticulously curated ecosystem where owners of prestigious assets connect directly with verified, qualified buyers — without unnecessary public exposure.</p>
               <span className="nx-rule" />
             </div>
           </div>
@@ -132,7 +132,7 @@ function Home() {
               <span className="nx-eyebrow">Why Eliteoz</span>
               <h2>Operational Excellence You Can Trust.</h2>
               <div className="nx-body">
-                <p>At Eliteoz, every mandate is executed under the direct supervision of Col. N.K. Yadav (Retd.), Indian Army, supported by an elite panel of Retd. ACPs, certified professionals and legal experts.</p>
+                <p>At Eliteoz, every mandate is executed under the direct supervision of Col. N.K. Yadav (Retd.), Indian Army, supported by an elite panel of Retd. ACPs, certified document experts and legal professionals.</p>
                 <p>We are committed to ensuring secure, confidential and fully verified execution with absolute transparency.</p>
               </div>
             </div>
