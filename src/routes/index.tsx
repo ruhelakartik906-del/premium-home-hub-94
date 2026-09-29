@@ -202,14 +202,7 @@ function Home() {
         </section>
       </main>
 
-      <footer className="nx-footer">
-        <div className="nx-wrap nx-footer-grid">
-          <div><img src={logo.url} alt="ELITEOZ" width={940} height={560} loading="lazy" className="nx-footer-logo" /><p className="nx-statement-line">Eliteoz — Where 50 Crore+ Assets Change Hands in Complete Silence.</p></div>
-          <nav>{nav.map(([l, p]) => <Link key={p} to={p}>{l}</Link>)}<Link to="/login">Login</Link><Link to="/register">Become a Member</Link></nav>
-          <div className="nx-footer-contact"><a href="mailto:privacy@eliteoz.com">privacy@eliteoz.com</a><a href="tel:+919315089933">9315089933</a></div>
-        </div>
-        <div className="nx-wrap nx-footer-bottom"><span>© 2026 ELITEOZ. All rights reserved.</span><span><Link to="/privacy">Privacy</Link> · <Link to="/terms">Terms</Link></span></div>
-      </footer>
+      <Footer />
     </div>
   );
 }
