@@ -22,7 +22,7 @@ export async function rzp<T>(cfg: GatewayConfig, path: string, init?: { method?:
   const res = await fetch(`https://api.razorpay.com/v1${path}`, {
     method: init?.method ?? 'GET',
     headers: { Authorization: `Basic ${Buffer.from(`${cfg.keyId}:${cfg.keySecret}`).toString('base64')}`, 'Content-Type': 'application/json' },
-    body: init?.body ? JSON.stringify(init.body) : undefined,
+    body: init?.body ? JSON.stringify(init.body) : null,
   });
   const json = await res.json().catch(() => ({}));
   if (!res.ok) { console.error('Razorpay error', res.status, json?.error?.description); throw new Error(json?.error?.description ?? `Razorpay ${res.status}`); }
