@@ -1,7 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { Footer } from '@/components/eliteoz';
-import { useState } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Footer, PublicHeader } from '@/components/eliteoz';
 import logo from '@/assets/eliteoz-logo.webp.asset.json';
 import portrait from '@/assets/col-nk-yadav.webp.asset.json';
 import heroImg from '@/assets/home-estate-noir.jpg';
@@ -21,25 +19,7 @@ export const Route = createFileRoute('/')({
   component: Home,
 });
 
-const nav = [['Properties', '/properties'], ['How It Works', '/how-it-works'], ['For Buyers', '/buyers'], ['For Sellers', '/sellers'], ['About', '/about'], ['Contact', '/contact']] as const;
-
-function NoirHeader() {
-  const [open, setOpen] = useState(false);
-  return (
-    <header className="nx-header">
-      <div className="nx-wrap nx-header-row">
-        <Link to="/" aria-label="Eliteoz home" className="nx-logo"><img src={logo.url} alt="ELITEOZ" width={940} height={560} /></Link>
-        <nav className="nx-nav">{nav.map(([l, p]) => <Link key={p} to={p}>{l}</Link>)}</nav>
-        <div className="nx-actions">
-          <Link to="/login" className="nx-login">Log in</Link>
-          <Link to="/register" className="nx-btn nx-btn-sm">Become a Member</Link>
-          <button className="nx-burger" onClick={() => setOpen(!open)} aria-label="Toggle menu" aria-expanded={open}>{open ? <X size={22} /> : <Menu size={22} />}</button>
-        </div>
-      </div>
-      {open && <nav className="nx-mobile-nav">{nav.map(([l, p]) => <Link key={p} to={p} onClick={() => setOpen(false)}>{l}</Link>)}<Link to="/login" onClick={() => setOpen(false)}>Log in</Link></nav>}
-    </header>
-  );
-}
+const NoirHeader = PublicHeader;
 
 const faqs: [string, string][] = [
   ['What is Eliteoz?', 'Eliteoz is an exclusive, invitation-based platform dedicated to properties and assets valued at ₹50 Crore and above, connecting verified owners with qualified buyers in complete confidence.'],

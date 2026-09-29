@@ -16,6 +16,8 @@ import { Route as AdminSetupRouteImport } from './routes/admin-setup'
 import { Route as BuyerGuidelinesRouteImport } from './routes/buyer-guidelines'
 import { Route as BuyersRouteImport } from './routes/buyers'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as CookiePolicyRouteImport } from './routes/cookie-policy'
+import { Route as DisclaimerRouteImport } from './routes/disclaimer'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
@@ -24,6 +26,7 @@ import { Route as McpRouteImport } from './routes/mcp'
 import { Route as PaymentPolicyRouteImport } from './routes/payment-policy'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PropertiesRouteImport } from './routes/properties'
+import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SellerGuidelinesRouteImport } from './routes/seller-guidelines'
@@ -80,6 +83,16 @@ const ContactRoute = ContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CookiePolicyRoute = CookiePolicyRouteImport.update({
+  id: '/cookie-policy',
+  path: '/cookie-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DisclaimerRoute = DisclaimerRouteImport.update({
+  id: '/disclaimer',
+  path: '/disclaimer',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FaqRoute = FaqRouteImport.update({
   id: '/faq',
   path: '/faq',
@@ -118,6 +131,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const PropertiesRoute = PropertiesRouteImport.update({
   id: '/properties',
   path: '/properties',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RefundPolicyRoute = RefundPolicyRouteImport.update({
+  id: '/refund-policy',
+  path: '/refund-policy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegisterRoute = RegisterRouteImport.update({
@@ -239,6 +257,8 @@ export interface FileRoutesByFullPath {
   '/buyer-guidelines': typeof BuyerGuidelinesRoute
   '/buyers': typeof BuyersRoute
   '/contact': typeof ContactRoute
+  '/cookie-policy': typeof CookiePolicyRoute
+  '/disclaimer': typeof DisclaimerRoute
   '/faq': typeof FaqRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/how-it-works': typeof HowItWorksRoute
@@ -247,6 +267,7 @@ export interface FileRoutesByFullPath {
   '/payment-policy': typeof PaymentPolicyRoute
   '/privacy': typeof PrivacyRoute
   '/properties': typeof PropertiesRouteWithChildren
+  '/refund-policy': typeof RefundPolicyRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/seller-guidelines': typeof SellerGuidelinesRoute
@@ -276,6 +297,8 @@ export interface FileRoutesByTo {
   '/buyer-guidelines': typeof BuyerGuidelinesRoute
   '/buyers': typeof BuyersRoute
   '/contact': typeof ContactRoute
+  '/cookie-policy': typeof CookiePolicyRoute
+  '/disclaimer': typeof DisclaimerRoute
   '/faq': typeof FaqRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/how-it-works': typeof HowItWorksRoute
@@ -283,6 +306,7 @@ export interface FileRoutesByTo {
   '/mcp': typeof McpRoute
   '/payment-policy': typeof PaymentPolicyRoute
   '/privacy': typeof PrivacyRoute
+  '/refund-policy': typeof RefundPolicyRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/seller-guidelines': typeof SellerGuidelinesRoute
@@ -311,6 +335,8 @@ export interface FileRoutesById {
   '/buyer-guidelines': typeof BuyerGuidelinesRoute
   '/buyers': typeof BuyersRoute
   '/contact': typeof ContactRoute
+  '/cookie-policy': typeof CookiePolicyRoute
+  '/disclaimer': typeof DisclaimerRoute
   '/faq': typeof FaqRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/how-it-works': typeof HowItWorksRoute
@@ -319,6 +345,7 @@ export interface FileRoutesById {
   '/payment-policy': typeof PaymentPolicyRoute
   '/privacy': typeof PrivacyRoute
   '/properties': typeof PropertiesRouteWithChildren
+  '/refund-policy': typeof RefundPolicyRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/seller-guidelines': typeof SellerGuidelinesRoute
@@ -350,6 +377,8 @@ export interface FileRouteTypes {
     | '/buyer-guidelines'
     | '/buyers'
     | '/contact'
+    | '/cookie-policy'
+    | '/disclaimer'
     | '/faq'
     | '/forgot-password'
     | '/how-it-works'
@@ -358,6 +387,7 @@ export interface FileRouteTypes {
     | '/payment-policy'
     | '/privacy'
     | '/properties'
+    | '/refund-policy'
     | '/register'
     | '/reset-password'
     | '/seller-guidelines'
@@ -387,6 +417,8 @@ export interface FileRouteTypes {
     | '/buyer-guidelines'
     | '/buyers'
     | '/contact'
+    | '/cookie-policy'
+    | '/disclaimer'
     | '/faq'
     | '/forgot-password'
     | '/how-it-works'
@@ -394,6 +426,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/payment-policy'
     | '/privacy'
+    | '/refund-policy'
     | '/register'
     | '/reset-password'
     | '/seller-guidelines'
@@ -421,6 +454,8 @@ export interface FileRouteTypes {
     | '/buyer-guidelines'
     | '/buyers'
     | '/contact'
+    | '/cookie-policy'
+    | '/disclaimer'
     | '/faq'
     | '/forgot-password'
     | '/how-it-works'
@@ -429,6 +464,7 @@ export interface FileRouteTypes {
     | '/payment-policy'
     | '/privacy'
     | '/properties'
+    | '/refund-policy'
     | '/register'
     | '/reset-password'
     | '/seller-guidelines'
@@ -460,6 +496,8 @@ export interface RootRouteChildren {
   BuyerGuidelinesRoute: typeof BuyerGuidelinesRoute
   BuyersRoute: typeof BuyersRoute
   ContactRoute: typeof ContactRoute
+  CookiePolicyRoute: typeof CookiePolicyRoute
+  DisclaimerRoute: typeof DisclaimerRoute
   FaqRoute: typeof FaqRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   HowItWorksRoute: typeof HowItWorksRoute
@@ -468,6 +506,7 @@ export interface RootRouteChildren {
   PaymentPolicyRoute: typeof PaymentPolicyRoute
   PrivacyRoute: typeof PrivacyRoute
   PropertiesRoute: typeof PropertiesRouteWithChildren
+  RefundPolicyRoute: typeof RefundPolicyRoute
   RegisterRoute: typeof RegisterRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SellerGuidelinesRoute: typeof SellerGuidelinesRoute
@@ -530,6 +569,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cookie-policy': {
+      id: '/cookie-policy'
+      path: '/cookie-policy'
+      fullPath: '/cookie-policy'
+      preLoaderRoute: typeof CookiePolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/disclaimer': {
+      id: '/disclaimer'
+      path: '/disclaimer'
+      fullPath: '/disclaimer'
+      preLoaderRoute: typeof DisclaimerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/faq': {
       id: '/faq'
       path: '/faq'
@@ -584,6 +637,13 @@ declare module '@tanstack/react-router' {
       path: '/properties'
       fullPath: '/properties'
       preLoaderRoute: typeof PropertiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/refund-policy': {
+      id: '/refund-policy'
+      path: '/refund-policy'
+      fullPath: '/refund-policy'
+      preLoaderRoute: typeof RefundPolicyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/register': {
@@ -814,6 +874,8 @@ const rootRouteChildren: RootRouteChildren = {
   BuyerGuidelinesRoute: BuyerGuidelinesRoute,
   BuyersRoute: BuyersRoute,
   ContactRoute: ContactRoute,
+  CookiePolicyRoute: CookiePolicyRoute,
+  DisclaimerRoute: DisclaimerRoute,
   FaqRoute: FaqRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   HowItWorksRoute: HowItWorksRoute,
@@ -822,6 +884,7 @@ const rootRouteChildren: RootRouteChildren = {
   PaymentPolicyRoute: PaymentPolicyRoute,
   PrivacyRoute: PrivacyRoute,
   PropertiesRoute: PropertiesRouteWithChildren,
+  RefundPolicyRoute: RefundPolicyRoute,
   RegisterRoute: RegisterRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SellerGuidelinesRoute: SellerGuidelinesRoute,

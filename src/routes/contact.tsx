@@ -1,6 +1,34 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { ContentPage } from '@/components/public-content';
+import { useState } from 'react';
+import { NoirPage, noirMeta } from '@/components/noir-page';
+
 export const Route = createFileRoute('/contact')({
- head:()=>({meta:[{title:'Contact Eliteoz | ELITEOZ'},{name:'description',content:'Contact Eliteoz: learn about the verified, high-value real estate experience at Eliteoz.'},{property:'og:title',content:'Contact Eliteoz | ELITEOZ'},{property:'og:description',content:'Contact Eliteoz: learn about the verified, high-value real estate experience at Eliteoz.'},{property:'og:type',content:'website'},{name:'twitter:card',content:'summary_large_image'}]}),
- component:()=> <ContentPage slug="contact"/>
+  head: () => noirMeta('Contact Eliteoz | A private conversation', 'Reach Eliteoz in confidence. Offices in Delhi Cantt and Connaught Place, New Delhi.'),
+  component: Contact,
 });
+
+function Contact() {
+  const [note, setNote] = useState('');
+  return (
+    <NoirPage
+      eyebrow="Contact"
+      title="A Private Conversation."
+      cta={false}
+      sections={[
+        { title: 'Phone', body: <p><a href="tel:+919315089933">9315089933</a></p> },
+        { title: 'Email', body: <p><a href="mailto:privacy@eliteoz.com">privacy@eliteoz.com</a><br /><a href="mailto:satish@eliteoz.com">satish@eliteoz.com</a></p> },
+        { title: 'Registered Address', body: <p>3/4/28, Gopi Nath Bazar,<br />Delhi Cantt,<br />New Delhi — 110010</p> },
+        { title: 'Head Office', body: <p>14 School Lane,<br />Barakhamba Avenue, Connaught Place,<br />New Delhi — 110001</p> },
+      ]}
+    >
+      <form className="nx-form" onSubmit={(e) => { e.preventDefault(); setNote('Messages cannot be sent from the website yet. Please write to privacy@eliteoz.com or call 9315089933.'); }}>
+        <label>Name<input required autoComplete="name" /></label>
+        <label>Email<input type="email" required autoComplete="email" /></label>
+        <label>Mobile<input type="tel" required autoComplete="tel" /></label>
+        <label>Subject<input required /></label>
+        <label className="nx-full">Message<textarea rows={4} required /></label>
+        <div className="nx-full"><button type="submit" className="nx-btn">Send Message</button>{note && <p className="nx-muted" role="status" style={{ marginTop: '1rem' }}>{note}</p>}</div>
+      </form>
+    </NoirPage>
+  );
+}
