@@ -10,6 +10,8 @@ import { MemberBody } from '@/components/workspace-member';
 import { AdminBody } from '@/components/workspace-admin';
 
 import { ActivationBanner } from '@/components/activation-banner';
+import { useServerFn } from '@tanstack/react-start';
+import { recordAuthEvent } from '@/lib/admin-users.functions';
 export type Role = 'buyer' | 'seller' | 'admin';
 type NavItem = { label: string; slug: string; icon: typeof Heart; group?: string };
 const buyer: NavItem[] = [{ label: 'Dashboard', slug: '', icon: LayoutDashboard }, { label: 'Explore Properties', slug: 'explore', icon: Search }, { label: 'Compare', slug: 'compare', icon: SlidersHorizontal }, { label: 'My Interests', slug: 'interests', icon: Heart }, { label: 'Saved', slug: 'saved', icon: Bookmark }, { label: 'Notifications', slug: 'notifications', icon: Bell, group: 'ACCOUNT' }, { label: 'Verification', slug: 'verification', icon: FileCheck }, { label: 'Payments', slug: 'payments', icon: CreditCard }, { label: 'Profile', slug: 'profile', icon: Users }, { label: 'Security', slug: 'security', icon: LockKeyhole }, { label: 'Support Tickets', slug: 'support', icon: LifeBuoy }];
@@ -43,6 +45,7 @@ export function Workspace({ role, section = '' }: { role: Role; section?: string
   const navigate = useNavigate();
   const path = useRouterState({ select: (r) => r.location.pathname });
   const { data: me, isLoading } = useMe();
+  const recordAuth = useServerFn(recordAuthEvent);
   const unread = useUnread(me?.user.id);
   if (isLoading) return <div className="workspace-loading"><Brand /><p>Loading your workspace…</p></div>;
   if (!me) return <div className="workspace-loading"><p>Please log in.</p><Button asChild><Link to="/login">Log in</Link></Button></div>;
@@ -60,7 +63,7 @@ export function Workspace({ role, section = '' }: { role: Role; section?: string
   const status = p && role !== 'admin' ? effectiveStatus(p) : 'active';
   const needsKyc = p && role !== 'admin' && !['submitted', 'approved'].includes(p.verification_status);
   const locked = status === 'pending_payment' ? !['payments', 'profile', 'notifications', 'security', 'support'].includes(section) : (status === 'suspended' || status === 'blocked') && !['verification', 'payments', 'profile', 'notifications', 'security', 'support'].includes(section);
-  const signOut = async () => { await supabase.auth.signOut(); navigate({ to: '/login' }); };
+  const signOut = async () => { await recordAuth({ data: { event: 'logout' } }).catch(() => null); await supabase.auth.signOut(); navigate({ to: '/login' }); };
   const hrefFor = (slug: string) => (slug ? `/${role}/${slug}` : `/${role}`);
 
   return <div className="workspace">
