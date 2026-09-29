@@ -43,7 +43,7 @@ export function MemberBody({ role, section, me }: { role: 'buyer' | 'seller'; se
 function VerificationCard({ me, role }: { me: Me; role: 'buyer' | 'seller' }) {
   const p = me.profile; if (!p) return null;
   const v = p.verification_status;
-  return <div className="verify-card"><div className="verify-ring" data-state={v}><FileCheck size={22} /></div><div><span className="eyebrow">VERIFICATION</span><h3>{v === 'approved' ? 'You are verified' : v === 'submitted' ? 'Under review' : v === 'rejected' ? 'Action required' : 'Not yet submitted'}</h3><p className="muted">{v === 'approved' ? 'Your identity has been approved by Eliteoz.' : v === 'submitted' ? 'Our team is reviewing your details.' : `Complete within ${daysLeft(p.verification_due_at)} days to keep your account active.`}</p></div>{!['approved', 'submitted'].includes(v) && <Button size="sm" asChild><SectionLink role={role} slug="verification">Verify</SectionLink></Button>}</div>;
+  return <div className="verify-card"><div className="verify-ring" data-state={v}><FileCheck size={22} /></div><div><span className="eyebrow">VERIFICATION</span><h3>{v === 'approved' ? 'You are verified' : v === 'submitted' ? 'Under review' : ['rejected', 'changes_required'].includes(v) ? 'Action required' : 'Not yet submitted'}</h3><p className="muted">{v === 'approved' ? 'Your identity has been approved by Eliteoz.' : v === 'submitted' ? 'Our team is reviewing your details.' : `Complete within ${daysLeft(p.verification_due_at)} days to keep your account active.`}</p></div>{!['approved', 'submitted'].includes(v) && <Button size="sm" asChild><SectionLink role={role} slug="verification">Verify</SectionLink></Button>}</div>;
 }
 
 function BuyerOverview({ me }: { me: Me }) {
@@ -200,36 +200,48 @@ function Notifications({ me }: { me: Me }) {
   </Panel>;
 }
 
+const KYC_FIELDS: { key: string; label: string; props: Record<string, unknown>; seller?: boolean }[] = [
+  { key: 'pan', label: 'PAN number', props: { required: true, pattern: '[A-Za-z]{5}[0-9]{4}[A-Za-z]', placeholder: 'ABCDE1234F' } },
+  { key: 'gov_id', label: 'Government ID number (Aadhaar / Passport)', props: { required: true, minLength: 6 } },
+  { key: 'gst', label: 'GST number (if applicable)', props: {}, seller: true },
+  { key: 'account_holder', label: 'Account holder name', props: { required: true } },
+  { key: 'bank_name', label: 'Bank name', props: { required: true } },
+  { key: 'account_number', label: 'Account number', props: { required: true, pattern: '[0-9]{6,20}' } },
+  { key: 'ifsc', label: 'IFSC code', props: { required: true, pattern: '[A-Za-z]{4}0[A-Za-z0-9]{6}', placeholder: 'HDFC0001234' } },
+];
+export const KYC_FIELD_LABELS: Record<string, string> = Object.fromEntries(KYC_FIELDS.map((f) => [f.key, f.label]));
+
 function Verification({ me, role }: { me: Me; role: 'buyer' | 'seller' }) {
   const qc = useQueryClient();
-  const sub = useQuery({ queryKey: ['my-kyc', me.user.id], queryFn: async () => { const { data } = await supabase.from('kyc_submissions').select('status,admin_note,created_at,pan').eq('user_id', me.user.id).order('created_at', { ascending: false }).limit(1).maybeSingle(); return data; } });
+  const sub = useQuery({ queryKey: ['my-kyc', me.user.id], queryFn: async () => { const { data } = await supabase.from('kyc_submissions').select('*').eq('user_id', me.user.id).order('created_at', { ascending: false }).limit(1).maybeSingle(); return data; } });
   const [busy, setBusy] = useState(false);
   const p = me.profile!; const v = p.verification_status;
-  const steps = [['Account created', true], ['Details submitted', ['submitted', 'approved', 'rejected'].includes(v)], ['Team review', ['approved', 'rejected'].includes(v)], ['Verified', v === 'approved']] as const;
+  const last = sub.data; const retry = v === 'rejected' || v === 'changes_required';
+  const required = v === 'changes_required' && last?.required_fields?.length ? last.required_fields : null;
+  const steps = [['Account created', true], ['Details submitted', ['submitted', 'approved', 'rejected', 'changes_required'].includes(v)], ['Team review', ['approved', 'rejected', 'changes_required'].includes(v)], ['Verified', v === 'approved']] as const;
+  if (sub.isLoading) return <Panel><p className="muted">Loading…</p></Panel>;
   return <>
     <div className="verify-steps">{steps.map(([l, ok], i) => <div key={l} className={ok ? 'ok' : ''}><span>{ok ? '✓' : i + 1}</span>{l}</div>)}</div>
-    {v === 'approved' ? <Panel><div className="empty-state"><BadgeCheck /><h3>You are verified.</h3><p>Thank you — your identity has been approved.</p></div></Panel>
-      : v === 'submitted' ? <Panel><div className="empty-state"><FileCheck /><h3>Under review.</h3><p>Submitted on {sub.data ? fmtDate(sub.data.created_at) : '—'}. Your account stays active while we review.</p></div></Panel>
+    {v === 'approved' ? <Panel><div className="empty-state"><BadgeCheck /><h3>You are verified.</h3><p>Your verified details are locked. To change them, raise a support ticket and the Eliteoz team can reopen your verification.</p></div></Panel>
+      : v === 'submitted' ? <Panel><div className="empty-state"><FileCheck /><h3>Under review.</h3><p>Submitted on {last ? fmtDate(last.created_at) : '—'}. Your account stays active while we review.</p></div></Panel>
         : <form className="panel" onSubmit={async (e) => {
           e.preventDefault(); const f = new FormData(e.currentTarget); const g = (k: string) => String(f.get(k) ?? '').trim().slice(0, 60); setBusy(true);
-          const { error } = await supabase.from('kyc_submissions').insert({ user_id: me.user.id, pan: g('pan').toUpperCase(), gov_id: g('gov_id'), gst: g('gst') || null, account_holder: g('holder'), bank_name: g('bank'), account_number: g('acc'), ifsc: g('ifsc').toUpperCase() });
+          const { error } = await supabase.from('kyc_submissions').insert({ user_id: me.user.id, pan: g('pan').toUpperCase(), gov_id: g('gov_id'), gst: g('gst') || null, account_holder: g('account_holder'), bank_name: g('bank_name'), account_number: g('account_number'), ifsc: g('ifsc').toUpperCase() });
           setBusy(false); if (error) { toast.error('Could not submit. Please check the details.'); return; }
-          toast.success('Verification submitted'); qc.invalidateQueries();
+          toast.success(retry ? 'Verification resubmitted' : 'Verification submitted'); qc.invalidateQueries();
         }}>
-          <h2>{v === 'rejected' ? 'Resubmit your verification' : 'Complete your verification'}</h2>
-          {v === 'rejected' && sub.data?.admin_note && <p className="danger-text">Reason: {sub.data.admin_note}</p>}
-          <p className="muted">{v === 'rejected' ? 'Please correct the details below.' : `You have ${daysLeft(p.verification_due_at)} days left. Accounts not verified within 7 days are suspended.`}</p>
+          <h2>{retry ? 'Resubmit your verification' : 'Complete your verification'}</h2>
+          {retry && last?.admin_note && <div className="alert-band danger"><div><strong>Remarks from Eliteoz:</strong> {last.admin_note}</div></div>}
+          <p className="muted">{required ? 'Only the highlighted fields need to be corrected. Other details stay as submitted.' : retry ? 'Please correct your details and resubmit.' : `You have ${daysLeft(p.verification_due_at)} days left. Unverified accounts are suspended after the deadline.`}</p>
           <div className="form-grid">
-            <div className="field"><label>PAN number *</label><input name="pan" className="field-input" required pattern="[A-Za-z]{5}[0-9]{4}[A-Za-z]" placeholder="ABCDE1234F" /></div>
-            <div className="field"><label>Government ID number (Aadhaar / Passport) *</label><input name="gov_id" className="field-input" required minLength={6} /></div>
-            {role === 'seller' && <div className="field"><label>GST number (if applicable)</label><input name="gst" className="field-input" /></div>}
-            <div className="field"><label>Account holder name *</label><input name="holder" className="field-input" required defaultValue={p.full_name} /></div>
-            <div className="field"><label>Bank name *</label><input name="bank" className="field-input" required /></div>
-            <div className="field"><label>Account number *</label><input name="acc" className="field-input" required pattern="[0-9]{6,20}" /></div>
-            <div className="field"><label>IFSC code *</label><input name="ifsc" className="field-input" required pattern="[A-Za-z]{4}0[A-Za-z0-9]{6}" placeholder="HDFC0001234" /></div>
+            {KYC_FIELDS.filter((fd) => !fd.seller || role === 'seller').map((fd) => {
+              const locked = !!required && !required.includes(fd.key); const flagged = !!required?.includes(fd.key);
+              const prev = retry && last ? String((last as Record<string, unknown>)[fd.key] ?? '') : fd.key === 'account_holder' ? p.full_name : '';
+              return <div className="field" key={fd.key}><label>{fd.label}{fd.props.required ? ' *' : ''}{flagged && <small className="danger-text"> — needs correction</small>}{locked && <small className="muted"> — locked</small>}</label><input name={fd.key} className="field-input" defaultValue={prev} readOnly={locked} style={flagged ? { borderColor: 'var(--destructive)' } : undefined} {...fd.props} /></div>;
+            })}
           </div>
           <p className="muted small">These details are visible only to you and the Eliteoz admin team.</p>
-          <div className="form-actions"><Button type="submit" disabled={busy}>{busy ? 'Submitting…' : 'Submit for verification'}</Button></div>
+          <div className="form-actions"><Button type="submit" disabled={busy}>{busy ? 'Submitting…' : retry ? 'Resubmit for verification' : 'Submit for verification'}</Button></div>
         </form>}
   </>;
 }
