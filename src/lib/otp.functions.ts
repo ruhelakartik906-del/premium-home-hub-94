@@ -93,12 +93,3 @@ export const verifyOtp = createServerFn({ method: 'POST' })
     return { ok: true as const, token };
   });
 
-// Server-only helper used by registration: consumes a verification token once.
-export async function consumeOtpToken(mobile: string, token: string) {
-  const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
-  const digits = mobile.replace(/\D/g, '').slice(-10);
-  const since = new Date(Date.now() - 30 * 60 * 1000).toISOString();
-  const { data } = await supabaseAdmin.from('otp_verifications').update({ status: 'consumed' })
-    .eq('mobile', digits).eq('status', 'verified').eq('verify_token_hash', await sha256(token)).gte('verified_at', since).select('id');
-  return !!data?.length;
-}
