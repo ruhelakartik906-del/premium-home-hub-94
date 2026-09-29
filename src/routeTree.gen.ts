@@ -10,33 +10,385 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as BuyerRouteImport } from './routes/buyer'
+import { Route as BuyerGuidelinesRouteImport } from './routes/buyer-guidelines'
+import { Route as BuyersRouteImport } from './routes/buyers'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as FaqRouteImport } from './routes/faq'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as HowItWorksRouteImport } from './routes/how-it-works'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as PaymentPolicyRouteImport } from './routes/payment-policy'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as PropertiesRouteImport } from './routes/properties'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as SellerRouteImport } from './routes/seller'
+import { Route as SellerGuidelinesRouteImport } from './routes/seller-guidelines'
+import { Route as SellersRouteImport } from './routes/sellers'
+import { Route as TermsRouteImport } from './routes/terms'
+import { Route as VerificationPolicyRouteImport } from './routes/verification-policy'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminSectionRouteImport } from './routes/admin.$section'
+import { Route as BuyerIndexRouteImport } from './routes/buyer.index'
+import { Route as BuyerSectionRouteImport } from './routes/buyer.$section'
+import { Route as PropertiesIndexRouteImport } from './routes/properties.index'
+import { Route as PropertiesIdRouteImport } from './routes/properties.$id'
+import { Route as SellerIndexRouteImport } from './routes/seller.index'
+import { Route as SellerSectionRouteImport } from './routes/seller.$section'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BuyerRoute = BuyerRouteImport.update({
+  id: '/buyer',
+  path: '/buyer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BuyerGuidelinesRoute = BuyerGuidelinesRouteImport.update({
+  id: '/buyer-guidelines',
+  path: '/buyer-guidelines',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BuyersRoute = BuyersRouteImport.update({
+  id: '/buyers',
+  path: '/buyers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HowItWorksRoute = HowItWorksRouteImport.update({
+  id: '/how-it-works',
+  path: '/how-it-works',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaymentPolicyRoute = PaymentPolicyRouteImport.update({
+  id: '/payment-policy',
+  path: '/payment-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PropertiesRoute = PropertiesRouteImport.update({
+  id: '/properties',
+  path: '/properties',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SellerRoute = SellerRouteImport.update({
+  id: '/seller',
+  path: '/seller',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SellerGuidelinesRoute = SellerGuidelinesRouteImport.update({
+  id: '/seller-guidelines',
+  path: '/seller-guidelines',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SellersRoute = SellersRouteImport.update({
+  id: '/sellers',
+  path: '/sellers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VerificationPolicyRoute = VerificationPolicyRouteImport.update({
+  id: '/verification-policy',
+  path: '/verification-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSectionRoute = AdminSectionRouteImport.update({
+  id: '/$section',
+  path: '/$section',
+  getParentRoute: () => AdminRoute,
+} as any)
+const BuyerIndexRoute = BuyerIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => BuyerRoute,
+} as any)
+const BuyerSectionRoute = BuyerSectionRouteImport.update({
+  id: '/$section',
+  path: '/$section',
+  getParentRoute: () => BuyerRoute,
+} as any)
+const PropertiesIndexRoute = PropertiesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PropertiesRoute,
+} as any)
+const PropertiesIdRoute = PropertiesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => PropertiesRoute,
+} as any)
+const SellerIndexRoute = SellerIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SellerRoute,
+} as any)
+const SellerSectionRoute = SellerSectionRouteImport.update({
+  id: '/$section',
+  path: '/$section',
+  getParentRoute: () => SellerRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/buyer': typeof BuyerRouteWithChildren
+  '/buyer-guidelines': typeof BuyerGuidelinesRoute
+  '/buyers': typeof BuyersRoute
+  '/contact': typeof ContactRoute
+  '/faq': typeof FaqRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/how-it-works': typeof HowItWorksRoute
+  '/login': typeof LoginRoute
+  '/payment-policy': typeof PaymentPolicyRoute
+  '/privacy': typeof PrivacyRoute
+  '/properties': typeof PropertiesRouteWithChildren
+  '/register': typeof RegisterRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/seller': typeof SellerRouteWithChildren
+  '/seller-guidelines': typeof SellerGuidelinesRoute
+  '/sellers': typeof SellersRoute
+  '/terms': typeof TermsRoute
+  '/verification-policy': typeof VerificationPolicyRoute
+  '/admin/$section': typeof AdminSectionRoute
+  '/buyer/$section': typeof BuyerSectionRoute
+  '/properties/$id': typeof PropertiesIdRoute
+  '/seller/$section': typeof SellerSectionRoute
+  '/admin/': typeof AdminIndexRoute
+  '/buyer/': typeof BuyerIndexRoute
+  '/properties/': typeof PropertiesIndexRoute
+  '/seller/': typeof SellerIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/buyer-guidelines': typeof BuyerGuidelinesRoute
+  '/buyers': typeof BuyersRoute
+  '/contact': typeof ContactRoute
+  '/faq': typeof FaqRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/how-it-works': typeof HowItWorksRoute
+  '/login': typeof LoginRoute
+  '/payment-policy': typeof PaymentPolicyRoute
+  '/privacy': typeof PrivacyRoute
+  '/register': typeof RegisterRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/seller-guidelines': typeof SellerGuidelinesRoute
+  '/sellers': typeof SellersRoute
+  '/terms': typeof TermsRoute
+  '/verification-policy': typeof VerificationPolicyRoute
+  '/admin/$section': typeof AdminSectionRoute
+  '/buyer/$section': typeof BuyerSectionRoute
+  '/properties/$id': typeof PropertiesIdRoute
+  '/seller/$section': typeof SellerSectionRoute
+  '/admin': typeof AdminIndexRoute
+  '/buyer': typeof BuyerIndexRoute
+  '/properties': typeof PropertiesIndexRoute
+  '/seller': typeof SellerIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/buyer': typeof BuyerRouteWithChildren
+  '/buyer-guidelines': typeof BuyerGuidelinesRoute
+  '/buyers': typeof BuyersRoute
+  '/contact': typeof ContactRoute
+  '/faq': typeof FaqRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/how-it-works': typeof HowItWorksRoute
+  '/login': typeof LoginRoute
+  '/payment-policy': typeof PaymentPolicyRoute
+  '/privacy': typeof PrivacyRoute
+  '/properties': typeof PropertiesRouteWithChildren
+  '/register': typeof RegisterRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/seller': typeof SellerRouteWithChildren
+  '/seller-guidelines': typeof SellerGuidelinesRoute
+  '/sellers': typeof SellersRoute
+  '/terms': typeof TermsRoute
+  '/verification-policy': typeof VerificationPolicyRoute
+  '/admin/$section': typeof AdminSectionRoute
+  '/buyer/$section': typeof BuyerSectionRoute
+  '/properties/$id': typeof PropertiesIdRoute
+  '/seller/$section': typeof SellerSectionRoute
+  '/admin/': typeof AdminIndexRoute
+  '/buyer/': typeof BuyerIndexRoute
+  '/properties/': typeof PropertiesIndexRoute
+  '/seller/': typeof SellerIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/admin'
+    | '/buyer'
+    | '/buyer-guidelines'
+    | '/buyers'
+    | '/contact'
+    | '/faq'
+    | '/forgot-password'
+    | '/how-it-works'
+    | '/login'
+    | '/payment-policy'
+    | '/privacy'
+    | '/properties'
+    | '/register'
+    | '/reset-password'
+    | '/seller'
+    | '/seller-guidelines'
+    | '/sellers'
+    | '/terms'
+    | '/verification-policy'
+    | '/admin/$section'
+    | '/buyer/$section'
+    | '/properties/$id'
+    | '/seller/$section'
+    | '/admin/'
+    | '/buyer/'
+    | '/properties/'
+    | '/seller/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/about'
+    | '/buyer-guidelines'
+    | '/buyers'
+    | '/contact'
+    | '/faq'
+    | '/forgot-password'
+    | '/how-it-works'
+    | '/login'
+    | '/payment-policy'
+    | '/privacy'
+    | '/register'
+    | '/reset-password'
+    | '/seller-guidelines'
+    | '/sellers'
+    | '/terms'
+    | '/verification-policy'
+    | '/admin/$section'
+    | '/buyer/$section'
+    | '/properties/$id'
+    | '/seller/$section'
+    | '/admin'
+    | '/buyer'
+    | '/properties'
+    | '/seller'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/admin'
+    | '/buyer'
+    | '/buyer-guidelines'
+    | '/buyers'
+    | '/contact'
+    | '/faq'
+    | '/forgot-password'
+    | '/how-it-works'
+    | '/login'
+    | '/payment-policy'
+    | '/privacy'
+    | '/properties'
+    | '/register'
+    | '/reset-password'
+    | '/seller'
+    | '/seller-guidelines'
+    | '/sellers'
+    | '/terms'
+    | '/verification-policy'
+    | '/admin/$section'
+    | '/buyer/$section'
+    | '/properties/$id'
+    | '/seller/$section'
+    | '/admin/'
+    | '/buyer/'
+    | '/properties/'
+    | '/seller/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
+  AdminRoute: typeof AdminRouteWithChildren
+  BuyerRoute: typeof BuyerRouteWithChildren
+  BuyerGuidelinesRoute: typeof BuyerGuidelinesRoute
+  BuyersRoute: typeof BuyersRoute
+  ContactRoute: typeof ContactRoute
+  FaqRoute: typeof FaqRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
+  HowItWorksRoute: typeof HowItWorksRoute
+  LoginRoute: typeof LoginRoute
+  PaymentPolicyRoute: typeof PaymentPolicyRoute
+  PrivacyRoute: typeof PrivacyRoute
+  PropertiesRoute: typeof PropertiesRouteWithChildren
+  RegisterRoute: typeof RegisterRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
+  SellerRoute: typeof SellerRouteWithChildren
+  SellerGuidelinesRoute: typeof SellerGuidelinesRoute
+  SellersRoute: typeof SellersRoute
+  TermsRoute: typeof TermsRoute
+  VerificationPolicyRoute: typeof VerificationPolicyRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +400,278 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/buyer': {
+      id: '/buyer'
+      path: '/buyer'
+      fullPath: '/buyer'
+      preLoaderRoute: typeof BuyerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/buyer-guidelines': {
+      id: '/buyer-guidelines'
+      path: '/buyer-guidelines'
+      fullPath: '/buyer-guidelines'
+      preLoaderRoute: typeof BuyerGuidelinesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/buyers': {
+      id: '/buyers'
+      path: '/buyers'
+      fullPath: '/buyers'
+      preLoaderRoute: typeof BuyersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/how-it-works': {
+      id: '/how-it-works'
+      path: '/how-it-works'
+      fullPath: '/how-it-works'
+      preLoaderRoute: typeof HowItWorksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/payment-policy': {
+      id: '/payment-policy'
+      path: '/payment-policy'
+      fullPath: '/payment-policy'
+      preLoaderRoute: typeof PaymentPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/properties': {
+      id: '/properties'
+      path: '/properties'
+      fullPath: '/properties'
+      preLoaderRoute: typeof PropertiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/seller': {
+      id: '/seller'
+      path: '/seller'
+      fullPath: '/seller'
+      preLoaderRoute: typeof SellerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/seller-guidelines': {
+      id: '/seller-guidelines'
+      path: '/seller-guidelines'
+      fullPath: '/seller-guidelines'
+      preLoaderRoute: typeof SellerGuidelinesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sellers': {
+      id: '/sellers'
+      path: '/sellers'
+      fullPath: '/sellers'
+      preLoaderRoute: typeof SellersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verification-policy': {
+      id: '/verification-policy'
+      path: '/verification-policy'
+      fullPath: '/verification-policy'
+      preLoaderRoute: typeof VerificationPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/$section': {
+      id: '/admin/$section'
+      path: '/$section'
+      fullPath: '/admin/$section'
+      preLoaderRoute: typeof AdminSectionRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/buyer/': {
+      id: '/buyer/'
+      path: '/'
+      fullPath: '/buyer/'
+      preLoaderRoute: typeof BuyerIndexRouteImport
+      parentRoute: typeof BuyerRoute
+    }
+    '/buyer/$section': {
+      id: '/buyer/$section'
+      path: '/$section'
+      fullPath: '/buyer/$section'
+      preLoaderRoute: typeof BuyerSectionRouteImport
+      parentRoute: typeof BuyerRoute
+    }
+    '/properties/': {
+      id: '/properties/'
+      path: '/'
+      fullPath: '/properties/'
+      preLoaderRoute: typeof PropertiesIndexRouteImport
+      parentRoute: typeof PropertiesRoute
+    }
+    '/properties/$id': {
+      id: '/properties/$id'
+      path: '/$id'
+      fullPath: '/properties/$id'
+      preLoaderRoute: typeof PropertiesIdRouteImport
+      parentRoute: typeof PropertiesRoute
+    }
+    '/seller/': {
+      id: '/seller/'
+      path: '/'
+      fullPath: '/seller/'
+      preLoaderRoute: typeof SellerIndexRouteImport
+      parentRoute: typeof SellerRoute
+    }
+    '/seller/$section': {
+      id: '/seller/$section'
+      path: '/$section'
+      fullPath: '/seller/$section'
+      preLoaderRoute: typeof SellerSectionRouteImport
+      parentRoute: typeof SellerRoute
+    }
   }
 }
 
+interface AdminRouteChildren {
+  AdminSectionRoute: typeof AdminSectionRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminSectionRoute: AdminSectionRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
+interface BuyerRouteChildren {
+  BuyerSectionRoute: typeof BuyerSectionRoute
+  BuyerIndexRoute: typeof BuyerIndexRoute
+}
+
+const BuyerRouteChildren: BuyerRouteChildren = {
+  BuyerSectionRoute: BuyerSectionRoute,
+  BuyerIndexRoute: BuyerIndexRoute,
+}
+
+const BuyerRouteWithChildren = BuyerRoute._addFileChildren(BuyerRouteChildren)
+
+interface PropertiesRouteChildren {
+  PropertiesIdRoute: typeof PropertiesIdRoute
+  PropertiesIndexRoute: typeof PropertiesIndexRoute
+}
+
+const PropertiesRouteChildren: PropertiesRouteChildren = {
+  PropertiesIdRoute: PropertiesIdRoute,
+  PropertiesIndexRoute: PropertiesIndexRoute,
+}
+
+const PropertiesRouteWithChildren = PropertiesRoute._addFileChildren(
+  PropertiesRouteChildren,
+)
+
+interface SellerRouteChildren {
+  SellerSectionRoute: typeof SellerSectionRoute
+  SellerIndexRoute: typeof SellerIndexRoute
+}
+
+const SellerRouteChildren: SellerRouteChildren = {
+  SellerSectionRoute: SellerSectionRoute,
+  SellerIndexRoute: SellerIndexRoute,
+}
+
+const SellerRouteWithChildren =
+  SellerRoute._addFileChildren(SellerRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
+  AdminRoute: AdminRouteWithChildren,
+  BuyerRoute: BuyerRouteWithChildren,
+  BuyerGuidelinesRoute: BuyerGuidelinesRoute,
+  BuyersRoute: BuyersRoute,
+  ContactRoute: ContactRoute,
+  FaqRoute: FaqRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
+  HowItWorksRoute: HowItWorksRoute,
+  LoginRoute: LoginRoute,
+  PaymentPolicyRoute: PaymentPolicyRoute,
+  PrivacyRoute: PrivacyRoute,
+  PropertiesRoute: PropertiesRouteWithChildren,
+  RegisterRoute: RegisterRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
+  SellerRoute: SellerRouteWithChildren,
+  SellerGuidelinesRoute: SellerGuidelinesRoute,
+  SellersRoute: SellersRoute,
+  TermsRoute: TermsRoute,
+  VerificationPolicyRoute: VerificationPolicyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
