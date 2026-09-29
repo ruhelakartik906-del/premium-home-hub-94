@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AdminSetupRouteImport } from './routes/admin-setup'
 import { Route as BuyerRouteImport } from './routes/buyer'
 import { Route as BuyerGuidelinesRouteImport } from './routes/buyer-guidelines'
 import { Route as BuyersRouteImport } from './routes/buyers'
@@ -52,6 +53,11 @@ const AboutRoute = AboutRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSetupRoute = AdminSetupRouteImport.update({
+  id: '/admin-setup',
+  path: '/admin-setup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BuyerRoute = BuyerRouteImport.update({
@@ -189,6 +195,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
+  '/admin-setup': typeof AdminSetupRoute
   '/buyer': typeof BuyerRouteWithChildren
   '/buyer-guidelines': typeof BuyerGuidelinesRoute
   '/buyers': typeof BuyersRoute
@@ -219,6 +226,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin-setup': typeof AdminSetupRoute
   '/buyer-guidelines': typeof BuyerGuidelinesRoute
   '/buyers': typeof BuyersRoute
   '/contact': typeof ContactRoute
@@ -248,6 +256,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
+  '/admin-setup': typeof AdminSetupRoute
   '/buyer': typeof BuyerRouteWithChildren
   '/buyer-guidelines': typeof BuyerGuidelinesRoute
   '/buyers': typeof BuyersRoute
@@ -281,6 +290,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/admin'
+    | '/admin-setup'
     | '/buyer'
     | '/buyer-guidelines'
     | '/buyers'
@@ -311,6 +321,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/admin-setup'
     | '/buyer-guidelines'
     | '/buyers'
     | '/contact'
@@ -339,6 +350,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/admin'
+    | '/admin-setup'
     | '/buyer'
     | '/buyer-guidelines'
     | '/buyers'
@@ -371,6 +383,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRouteWithChildren
+  AdminSetupRoute: typeof AdminSetupRoute
   BuyerRoute: typeof BuyerRouteWithChildren
   BuyerGuidelinesRoute: typeof BuyerGuidelinesRoute
   BuyersRoute: typeof BuyersRoute
@@ -412,6 +425,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-setup': {
+      id: '/admin-setup'
+      path: '/admin-setup'
+      fullPath: '/admin-setup'
+      preLoaderRoute: typeof AdminSetupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/buyer': {
@@ -654,6 +674,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AdminRoute: AdminRouteWithChildren,
+  AdminSetupRoute: AdminSetupRoute,
   BuyerRoute: BuyerRouteWithChildren,
   BuyerGuidelinesRoute: BuyerGuidelinesRoute,
   BuyersRoute: BuyersRoute,
