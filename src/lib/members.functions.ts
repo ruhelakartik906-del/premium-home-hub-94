@@ -37,7 +37,7 @@ async function createMember(m: Member, opts: { byAdmin: boolean; payment?: { met
   const n = (v?: string) => (v && v.trim() ? v.trim() : null);
   await supabaseAdmin.from('profiles').insert({ id, full_name: m.full_name, email: m.email, mobile: m.mobile, dob: n(m.dob), gender: n(m.gender), country: n(m.country), state: n(m.state), city: n(m.city), address: n(m.address), pincode: n(m.pincode), company_name: n(m.company_name), business_type: n(m.business_type), account_type: m.role, created_by_admin: opts.byAdmin });
   if (opts.payment) {
-    await supabaseAdmin.from('transactions').insert({ user_id: id, amount: ACTIVATION_FEE, purpose: 'activation', method: opts.payment.method, status: opts.payment.status, payer_name: m.full_name, payer_email: m.email });
+    await supabaseAdmin.from('transactions').insert({ user_id: id, amount: Number((await supabaseAdmin.from('payment_settings').select('activation_fee').eq('id', 1).maybeSingle()).data?.activation_fee ?? ACTIVATION_FEE), purpose: 'activation', method: opts.payment.method, status: opts.payment.status, payer_name: m.full_name, payer_email: m.email });
   }
   await supabaseAdmin.from('notifications').insert({ user_id: id, title: 'Welcome to Eliteoz', body: 'Your membership is active. Please complete verification within 7 days to keep your account active.' });
   return { ok: true as const, userId: id };

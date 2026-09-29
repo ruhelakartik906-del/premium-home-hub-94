@@ -85,3 +85,60 @@ export function SaveButton({ propertyUuid }: { propertyUuid: string }) {
   };
   return <Button variant="outline" onClick={toggle} style={{ width: '100%', marginBottom: 12 }}>{q.data ? <><BookmarkCheck /> Saved</> : <><Bookmark /> Save property</>}</Button>;
 }
+
+type OfflineUser = { id: string; name: string; email: string };
+export function OfflinePaymentForm({ users }: { users: OfflineUser[] }) {
+  const qc = useQueryClient(); const [open, setOpen] = useState(false); const [busy, setBusy] = useState(false);
+  const fee = useQuery({ queryKey: ['pay-fee'], queryFn: async () => Number((await supabase.from('payment_settings').select('activation_fee').eq('id', 1).maybeSingle()).data?.activation_fee ?? 50000) });
+  if (!open) return <div className="form-actions" style={{ justifyContent: 'flex-start', marginBottom: 12 }}><Button onClick={() => setOpen(true)}>Record offline payment</Button></div>;
+  return <form className="panel" onSubmit={async (e) => {
+    e.preventDefault(); const form = e.currentTarget; const f = new FormData(form); setBusy(true);
+    const { data: auth } = await supabase.auth.getUser(); const u = users.find((x) => x.id === f.get('user_id'));
+    if (!auth.user || !u) { setBusy(false); toast.error('Choose a member'); return; }
+    let receipt_path: string | null = null; const file = f.get('receipt') as File | null;
+    if (file && file.size) {
+      if (file.size > 10 * 1024 * 1024) { setBusy(false); toast.error('Receipt must be under 10 MB'); return; }
+      receipt_path = `receipts/${u.id}/${Date.now()}-${file.name.replace(/[^\w.-]/g, '_')}`;
+      const up = await supabase.storage.from('property-docs').upload(receipt_path, file);
+      if (up.error) { setBusy(false); toast.error('Receipt upload failed'); return; }
+    }
+    const verified = f.get('status') === 'success';
+    const ref = String(f.get('reference') ?? '').trim();
+    const { error } = await supabase.from('transactions').insert({
+      user_id: u.id, payer_name: u.name, payer_email: u.email, purpose: String(f.get('purpose')), method: String(f.get('method')),
+      amount: Number(f.get('amount')), status: verified ? 'success' : 'pending', payment_date: String(f.get('payment_date')) || null,
+      notes: String(f.get('notes') ?? '').trim() || null, receipt_path, provider: 'offline', recorded_by: auth.user.id,
+      ...(ref ? { reference: ref } : {}), ...(verified ? { verified_by: auth.user.id, verified_at: new Date().toISOString() } : {}),
+    });
+    setBusy(false); if (error) { toast.error(error.message.includes('duplicate') ? 'This reference is already recorded' : 'Could not record the payment'); return; }
+    toast.success(verified ? 'Payment recorded and account activated' : 'Payment recorded as pending'); form.reset(); setOpen(false);
+    qc.invalidateQueries({ queryKey: ['admin-txns'] }); qc.invalidateQueries({ queryKey: ['admin-users'] }); qc.invalidateQueries();
+  }}>
+    <h2>Record offline payment</h2>
+    <div className="form-grid">
+      <div className="field"><label>Member *</label><select name="user_id" className="field-input" required defaultValue=""><option value="" disabled>Choose a member</option>{users.map((u) => <option key={u.id} value={u.id}>{u.name} · {u.email}</option>)}</select></div>
+      <div className="field"><label>Purpose</label><select name="purpose" className="field-input"><option value="activation">Registration / activation fee</option><option value="other">Other</option></select></div>
+      <div className="field"><label>Payment method *</label><select name="method" className="field-input" required><option value="cash">Cash</option><option value="bank_transfer">Bank transfer</option><option value="cheque">Cheque</option><option value="other">Other</option></select></div>
+      <div className="field"><label>Amount (₹) *</label><input name="amount" type="number" min={0} required className="field-input" key={fee.data} defaultValue={fee.data ?? 50000} /></div>
+      <div className="field"><label>Transaction / reference number</label><input name="reference" className="field-input" placeholder="UTR, cheque no. or receipt no." maxLength={80} /></div>
+      <div className="field"><label>Payment date *</label><input name="payment_date" type="date" required className="field-input" defaultValue={new Date().toISOString().slice(0, 10)} /></div>
+      <div className="field"><label>Status</label><select name="status" className="field-input"><option value="success">Verified — money received</option><option value="pending">Pending — verify later</option></select></div>
+      <div className="field"><label>Receipt / proof (optional)</label><input name="receipt" type="file" accept="image/*,application/pdf" className="field-input" /></div>
+      <div className="field" style={{ gridColumn: '1/-1' }}><label>Notes</label><textarea name="notes" className="field-input" rows={2} maxLength={500} /></div>
+    </div>
+    <p className="muted small">A verified registration payment activates the member's account automatically.</p>
+    <div className="form-actions"><Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button><Button type="submit" disabled={busy}>{busy ? 'Saving…' : 'Save payment'}</Button></div>
+  </form>;
+}
+
+export function VerifyPaymentButton({ t }: { t: { id: string; status: string; provider?: string | null; receipt_path?: string | null } }) {
+  const qc = useQueryClient();
+  const viewReceipt = async () => { const { data } = await supabase.storage.from('property-docs').createSignedUrl(t.receipt_path!, 120); if (data) window.open(data.signedUrl, '_blank', 'noopener'); else toast.error('Could not open receipt'); };
+  const verify = async () => {
+    if (!confirm('Confirm this payment was received? A registration payment will activate the account.')) return;
+    const { data: auth } = await supabase.auth.getUser();
+    const { error } = await supabase.from('transactions').update({ status: 'success', verified_by: auth.user?.id, verified_at: new Date().toISOString() }).eq('id', t.id);
+    if (error) { toast.error('Could not verify'); return; } toast.success('Payment verified'); qc.invalidateQueries();
+  };
+  return <div className="row-actions">{t.receipt_path && <Button size="sm" variant="ghost" onClick={viewReceipt}>Receipt</Button>}{t.status === 'pending' && t.provider === 'offline' && <Button size="sm" variant="outline" onClick={verify}>Verify</Button>}</div>;
+}
