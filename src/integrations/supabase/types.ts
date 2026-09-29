@@ -14,16 +14,375 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      categories: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      interests: {
+        Row: {
+          admin_note: string | null
+          buyer_id: string
+          created_at: string
+          email: string
+          id: string
+          message: string | null
+          name: string
+          phone: string
+          preferred_time: string | null
+          property_id: string
+          status: string
+        }
+        Insert: {
+          admin_note?: string | null
+          buyer_id: string
+          created_at?: string
+          email: string
+          id?: string
+          message?: string | null
+          name: string
+          phone: string
+          preferred_time?: string | null
+          property_id: string
+          status?: string
+        }
+        Update: {
+          admin_note?: string | null
+          buyer_id?: string
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string | null
+          name?: string
+          phone?: string
+          preferred_time?: string | null
+          property_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interests_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kyc_submissions: {
+        Row: {
+          account_holder: string
+          account_number: string
+          admin_note: string | null
+          bank_name: string
+          created_at: string
+          gov_id: string
+          gst: string | null
+          id: string
+          ifsc: string
+          pan: string
+          reviewed_at: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          account_holder: string
+          account_number: string
+          admin_note?: string | null
+          bank_name: string
+          created_at?: string
+          gov_id: string
+          gst?: string | null
+          id?: string
+          ifsc: string
+          pan: string
+          reviewed_at?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          account_holder?: string
+          account_number?: string
+          admin_note?: string | null
+          bank_name?: string
+          created_at?: string
+          gov_id?: string
+          gst?: string | null
+          id?: string
+          ifsc?: string
+          pan?: string
+          reviewed_at?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          read: boolean
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          read?: boolean
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          read?: boolean
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          account_type: string
+          activated_at: string
+          address: string | null
+          business_type: string | null
+          city: string | null
+          company_name: string | null
+          country: string | null
+          created_at: string
+          created_by_admin: boolean
+          dob: string | null
+          email: string
+          full_name: string
+          gender: string | null
+          id: string
+          mobile: string | null
+          pincode: string | null
+          state: string | null
+          status: string
+          updated_at: string
+          verification_due_at: string
+          verification_status: string
+        }
+        Insert: {
+          account_type?: string
+          activated_at?: string
+          address?: string | null
+          business_type?: string | null
+          city?: string | null
+          company_name?: string | null
+          country?: string | null
+          created_at?: string
+          created_by_admin?: boolean
+          dob?: string | null
+          email?: string
+          full_name?: string
+          gender?: string | null
+          id: string
+          mobile?: string | null
+          pincode?: string | null
+          state?: string | null
+          status?: string
+          updated_at?: string
+          verification_due_at?: string
+          verification_status?: string
+        }
+        Update: {
+          account_type?: string
+          activated_at?: string
+          address?: string | null
+          business_type?: string | null
+          city?: string | null
+          company_name?: string | null
+          country?: string | null
+          created_at?: string
+          created_by_admin?: boolean
+          dob?: string | null
+          email?: string
+          full_name?: string
+          gender?: string | null
+          id?: string
+          mobile?: string | null
+          pincode?: string | null
+          state?: string | null
+          status?: string
+          updated_at?: string
+          verification_due_at?: string
+          verification_status?: string
+        }
+        Relationships: []
+      }
+      properties: {
+        Row: {
+          admin_note: string | null
+          amenities: string[]
+          area_sqft: number | null
+          baths: number | null
+          beds: number | null
+          category_id: string | null
+          created_at: string
+          description: string | null
+          featured: boolean
+          id: string
+          image: string
+          location: string
+          price: number
+          property_type: string
+          ref: string
+          seller_id: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          admin_note?: string | null
+          amenities?: string[]
+          area_sqft?: number | null
+          baths?: number | null
+          beds?: number | null
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          featured?: boolean
+          id?: string
+          image?: string
+          location: string
+          price?: number
+          property_type?: string
+          ref?: string
+          seller_id?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          admin_note?: string | null
+          amenities?: string[]
+          area_sqft?: number | null
+          baths?: number | null
+          beds?: number | null
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          featured?: boolean
+          id?: string
+          image?: string
+          location?: string
+          price?: number
+          property_type?: string
+          ref?: string
+          seller_id?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "properties_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          method: string
+          payer_email: string | null
+          payer_name: string | null
+          purpose: string
+          reference: string
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          method?: string
+          payer_email?: string | null
+          payer_name?: string | null
+          purpose?: string
+          reference?: string
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          method?: string
+          payer_email?: string | null
+          payer_name?: string | null
+          purpose?: string
+          reference?: string
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      admin_exists: { Args: never; Returns: boolean }
+      claim_first_admin: { Args: never; Returns: boolean }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "buyer" | "seller"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +509,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "buyer", "seller"],
+    },
   },
 } as const
