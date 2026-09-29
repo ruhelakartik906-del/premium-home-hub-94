@@ -70,22 +70,34 @@ export type Database = {
           id: number
           key_secret: string | null
           msg91_auth_key: string | null
+          smtp_password: string | null
           updated_at: string
           webhook_secret: string | null
+          whatsapp_access_token: string | null
+          whatsapp_verify_token: string | null
+          whatsapp_webhook_secret: string | null
         }
         Insert: {
           id?: number
           key_secret?: string | null
           msg91_auth_key?: string | null
+          smtp_password?: string | null
           updated_at?: string
           webhook_secret?: string | null
+          whatsapp_access_token?: string | null
+          whatsapp_verify_token?: string | null
+          whatsapp_webhook_secret?: string | null
         }
         Update: {
           id?: number
           key_secret?: string | null
           msg91_auth_key?: string | null
+          smtp_password?: string | null
           updated_at?: string
           webhook_secret?: string | null
+          whatsapp_access_token?: string | null
+          whatsapp_verify_token?: string | null
+          whatsapp_webhook_secret?: string | null
         }
         Relationships: []
       }
@@ -295,55 +307,121 @@ export type Database = {
         Row: {
           contact_email: string | null
           contact_phone: string | null
+          currency: string
           id: number
+          maintenance_mode: boolean
           manual_payment_enabled: boolean
+          max_upload_mb: number
           msg91_enabled: boolean
           msg91_sender_id: string | null
           msg91_template_id: string | null
+          notification_matrix: Json
           notify_email: boolean
+          notify_sms: boolean
           notify_whatsapp: boolean
+          otp_expiry_minutes: number
+          otp_max_attempts: number
           otp_provider: string
+          otp_resend_seconds: number
+          platform_email: string | null
+          platform_name: string
+          platform_status: string
           reminder_days_before: number
+          session_timeout_minutes: number
+          smtp_enabled: boolean
           smtp_from: string | null
+          smtp_from_name: string | null
           smtp_host: string | null
+          smtp_port: number | null
+          smtp_security: string
+          smtp_username: string | null
           updated_at: string
           verification_days: number
+          whatsapp_api_url: string | null
+          whatsapp_business_account_id: string | null
+          whatsapp_enabled: boolean
+          whatsapp_phone_number_id: string | null
+          whatsapp_provider: string | null
           whatsapp_webhook_url: string | null
         }
         Insert: {
           contact_email?: string | null
           contact_phone?: string | null
+          currency?: string
           id?: number
+          maintenance_mode?: boolean
           manual_payment_enabled?: boolean
+          max_upload_mb?: number
           msg91_enabled?: boolean
           msg91_sender_id?: string | null
           msg91_template_id?: string | null
+          notification_matrix?: Json
           notify_email?: boolean
+          notify_sms?: boolean
           notify_whatsapp?: boolean
+          otp_expiry_minutes?: number
+          otp_max_attempts?: number
           otp_provider?: string
+          otp_resend_seconds?: number
+          platform_email?: string | null
+          platform_name?: string
+          platform_status?: string
           reminder_days_before?: number
+          session_timeout_minutes?: number
+          smtp_enabled?: boolean
           smtp_from?: string | null
+          smtp_from_name?: string | null
           smtp_host?: string | null
+          smtp_port?: number | null
+          smtp_security?: string
+          smtp_username?: string | null
           updated_at?: string
           verification_days?: number
+          whatsapp_api_url?: string | null
+          whatsapp_business_account_id?: string | null
+          whatsapp_enabled?: boolean
+          whatsapp_phone_number_id?: string | null
+          whatsapp_provider?: string | null
           whatsapp_webhook_url?: string | null
         }
         Update: {
           contact_email?: string | null
           contact_phone?: string | null
+          currency?: string
           id?: number
+          maintenance_mode?: boolean
           manual_payment_enabled?: boolean
+          max_upload_mb?: number
           msg91_enabled?: boolean
           msg91_sender_id?: string | null
           msg91_template_id?: string | null
+          notification_matrix?: Json
           notify_email?: boolean
+          notify_sms?: boolean
           notify_whatsapp?: boolean
+          otp_expiry_minutes?: number
+          otp_max_attempts?: number
           otp_provider?: string
+          otp_resend_seconds?: number
+          platform_email?: string | null
+          platform_name?: string
+          platform_status?: string
           reminder_days_before?: number
+          session_timeout_minutes?: number
+          smtp_enabled?: boolean
           smtp_from?: string | null
+          smtp_from_name?: string | null
           smtp_host?: string | null
+          smtp_port?: number | null
+          smtp_security?: string
+          smtp_username?: string | null
           updated_at?: string
           verification_days?: number
+          whatsapp_api_url?: string | null
+          whatsapp_business_account_id?: string | null
+          whatsapp_enabled?: boolean
+          whatsapp_phone_number_id?: string | null
+          whatsapp_provider?: string | null
           whatsapp_webhook_url?: string | null
         }
         Relationships: []
@@ -667,6 +745,45 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      webhook_endpoints: {
+        Row: {
+          active: boolean
+          endpoint: string
+          events: string[]
+          id: string
+          last_error: string | null
+          last_error_at: string | null
+          last_event_at: string | null
+          last_success_at: string | null
+          provider: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          endpoint: string
+          events?: string[]
+          id: string
+          last_error?: string | null
+          last_error_at?: string | null
+          last_event_at?: string | null
+          last_success_at?: string | null
+          provider: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          endpoint?: string
+          events?: string[]
+          id?: string
+          last_error?: string | null
+          last_error_at?: string | null
+          last_event_at?: string | null
+          last_success_at?: string | null
+          provider?: string
+          updated_at?: string
         }
         Relationships: []
       }

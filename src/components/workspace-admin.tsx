@@ -47,7 +47,7 @@ export function AdminBody({ section, me }: { section: string; me: Me }) {
     case 'integrations': return <Integrations />;
     case 'tickets': return <Tickets />;
     case 'gateway': return <Gateway />;
-    case 'settings': return <PlatformSettings />;
+    case 'settings': return <PlatformSettings payments={<Gateway />} />;
     case 'audit': return <AuditLog />;
     default: return null;
   }
