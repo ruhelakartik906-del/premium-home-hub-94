@@ -661,8 +661,6 @@ export type Database = {
         }
         Returns: boolean
       }
-      is_account_active: { Args: { _uid: string }; Returns: boolean }
-      kyc_is_open: { Args: { _uid: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "buyer" | "seller"
