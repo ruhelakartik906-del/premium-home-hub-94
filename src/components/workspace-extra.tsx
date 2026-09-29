@@ -17,34 +17,34 @@ const CHANNELS = ['email', 'sms', 'whatsapp'] as const;
 function ConnState({ ready, enabled }: { ready: boolean; enabled: boolean }) {
   return <div className="flex flex-wrap gap-2"><span className={`status ${ready ? 'pending' : 'suspended'}`}>{ready ? 'Configured' : 'Not configured'}</span><span className="status suspended">Not connected</span><span className={`status ${enabled ? 'active' : 'suspended'}`}>{enabled ? 'Enabled' : 'Disabled'}</span></div>;
 }
-function SecretField({ label, name, masked, value, onChange }: { label: string; name: string; masked?: string | null; value: string; onChange: (n: string, v: string) => void }) {
+function SecretField({ label, name, masked, value, onChange }: { label: string; name: string; masked?: string | null | undefined; value: string; onChange: (n: string, v: string) => void }) {
   return <div className="field"><label>{label}</label><input type="password" autoComplete="new-password" className="field-input" value={value} onChange={(e) => onChange(name, e.target.value)} placeholder={masked ?? 'Not configured'} /><small className="muted">{masked ? `Saved ${masked}. Leave blank to keep it.` : 'Not configured. Stored privately on the server only.'}</small></div>;
 }
-function Toggle({ name, checked, title, note }: { name: string; checked?: boolean; title: string; note: string }) {
+function Toggle({ name, checked, title, note }: { name: string; checked?: boolean | undefined; title: string; note: string }) {
   return <label className="gateway-toggle"><input type="checkbox" name={name} defaultChecked={!!checked} /> <span><strong>{title}</strong><small>{note}</small></span></label>;
 }
 
 export function PlatformSettings({ payments }: { payments?: React.ReactNode }) {
   const qc = useQueryClient(); const [busy, setBusy] = useState(false); const [tab, setTab] = useState('general');
-  const [secrets, setSecrets] = useState<Record<string, string>>({});
-  const onSecret = (n: string, v: string) => setSecrets((x) => ({ ...x, [n]: v }));
+  const [secrets, setSecrets] = useState<{ [k in 'msg91_auth_key'|'key_secret'|'webhook_secret'|'smtp_password'|'whatsapp_access_token'|'whatsapp_verify_token'|'whatsapp_webhook_secret']?: string }>({});
+  const onSecret = (n: string, v: string) => setSecrets((x) => ({ ...x, [n as 'smtp_password']: v }));
   const secStatus = useServerFn(getIntegrationSecretStatus); const saveSecrets = useServerFn(saveIntegrationSecrets); const saveKey = useServerFn(saveSmsKey);
   const sec = useQuery({ queryKey: ['integration-secrets'], queryFn: () => secStatus() });
   const q = useQuery({ queryKey: ['platform-settings'], queryFn: async () => (await supabase.from('platform_settings').select('*').eq('id', 1).maybeSingle()).data });
   const hooks = useQuery({ queryKey: ['webhook-endpoints'], enabled: tab === 'webhooks', queryFn: async () => (await supabase.from('webhook_endpoints').select('*').order('id')).data ?? [] });
   const tabs: [string, string][] = [['general','General'],['payments','Payments'],['sms','SMS / OTP'],['email','Email / SMTP'],['whatsapp','WhatsApp'],['webhooks','Webhooks'],['notifications','Notifications'],['security','Security']];
   if (q.isLoading) return <Panel><p className="muted">Loading…</p></Panel>;
-  const s = q.data; const m = sec.data ?? {};
+  const s = q.data; const m = (sec.data ?? {}) as { [k in 'msg91_auth_key'|'key_secret'|'webhook_secret'|'smtp_password'|'whatsapp_access_token'|'whatsapp_verify_token'|'whatsapp_webhook_secret']?: string | null };
   const matrix = (s?.notification_matrix ?? {}) as Record<string, Record<string, boolean>>;
   const head = <Tabs value={tab} onChange={setTab} options={tabs} />;
   if (tab === 'payments') return <div>{head}{payments}</div>;
   if (tab === 'webhooks') return <div>{head}<Panel title="Webhooks">
     <p className="muted">Incoming events from providers. Signatures are verified on the server before anything is processed. No events are shown until a real provider sends one.</p>
-    <Table head={['Provider','Events','Endpoint','Status','Last event','Last success','Last error','Verification']}>{(hooks.data ?? []).map((h) => <tr key={h.id}>
-      <td><strong>{h.provider}</strong></td><td>{h.events.join(', ')}</td><td><code className="text-xs break-all">{h.endpoint}</code></td>
-      <td><button type="button" className={`status ${h.active ? 'active' : 'suspended'}`} onClick={async () => { const { error } = await supabase.from('webhook_endpoints').update({ active: !h.active, updated_at: new Date().toISOString() }).eq('id', h.id); if (error) toast.error('Could not update'); else qc.invalidateQueries({ queryKey: ['webhook-endpoints'] }); }}>{h.active ? 'Active' : 'Inactive'}</button></td>
-      <td>{h.last_event_at ? fmtDate(h.last_event_at) : 'None yet'}</td><td>{h.last_success_at ? fmtDate(h.last_success_at) : 'None yet'}</td><td>{h.last_error ?? '—'}</td>
-      <td><span className="status suspended">{(h.id === 'razorpay' ? m.webhook_secret : m.whatsapp_webhook_secret) ? 'Secret saved · not connected' : 'Secret not configured'}</span></td></tr>)}</Table>
+    <Table headers={['Provider','Events','Endpoint','Status','Last event','Last success','Last error','Verification']} rows={(hooks.data ?? []).map((h) => [
+      <strong key="p">{h.provider}</strong>, h.events.join(', '), <code key="e" className="text-xs break-all">{h.endpoint}</code>,
+      <button type="button" className={`status ${h.active ? 'active' : 'suspended'}`} onClick={async () => { const { error } = await supabase.from('webhook_endpoints').update({ active: !h.active, updated_at: new Date().toISOString() }).eq('id', h.id); if (error) toast.error('Could not update'); else qc.invalidateQueries({ queryKey: ['webhook-endpoints'] }); }}>{h.active ? 'Active' : 'Inactive'}</button>,
+      h.last_event_at ? fmtDate(h.last_event_at) : 'None yet', h.last_success_at ? fmtDate(h.last_success_at) : 'None yet', h.last_error ?? '—',
+      <span key="v" className="status suspended">{(h.id === 'razorpay' ? m.webhook_secret : m.whatsapp_webhook_secret) ? 'Secret saved · not connected' : 'Secret not configured'}</span>])} empty="No webhooks registered" />
   </Panel></div>;
 
   const n = (f: FormData, k: string, d: number) => { const v = Number(f.get(k)); return Number.isFinite(v) && v > 0 ? v : d; };
@@ -61,7 +61,7 @@ export function PlatformSettings({ payments }: { payments?: React.ReactNode }) {
     const { error } = await supabase.from('platform_settings').update({ ...patch, updated_at: new Date().toISOString() } as never).eq('id', 1);
     let secErr: string | null = null;
     if (!error) {
-      const pick = (k: string) => secrets[k]?.trim() || undefined;
+      const pick = (k: 'msg91_auth_key'|'key_secret'|'webhook_secret'|'smtp_password'|'whatsapp_access_token'|'whatsapp_verify_token'|'whatsapp_webhook_secret') => secrets[k]?.trim() || undefined;
       if (pick('msg91_auth_key')) { const r = await saveKey({ data: { authKey: pick('msg91_auth_key')! } }).catch(() => ({ ok: false as const, error: 'Could not save the SMS key.' })); if (!r.ok) secErr = r.error; }
       const payload = { smtp_password: pick('smtp_password'), whatsapp_access_token: pick('whatsapp_access_token'), whatsapp_verify_token: pick('whatsapp_verify_token'), whatsapp_webhook_secret: pick('whatsapp_webhook_secret') };
       if (!secErr && Object.values(payload).some(Boolean)) { const r = await saveSecrets({ data: payload }).catch((err) => ({ ok: false as const, error: err instanceof Error ? err.message : 'Could not save private keys.' })); if (!r.ok) secErr = r.error; }
@@ -129,7 +129,7 @@ export function PlatformSettings({ payments }: { payments?: React.ReactNode }) {
       <Toggle name="notify_email" checked={s?.notify_email} title="Email channel" note="Not connected — nothing is sent yet" />
       <Toggle name="notify_sms" checked={s?.notify_sms} title="SMS channel" note="Not connected — nothing is sent yet" />
       <Toggle name="notify_whatsapp" checked={s?.notify_whatsapp} title="WhatsApp channel" note="Not connected — nothing is sent yet" />
-      <Table head={['Event','Email','SMS','WhatsApp']}>{NOTIFY_TYPES.map(([k, l]) => <tr key={k}><td>{l}</td>{CHANNELS.map((c) => <td key={c}><input type="checkbox" aria-label={`${l} ${c}`} name={`${k}:${c}`} defaultChecked={!!matrix[k]?.[c]} className="h-5 w-5" /></td>)}</tr>)}</Table>
+      <Table headers={['Event','Email','SMS','WhatsApp']} rows={NOTIFY_TYPES.map(([k, l]) => [l, ...CHANNELS.map((c) => <input key={c} type="checkbox" aria-label={`${l} ${c}`} name={`${k}:${c}`} defaultChecked={!!matrix[k]?.[c]} className="h-5 w-5" />)])} />
     </>}
     {tab === 'security' && <>
       <h2>Security</h2>
