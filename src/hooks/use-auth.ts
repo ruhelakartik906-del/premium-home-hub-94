@@ -21,11 +21,16 @@ export function useMe() {
     queryFn: async () => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) return null;
-      const [{ data: roles }, { data: profile }] = await Promise.all([
+      const [{ data: roles }, { data: profile }, { data: staff }] = await Promise.all([
         supabase.from('user_roles').select('role').eq('user_id', u.user.id),
         supabase.from('profiles').select('*').eq('id', u.user.id).maybeSingle(),
+        supabase.from('staff_members').select('active,permissions').eq('user_id', u.user.id).maybeSingle(),
       ]);
-      return { user: u.user, roles: (roles ?? []).map((r) => r.role as string), profile: profile as Profile | null };
+      const r = (roles ?? []).map((x) => x.role as string);
+      const isMaster = r.includes('admin');
+      const staffPerms = !isMaster && staff?.active ? staff.permissions : null;
+      // Active staff use the admin workspace, limited to their permissions.
+      return { user: u.user, roles: staffPerms ? [...r, 'admin'] : r, profile: profile as Profile | null, isMaster, staffPerms };
     },
   });
 }
