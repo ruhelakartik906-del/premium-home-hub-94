@@ -1,3 +1,4 @@
+import { getGatewayStatus, saveGatewaySettings } from '@/lib/payments.functions';
 import { Link } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useServerFn } from '@tanstack/react-start';
@@ -222,30 +223,29 @@ function Tickets() {
 
 function Gateway() {
   const qc = useQueryClient(); const [busy, setBusy] = useState(false);
-  const q = useQuery({ queryKey: ['pay-settings'], queryFn: async () => { const [{ data: s }, { data: sec }] = await Promise.all([supabase.from('payment_settings').select('*').eq('id', 1).maybeSingle(), supabase.from('gateway_secrets').select('key_secret,webhook_secret').eq('id', 1).maybeSingle()]); return { s, hasSecret: !!sec?.key_secret, hasWebhook: !!sec?.webhook_secret }; } });
+  const getStatus = useServerFn(getGatewayStatus); const save = useServerFn(saveGatewaySettings);
+  const q = useQuery({ queryKey: ['pay-settings'], queryFn: () => getStatus() });
   if (!q.data) return <Panel><p className="muted">Loading…</p></Panel>;
-  const s = q.data.s;
+  const s = q.data;
+  const hookUrl = typeof window !== 'undefined' ? `${window.location.origin}/api/public/razorpay-webhook` : '';
   return <form className="panel" onSubmit={async (e) => {
     e.preventDefault(); const f = new FormData(e.currentTarget); setBusy(true);
     const enabled = f.get('enabled') === 'on';
-    const { error } = await supabase.from('payment_settings').update({ enabled, provider: String(f.get('provider')), mode: String(f.get('mode')), key_id: String(f.get('key_id') ?? '').trim() || null, activation_fee: Number(f.get('fee')) || 0, updated_at: new Date().toISOString() }).eq('id', 1);
-    const secret = String(f.get('key_secret') ?? '').trim(); const hook = String(f.get('webhook_secret') ?? '').trim();
-    const secPatch: { key_secret?: string; webhook_secret?: string; updated_at: string } = { updated_at: new Date().toISOString() }; if (secret) secPatch.key_secret = secret; if (hook) secPatch.webhook_secret = hook;
-    const { error: e2 } = await supabase.from('gateway_secrets').update(secPatch).eq('id', 1);
-    setBusy(false); if (error || e2) { toast.error('Could not save'); return; } toast.success(enabled ? 'Payment step is now ON for new registrations' : 'Payment step is OFF — registrations skip payment'); qc.invalidateQueries({ queryKey: ['pay-settings'] });
+    const r = await save({ data: { enabled, mode: String(f.get('mode')) as 'test' | 'live', keyId: String(f.get('key_id') ?? '').trim(), fee: Number(f.get('fee')) || 0, keySecret: String(f.get('key_secret') ?? '').trim() || undefined, webhookSecret: String(f.get('webhook_secret') ?? '').trim() || undefined } }).catch((err) => ({ ok: false as const, error: err instanceof Error ? err.message : 'Could not save' }));
+    setBusy(false); if (!r.ok) { toast.error(r.error); return; } toast.success(enabled ? 'Razorpay is ON for new registrations' : 'Payment step is OFF — registrations skip payment'); qc.invalidateQueries({ queryKey: ['pay-settings'] }); e.currentTarget?.reset?.();
   }}>
-    <h2>Payment gateway</h2>
-    <p className="muted">When switched off, new buyers and sellers skip the payment step and go straight to their dashboard. Switch it on once your gateway account is ready.</p>
-    <label className="gateway-toggle"><input type="checkbox" name="enabled" defaultChecked={s?.enabled} /> <span><strong>Collect activation fee at registration</strong><small>Currently {s?.enabled ? 'ON' : 'OFF (payment skipped)'}</small></span></label>
+    <h2>Razorpay settings</h2>
+    <p className="muted">Buyers and sellers pay the activation fee through Razorpay. Accounts activate only after the payment is verified on the server. When switched off, registrations skip payment.</p>
+    <div className="flex gap-2"><span className={`status ${s.mode === 'live' ? 'success' : 'pending'}`}>{s.mode === 'live' ? 'LIVE MODE' : 'TEST MODE'}</span><span className={`status ${s.enabled ? 'active' : 'suspended'}`}>{s.enabled ? 'Collecting payments' : 'Payments off'}</span></div>
+    <label className="gateway-toggle"><input type="checkbox" name="enabled" defaultChecked={s.enabled} /> <span><strong>Collect activation fee at registration</strong><small>Currently {s.enabled ? 'ON' : 'OFF (payment skipped)'}</small></span></label>
     <div className="form-grid">
-      <div className="field"><label>Provider</label><select name="provider" className="field-input" defaultValue={s?.provider ?? 'razorpay'}><option value="razorpay">Razorpay</option><option value="stripe">Stripe</option><option value="cashfree">Cashfree</option><option value="payu">PayU</option></select></div>
-      <div className="field"><label>Mode</label><select name="mode" className="field-input" defaultValue={s?.mode ?? 'test'}><option value="test">Test</option><option value="live">Live</option></select></div>
-      <div className="field"><label>Activation fee (₹)</label><input name="fee" type="number" min={0} className="field-input" defaultValue={Number(s?.activation_fee ?? 50000)} /></div>
-      <div className="field"><label>Key ID / Publishable key</label><input name="key_id" className="field-input" defaultValue={s?.key_id ?? ''} placeholder="rzp_test_…" /></div>
-      <div className="field"><label>Key secret {q.data.hasSecret && <small className="muted">(saved — leave blank to keep)</small>}</label><input name="key_secret" type="password" autoComplete="off" className="field-input" /></div>
-      <div className="field"><label>Webhook secret {q.data.hasWebhook && <small className="muted">(saved — leave blank to keep)</small>}</label><input name="webhook_secret" type="password" autoComplete="off" className="field-input" /></div>
+      <div className="field"><label>Environment</label><select name="mode" className="field-input" defaultValue={s.mode}><option value="test">Test</option><option value="live">Live</option></select></div>
+      <div className="field"><label>Activation fee (₹)</label><input name="fee" type="number" min={1} className="field-input" defaultValue={s.fee} /></div>
+      <div className="field"><label>Razorpay Key ID</label><input name="key_id" className="field-input" defaultValue={s.keyId ?? ''} placeholder="rzp_test_…" /></div>
+      <div className="field"><label>Key Secret {s.secretMasked && <small className="muted">saved {s.secretMasked} — leave blank to keep</small>}</label><input name="key_secret" type="password" autoComplete="off" className="field-input" /></div>
+      <div className="field full"><label>Webhook Secret {s.webhookMasked && <small className="muted">saved {s.webhookMasked} — leave blank to keep</small>}</label><input name="webhook_secret" type="password" autoComplete="off" className="field-input" /></div>
     </div>
-    <div className="preview-warning"><strong>Note:</strong> Keys are stored privately (admin-only). Until the live checkout for your chosen provider is connected, an enabled payment step records test transactions and no real money is charged.</div>
-    <div className="form-actions"><Button type="submit" disabled={busy}><Wallet /> Save gateway settings</Button></div>
+    <div className="preview-warning"><strong>Webhook URL:</strong> {hookUrl} — add it in Razorpay Dashboard → Webhooks with events payment.captured, payment.failed, order.paid and refund.processed, using the same webhook secret. Secrets are never shown again after saving.</div>
+    <div className="form-actions"><Button type="submit" disabled={busy}><Wallet /> Save Razorpay settings</Button></div>
   </form>;
 }

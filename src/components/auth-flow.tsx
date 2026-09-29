@@ -1,7 +1,7 @@
 import { Link, useNavigate } from '@tanstack/react-router';
 import { useServerFn } from '@tanstack/react-start';
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, ArrowRight, BriefcaseBusiness, CheckCircle2, CreditCard, Landmark, LockKeyhole, Smartphone, UserRound } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BriefcaseBusiness, CheckCircle2, LockKeyhole, UserRound } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Notice, PageShell } from '@/components/eliteoz';
