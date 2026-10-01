@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.properties_fx() FROM PUBLIC, anon, authenticated;

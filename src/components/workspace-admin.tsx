@@ -1,3 +1,6 @@
+import { MarketBadge, MarketTabs, useCountries } from '@/components/market';
+import { formatMoney, flagOf } from '@/lib/eliteoz-data';
+import { Globe } from 'lucide-react';
 import { adminDeactivateUser, getGatewayStatus, saveGatewaySettings } from '@/lib/payments.functions';
 import { Link } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -44,6 +47,7 @@ export function AdminBody({ section, me }: { section: string; me: Me }) {
     case 'kyc': return <Kyc />;
     case 'properties': return <PropertiesSection />;
     case 'categories': return <Categories />;
+    case 'countries': return <CountriesSection />;
     case 'leads': return <Leads />;
     case 'payments': return <Transactions />;
     case 'notifications': return <SendNotification me={me} />;
@@ -143,7 +147,7 @@ const PROP_ACTIONS: Record<string, [string, string, boolean][]> = {
 const PROP_MSG: Record<string, string> = { under_review: 'is now under review', approved: 'has been approved and will be published shortly', published: 'is now live on Eliteoz', changes_required: 'needs changes before it can go live', rejected: 'was not approved', unpublished: 'has been unpublished', suspended: 'has been suspended', sold: 'has been marked as sold' };
 
 function PropertiesSection() {
-  const qc = useQueryClient(); const props = useAllProps(); const users = useUsers(); const [tab, setTab] = useState('review'); const [cat, setCat] = useState(''); const [q, setQ] = useState('');
+  const qc = useQueryClient(); const props = useAllProps(); const users = useUsers(); const [tab, setTab] = useState('review'); const [cat, setCat] = useState(''); const [q, setQ] = useState(''); const [mk, setMk] = useState(''); const [cc, setCc] = useState(''); const [sel, setSel] = useState(''); const [enq, setEnq] = useState(''); const [ver, setVer] = useState(''); const leads = useLeads();
   const all = props.data ?? []; const n = (...st: string[]) => all.filter((p) => st.includes(p.status)).length;
   const seller = new Map((users.data ?? []).map((u) => [u.id, u]));
   const cats = [...new Set(all.map((p) => p.categories?.name).filter(Boolean))] as string[];
@@ -158,16 +162,44 @@ function PropertiesSection() {
   };
   const feature = async (p: { id: string; featured: boolean }) => { const { error } = await supabase.from('properties').update({ featured: !p.featured }).eq('id', p.id); if (error) toast.error('Update failed'); else qc.invalidateQueries({ queryKey: ['admin-props'] }); };
   const inTab = (st: string, featured: boolean) => tab === 'all' || (tab === 'review' ? ['pending', 'under_review'].includes(st) : tab === 'featured' ? featured : st === tab);
-  const list = all.filter((p) => inTab(p.status, p.featured) && (!cat || p.categories?.name === cat) && `${p.title} ${p.ref} ${p.location} ${seller.get(p.seller_id ?? '')?.full_name ?? ''}`.toLowerCase().includes(q.toLowerCase()));
+  const enquired = new Set((leads.data ?? []).map((l) => l.property_id));
+  const byCountry = [...all.reduce((m, p) => m.set(p.country, (m.get(p.country) ?? 0) + 1), new Map<string, number>()).entries()].sort((a, b) => b[1] - a[1]);
+  const countryOpts = [...new Map(all.map((p) => [p.country_code, p.country])).entries()].sort((a, b) => a[1].localeCompare(b[1]));
+  const sellerOpts = [...new Set(all.map((p) => p.seller_id).filter(Boolean))] as string[];
+  const remove = async (p: { id: string; title: string }) => { if (!confirm(`Permanently delete "${p.title}"?`)) return; const { error } = await supabase.from('properties').delete().eq('id', p.id); if (error) toast.error('Delete failed'); else { toast.success('Deleted'); qc.invalidateQueries({ queryKey: ['admin-props'] }); } };
+  const list = all.filter((p) => inTab(p.status, p.featured) && (!cat || p.categories?.name === cat) && (!mk || p.market === mk) && (!cc || p.country_code === cc) && (!sel || p.seller_id === sel) && (!enq || (enq === 'yes') === enquired.has(p.id)) && (!ver || seller.get(p.seller_id ?? '')?.verification_status === ver) && `${p.title} ${p.ref} ${p.location} ${seller.get(p.seller_id ?? '')?.full_name ?? ''}`.toLowerCase().includes(q.toLowerCase()));
   return <>
     <div className="stats-grid"><Stat icon={Building2} label="Total properties" value={all.length} hint={`${n('draft')} drafts`} /><Stat icon={FileCheck} label="Pending review" value={n('pending', 'under_review')} hint={`${n('approved')} approved, not yet live`} /><Stat icon={Eye} label="Published" value={n('published')} hint={`${n('sold')} sold / closed`} /><Stat icon={AlertTriangle} label="Rejected / suspended" value={n('rejected') + n('suspended')} hint={`${n('changes_required')} awaiting seller changes`} /></div>
+    <div className="stats-grid"><Stat icon={Building2} label="India properties" value={all.filter((p) => p.market === 'india').length} /><Stat icon={Globe} label="International properties" value={all.filter((p) => p.market === 'international').length} hint={`${countryOpts.length} countries`} /><Stat icon={BadgeCheck} label="Approved / live" value={n('approved', 'published')} /><Stat icon={Globe} label="Top markets" value={byCountry[0]?.[0] ?? '—'} hint={byCountry.slice(0, 4).map(([c, k]) => `${c} ${k}`).join(' · ')} /></div>
     <Panel><Tabs value={tab} onChange={setTab} options={[['review', `Review (${n('pending', 'under_review')})`], ['approved', 'Approved'], ['published', 'Published'], ['changes_required', 'Changes required'], ['rejected', 'Rejected'], ['suspended', 'Suspended'], ['unpublished', 'Unpublished'], ['sold', 'Sold'], ['draft', 'Drafts'], ['featured', 'Featured'], ['all', 'All']]} />
-    <div className="toolbar"><input className="field-input" placeholder="Search title, ref, location or seller" value={q} onChange={(e) => setQ(e.target.value)} /><select className="field-input" value={cat} onChange={(e) => setCat(e.target.value)}><option value="">All categories</option>{cats.map((c) => <option key={c}>{c}</option>)}</select></div>
+    <div className="toolbar"><input className="field-input" placeholder="Search title, ref, location or seller" value={q} onChange={(e) => setQ(e.target.value)} /><select className="field-input" value={cat} onChange={(e) => setCat(e.target.value)}><option value="">All categories</option>{cats.map((c) => <option key={c}>{c}</option>)}</select>
+      <MarketTabs value={mk} onChange={(v) => { setMk(v); setCc(''); }} />
+      <select className="field-input" value={cc} onChange={(e) => setCc(e.target.value)} aria-label="Country"><option value="">All countries</option>{countryOpts.map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select>
+      <select className="field-input" value={sel} onChange={(e) => setSel(e.target.value)} aria-label="Seller"><option value="">All sellers</option>{sellerOpts.map((id) => <option key={id} value={id}>{seller.get(id)?.full_name ?? id.slice(0, 8)}</option>)}</select>
+      <select className="field-input" value={enq} onChange={(e) => setEnq(e.target.value)} aria-label="Buyer enquiry"><option value="">Any enquiry</option><option value="yes">Has buyer enquiry</option><option value="no">No enquiry</option></select>
+      <select className="field-input" value={ver} onChange={(e) => setVer(e.target.value)} aria-label="Seller verification"><option value="">Any seller verification</option>{['not_submitted', 'submitted', 'approved', 'rejected', 'changes_required'].map((v) => <option key={v} value={v}>{v.replace('_', ' ')}</option>)}</select></div>
     <Table headers={['Property', 'Seller', 'Price', 'Status', 'Added', '']} empty={props.isLoading ? 'Loading…' : props.isError ? 'Could not load properties.' : 'No properties here.'} rows={list.map((p) => { const s = seller.get(p.seller_id ?? ''); return [
-      <div className="cell-prop"><img src={coverOf(p)} alt="" /><div><strong>{p.title}</strong><small>{p.ref} · {p.location} · {p.categories?.name ?? 'No category'}</small>{p.admin_note && <small className="muted">Note: {p.admin_note}</small>}</div></div>,
+      <div className="cell-prop"><img src={coverOf(p)} alt="" /><div><strong>{p.title}</strong><small>{p.ref} · {p.location} · {p.categories?.name ?? 'No category'}</small><MarketBadge market={p.market} country={p.country} code={p.country_code} />{p.admin_note && <small className="muted">Note: {p.admin_note}</small>}</div></div>,
       s ? <div><strong>{s.full_name}</strong><small className="block muted">Verification: {s.verification_status.replace('_', ' ')} · {s.status}</small></div> : '—',
-      formatINR(Number(p.price)), <Status value={p.status} />, fmtDate(p.created_at),
-      <div className="row-actions"><DocsButton docs={p.documents ?? []} gallery={p.gallery ?? []} />{(PROP_ACTIONS[p.status] ?? []).map(([l, st, r]) => <Button key={st} size="sm" variant={st === 'published' || st === 'approved' ? 'default' : 'outline'} onClick={() => move(p, st, r)}>{l}</Button>)}<Button size="sm" variant="ghost" aria-label="Toggle featured" onClick={() => feature(p)}><Star size={15} fill={p.featured ? 'currentColor' : 'none'} /></Button>{p.status === 'published' && <Button size="sm" variant="ghost" asChild><Link to="/properties/$id" params={{ id: p.ref }}>View</Link></Button>}</div>]; })} /></Panel>
+      <div>{formatMoney(Number(p.price), p.currency)}{p.currency !== 'INR' && p.price_in_inr ? <small className="block muted">≈ {formatINR(Number(p.price_in_inr))}</small> : null}</div>, <Status value={p.status} />, fmtDate(p.created_at),
+      <div className="row-actions"><DocsButton docs={p.documents ?? []} gallery={p.gallery ?? []} />{(PROP_ACTIONS[p.status] ?? []).map(([l, st, r]) => <Button key={st} size="sm" variant={st === 'published' || st === 'approved' ? 'default' : 'outline'} onClick={() => move(p, st, r)}>{l}</Button>)}<Button size="sm" variant="ghost" aria-label="Toggle featured" onClick={() => feature(p)}><Star size={15} fill={p.featured ? 'currentColor' : 'none'} /></Button>{p.status === 'published' && <Button size="sm" variant="ghost" asChild><Link to="/properties/$id" params={{ id: p.ref }}>View</Link></Button>}<Button size="sm" variant="ghost" aria-label="Delete" onClick={() => remove(p)}><Trash2 size={15} /></Button></div>]; })} /></Panel>
+  </>;
+}
+
+function CountriesSection() {
+  const qc = useQueryClient(); const q = useCountries(true); const [f, setF] = useState('');
+  const refresh = () => qc.invalidateQueries({ queryKey: ['countries'] });
+  const save = async (code: string, patch: { active?: boolean; inr_rate?: number | null; currency?: string }) => { const { error } = await supabase.from('countries').update(patch).eq('code', code); if (error) toast.error('Update failed'); else refresh(); };
+  const add = async (e: React.FormEvent<HTMLFormElement>) => { e.preventDefault(); const d = new FormData(e.currentTarget); const code = String(d.get('code')).trim().toUpperCase(); const name = String(d.get('name')).trim(); const currency = String(d.get('currency')).trim().toUpperCase(); const rate = Number(d.get('rate')) || null;
+    if (!/^[A-Z]{2}$/.test(code) || !/^[A-Z]{3}$/.test(currency) || name.length < 2) { toast.error('Use a 2-letter ISO code, a name and a 3-letter currency.'); return; }
+    const { error } = await supabase.from('countries').insert({ code, name: name.slice(0, 80), currency, inr_rate: rate }); if (error) toast.error(error.code === '23505' ? 'That country already exists.' : 'Could not add'); else { toast.success('Country added'); e.currentTarget.reset(); refresh(); } };
+  const list = (q.data ?? []).filter((c) => `${c.name} ${c.code} ${c.currency}`.toLowerCase().includes(f.toLowerCase()));
+  return <>
+    <Panel title="Add a country"><form className="toolbar wrap" onSubmit={add}><input name="code" className="field-input" placeholder="ISO code (e.g. FR)" maxLength={2} required /><input name="name" className="field-input" placeholder="Country name" required /><input name="currency" className="field-input" placeholder="Currency (e.g. EUR)" maxLength={3} required /><input name="rate" type="number" step="any" min={0} className="field-input" placeholder="1 unit = ₹ ?" /><Button type="submit">Add</Button></form></Panel>
+    <Panel title="Supported countries" action={<input className="field-input" placeholder="Search" value={f} onChange={(e) => setF(e.target.value)} />}>
+      <p className="muted">INR rates are set manually here and used for approximate INR prices shown to buyers. Inactive countries are hidden from sellers.</p>
+      <Table headers={['Country', 'ISO', 'Currency', '1 unit = ₹', 'Active']} empty="No countries." rows={list.map((c) => [<strong>{flagOf(c.code)} {c.name}</strong>, c.code, c.currency, <input className="field-input" type="number" step="any" min={0} defaultValue={c.inr_rate ?? ''} disabled={c.code === 'IN'} onBlur={(e) => { const v = e.target.value === '' ? null : Number(e.target.value); if (v !== c.inr_rate) void save(c.code, { inr_rate: v }); }} style={{ maxWidth: 120 }} />, <Button size="sm" variant={c.active ? 'default' : 'outline'} disabled={c.code === 'IN'} onClick={() => save(c.code, { active: !c.active })}>{c.active ? 'Active' : 'Inactive'}</Button>])} />
+    </Panel>
   </>;
 }
 

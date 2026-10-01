@@ -18,7 +18,8 @@ function publicClient() {
     },
   });
 }
-const cols = 'id,ref,title,location,price,area_sqft,beds,baths,property_type,description,image,cover_url,gallery,amenities,featured,status,categories(name)';
+import { PROPERTY_COLS } from '@/lib/eliteoz-data';
+const cols = PROPERTY_COLS;
 
 export const listPublicProperties = createServerFn({ method: 'GET' }).handler(async () => {
   const sb = publicClient();

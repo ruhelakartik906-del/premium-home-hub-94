@@ -7,13 +7,14 @@ import { Button } from '@/components/ui/button';
 import { PropertyCard } from '@/components/eliteoz';
 import { supabase } from '@/integrations/supabase/client';
 import { daysLeft, type useMe } from '@/hooks/use-auth';
-import { coverOf, formatINR, toListing, type Listing, type PropertyRow } from '@/lib/eliteoz-data';
+import { MarketBadge, MarketTabs, useCountries } from '@/components/market';
+import { PROPERTY_COLS, formatMoney, coverOf, formatINR, toListing, type Listing, type PropertyRow } from '@/lib/eliteoz-data';
 import { DobInput } from '@/components/auth-flow';
 import { readCompare, writeCompare } from '@/lib/queries';
 import { Panel, SectionLink, Stat, Status, Table, Tabs, fmtDate } from '@/components/workspace';
 
 export type Me = NonNullable<ReturnType<typeof useMe>['data']>;
-const cols = 'id,ref,title,location,price,area_sqft,beds,baths,property_type,description,image,cover_url,gallery,amenities,featured,status,categories(name)';
+const cols = PROPERTY_COLS;
 
 function useApproved() { return useQuery({ queryKey: ['approved-properties'], queryFn: async () => { const { data } = await supabase.from('properties').select(cols).eq('status', 'published').order('featured', { ascending: false }); return ((data ?? []) as unknown as PropertyRow[]).map(toListing); } }); }
 function useMyInterests(uid: string) { return useQuery({ queryKey: ['my-interests', uid], queryFn: async () => { const { data } = await supabase.from('interests').select('id,status,message,preferred_time,admin_note,created_at,properties(ref,title,location,price,image,cover_url)').eq('buyer_id', uid).order('created_at', { ascending: false }); return data ?? []; } }); }
@@ -60,11 +61,25 @@ function BuyerOverview({ me }: { me: Me }) {
 
 function Explore() {
   const props = useApproved(); const [q, setQ] = useState(''); const [cat, setCat] = useState('');
+  const [mk, setMk] = useState(''); const [cc, setCc] = useState(''); const [reg, setReg] = useState(''); const [city, setCity] = useState(''); const [type, setType] = useState(''); const [cur, setCur] = useState(''); const [min, setMin] = useState(''); const [max, setMax] = useState('');
   const [cmp, setCmp] = useState<string[]>([]); useEffect(() => setCmp(readCompare()), []);
-  const cats = [...new Set((props.data ?? []).map((p) => p.category))];
-  const list = (props.data ?? []).filter((p) => (!cat || p.category === cat) && `${p.name} ${p.location}`.toLowerCase().includes(q.toLowerCase()));
+  const all = props.data ?? [];
+  const uniq = (f: (p: Listing) => string, src = all) => [...new Set(src.map(f).filter(Boolean))].sort();
+  const inMk = all.filter((p) => !mk || p.market === mk);
+  const countries = [...new Map(inMk.map((p) => [p.countryCode, p.country])).entries()].sort((a, b) => a[1].localeCompare(b[1]));
+  const inC = inMk.filter((p) => !cc || p.countryCode === cc);
+  const list = inC.filter((p) => (!cat || p.category === cat) && (!reg || p.region === reg) && (!city || p.city === city) && (!type || p.type === type) && (!cur || p.currency === cur)
+    && (!min || p.priceValue >= Number(min) * 1e7) && (!max || p.priceValue <= Number(max) * 1e7)
+    && `${p.name} ${p.location} ${p.country} ${p.city}`.toLowerCase().includes(q.toLowerCase()));
   const toggle = (id: string) => { const next = cmp.includes(id) ? cmp.filter((x) => x !== id) : [...cmp, id].slice(-4); writeCompare(next); setCmp(next); };
-  return <><div className="toolbar"><input className="field-input" placeholder="Search by name or location" value={q} onChange={(e) => setQ(e.target.value)} /><select className="field-input" value={cat} onChange={(e) => setCat(e.target.value)}><option value="">All categories</option>{cats.map((c) => <option key={c}>{c}</option>)}</select>{cmp.length > 0 && <Button asChild variant="outline"><SectionLink role="buyer" slug="compare">Compare ({cmp.length})</SectionLink></Button>}</div>
+  const sel = (v: string, set: (s: string) => void, label: string, opts: [string, string][]) => <select className="field-input" value={v} onChange={(e) => set(e.target.value)} aria-label={label}><option value="">{label}</option>{opts.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>;
+  const pair = (a: string[]) => a.map((x) => [x, x] as [string, string]);
+  return <><div className="toolbar wrap"><MarketTabs value={mk} onChange={(v) => { setMk(v); setCc(''); setReg(''); setCity(''); }} /><input className="field-input" placeholder="Search name, city or country" value={q} onChange={(e) => setQ(e.target.value)} />
+    {sel(cc, (v) => { setCc(v); setReg(''); setCity(''); }, 'All countries', countries)}{sel(reg, setReg, 'State / Province', pair(uniq((p) => p.region, inC)))}{sel(city, setCity, 'City', pair(uniq((p) => p.city, inC)))}
+    {sel(type, setType, 'Property type', pair(uniq((p) => p.type)))}{sel(cat, setCat, 'All categories', pair(uniq((p) => p.category)))}{sel(cur, setCur, 'Currency', pair(uniq((p) => p.currency)))}
+    <input className="field-input" type="number" min={0} placeholder="Min ₹ Cr" value={min} onChange={(e) => setMin(e.target.value)} /><input className="field-input" type="number" min={0} placeholder="Max ₹ Cr" value={max} onChange={(e) => setMax(e.target.value)} />
+    {cmp.length > 0 && <Button asChild variant="outline"><SectionLink role="buyer" slug="compare">Compare ({cmp.length})</SectionLink></Button>}</div>
+    <p className="muted">{list.length} of {all.length} properties · price range compares the INR value (converted for international listings, approximate).</p>
     <div className="property-grid compact">{list.map((p) => <PropertyCard key={p.id} property={p} compared={cmp.includes(p.id)} onCompare={toggle} />)}</div>{!list.length && !props.isLoading && <div className="empty-state"><p>No properties match your search.</p></div>}</>;
 }
 
@@ -76,9 +91,9 @@ function Compare() {
   const minPrice = Math.min(...chosen.map((c) => c.priceValue)); const maxArea = Math.max(...chosen.map((c) => c.areaValue));
   const rows: [string, (l: Listing) => React.ReactNode][] = [
     ['Price', (l) => <span className={l.priceValue === minPrice && chosen.length > 1 ? 'best' : ''}>{l.price}</span>],
-    ['Price / sq.ft', (l) => (l.areaValue ? `₹ ${Math.round(l.priceValue / l.areaValue).toLocaleString('en-IN')}` : '—')],
+    ['Approx. INR', (l) => (l.priceInr ? formatINR(l.priceInr) : '—')], ['Price / sq.ft (INR)', (l) => (l.areaValue && l.priceInr ? `₹ ${Math.round(l.priceInr / l.areaValue).toLocaleString('en-IN')}` : '—')],
     ['Area', (l) => <span className={l.areaValue === maxArea && chosen.length > 1 ? 'best' : ''}>{l.area}</span>],
-    ['Category', (l) => l.category], ['Type', (l) => l.type], ['Location', (l) => l.location], ['Bedrooms', (l) => l.beds], ['Bathrooms', (l) => l.baths],
+    ['Market', (l) => <MarketBadge market={l.market} country={l.country} code={l.countryCode} />], ['Category', (l) => l.category], ['Type', (l) => l.type], ['Location', (l) => l.location], ['Bedrooms', (l) => l.beds], ['Bathrooms', (l) => l.baths],
     ['Amenities', (l) => l.amenities.length ? <ul className="amen-list">{l.amenities.map((a) => <li key={a}>{a}</li>)}</ul> : '—'],
   ];
   return <>
@@ -101,17 +116,18 @@ function SellerOverview({ me }: { me: Me }) {
   const list = props.data ?? []; const c = (s: string) => list.filter((p) => p.status === s).length;
   return <>
     <div className="stats-grid"><Stat icon={Building2} label="Total properties" value={list.length} /><Stat icon={BadgeCheck} label="Live" value={c('published')} hint={`${c('sold')} sold · ${c('draft')} drafts`} /><Stat icon={Eye} label="In review" value={c('pending') + c('under_review') + c('approved')} hint={`${c('changes_required') + c('rejected')} need your attention`} /><Stat icon={Heart} label="Buyer interests" value={ints.data?.length ?? 0} /></div>
-    <div className="dash-grid"><Panel title="Your listings" action={<SectionLink role="seller" slug="properties" className="text-link">Manage</SectionLink>}>{list.length ? <div className="listing-rows">{list.slice(0, 5).map((p) => <div className="listing-row" key={p.id}><img src={coverOf(p)} alt="" /><div className="grow"><strong>{p.title}</strong><small>{p.location} · {formatINR(Number(p.price))}</small></div><Status value={p.status} /></div>)}</div> : <div className="empty-state"><p>No properties yet.</p><Button asChild><SectionLink role="seller" slug="add-property">Add your first property</SectionLink></Button></div>}</Panel>
+    <div className="dash-grid"><Panel title="Your listings" action={<SectionLink role="seller" slug="properties" className="text-link">Manage</SectionLink>}>{list.length ? <div className="listing-rows">{list.slice(0, 5).map((p) => <div className="listing-row" key={p.id}><img src={coverOf(p)} alt="" /><div className="grow"><strong>{p.title}</strong><small>{p.location} · {formatMoney(Number(p.price), p.currency ?? 'INR')}</small><MarketBadge market={p.market} country={p.country} code={p.country_code} /></div><Status value={p.status} /></div>)}</div> : <div className="empty-state"><p>No properties yet.</p><Button asChild><SectionLink role="seller" slug="add-property">Add your first property</SectionLink></Button></div>}</Panel>
       <div className="dash-side"><VerificationCard me={me} role="seller" /><Panel title="Latest interest">{(ints.data ?? []).slice(0, 4).map((i) => <div className="mini-row" key={i.id}><div><strong>{i.properties?.title}</strong><small>{fmtDate(i.created_at)}</small></div><Status value={i.status} /></div>)}{!ints.data?.length && <p className="muted">Buyer interest in your properties will appear here.</p>}</Panel></div></div>
   </>;
 }
 
 function SellerProperties({ me }: { me: Me }) {
-  const qc = useQueryClient(); const props = useSellerProps(me.user.id); const [tab, setTab] = useState('all');
-  const list = (props.data ?? []).filter((p) => tab === 'all' || p.status === tab);
+  const qc = useQueryClient(); const props = useSellerProps(me.user.id); const [tab, setTab] = useState('all'); const [mk, setMk] = useState(''); const [cc, setCc] = useState('');
+  const countries = [...new Map((props.data ?? []).map((p) => [p.country_code ?? 'IN', p.country ?? 'India'])).entries()];
+  const list = (props.data ?? []).filter((p) => (tab === 'all' || p.status === tab) && (!mk || p.market === mk) && (!cc || p.country_code === cc));
   const act = async (id: string, patch: { status?: string } | 'delete') => { const { error } = patch === 'delete' ? await supabase.from('properties').delete().eq('id', id) : await supabase.from('properties').update(patch).eq('id', id); if (error) toast.error(error.message.includes('verification') ? 'Complete your verification before submitting.' : 'Action failed'); else { toast.success(patch === 'delete' ? 'Property deleted' : 'Submitted for review'); qc.invalidateQueries({ queryKey: ['seller-properties'] }); } };
-  return <Panel><Tabs value={tab} onChange={setTab} options={[['all', `All (${props.data?.length ?? 0})`], ['draft', 'Drafts'], ['pending', 'Submitted'], ['under_review', 'Under review'], ['changes_required', 'Changes required'], ['published', 'Live'], ['rejected', 'Rejected'], ['sold', 'Sold']]} />
-    <Table headers={['Property', 'Category', 'Price', 'Status', 'Added', '']} empty="No properties in this view." rows={list.map((p) => [<div className="cell-prop"><img src={coverOf(p)} alt="" /><div><strong>{p.title}</strong><small>{p.ref} · {p.location}</small>{['rejected', 'changes_required', 'unpublished', 'suspended'].includes(p.status) && p.admin_note && <small className="danger-text">Reason: {p.admin_note}</small>}</div></div>, p.categories?.name ?? '—', formatINR(Number(p.price)), <Status value={p.status} />, fmtDate(p.created_at), <div className="row-actions">{p.status === 'published' && <Button size="sm" variant="ghost" asChild><Link to="/properties/$id" params={{ id: p.ref }}>View</Link></Button>}{['draft', 'rejected', 'changes_required'].includes(p.status) && <Button size="sm" variant="outline" onClick={() => act(p.id, { status: 'pending' })}>{p.status === 'draft' ? 'Submit' : 'Resubmit'}</Button>}{p.status === 'approved' && <Button size="sm" onClick={() => act(p.id, { status: 'published' })}>Publish</Button>}{p.status === 'published' && <Button size="sm" variant="outline" onClick={() => confirm('Take this property offline?') && act(p.id, { status: 'unpublished' })}>Unpublish</Button>}<Button size="sm" variant="ghost" aria-label="Delete" onClick={() => confirm('Delete this property?') && act(p.id, 'delete')}><Trash2 size={15} /></Button></div>])} />
+  return <Panel><div className="toolbar wrap"><MarketTabs value={mk} onChange={(v) => { setMk(v); setCc(''); }} /><select className="field-input" value={cc} onChange={(e) => setCc(e.target.value)} aria-label="Country"><option value="">All countries</option>{countries.map(([k, n]) => <option key={k} value={k}>{n}</option>)}</select></div><Tabs value={tab} onChange={setTab} options={[['all', `All (${props.data?.length ?? 0})`], ['draft', 'Drafts'], ['pending', 'Submitted'], ['under_review', 'Under review'], ['changes_required', 'Changes required'], ['published', 'Live'], ['rejected', 'Rejected'], ['sold', 'Sold']]} />
+    <Table headers={['Property', 'Category', 'Price', 'Status', 'Added', '']} empty="No properties in this view." rows={list.map((p) => [<div className="cell-prop"><img src={coverOf(p)} alt="" /><div><strong>{p.title}</strong><small>{p.ref} · {p.location}</small><MarketBadge market={p.market} country={p.country} code={p.country_code} />{['rejected', 'changes_required', 'unpublished', 'suspended'].includes(p.status) && p.admin_note && <small className="danger-text">Reason: {p.admin_note}</small>}</div></div>, p.categories?.name ?? '—', formatMoney(Number(p.price), p.currency ?? 'INR'), <Status value={p.status} />, fmtDate(p.created_at), <div className="row-actions">{p.status === 'published' && <Button size="sm" variant="ghost" asChild><Link to="/properties/$id" params={{ id: p.ref }}>View</Link></Button>}{['draft', 'rejected', 'changes_required'].includes(p.status) && <Button size="sm" variant="outline" onClick={() => act(p.id, { status: 'pending' })}>{p.status === 'draft' ? 'Submit' : 'Resubmit'}</Button>}{p.status === 'approved' && <Button size="sm" onClick={() => act(p.id, { status: 'published' })}>Publish</Button>}{p.status === 'published' && <Button size="sm" variant="outline" onClick={() => confirm('Take this property offline?') && act(p.id, { status: 'unpublished' })}>Unpublish</Button>}<Button size="sm" variant="ghost" aria-label="Delete" onClick={() => confirm('Delete this property?') && act(p.id, 'delete')}><Trash2 size={15} /></Button></div>])} />
   </Panel>;
 }
 
@@ -142,7 +158,10 @@ function ListingForm({ me }: { me: Me }) {
   const cats = useQuery({ queryKey: ['categories-active'], queryFn: async () => { const { data } = await supabase.from('categories').select('id,name').eq('active', true).order('name'); return data ?? []; } });
   const [cover, setCover] = useState<File[]>([]); const [gallery, setGallery] = useState<File[]>([]); const [docs, setDocs] = useState<File[]>([]);
   const [busy, setBusy] = useState(false); const [done, setDone] = useState('');
+  const countries = useCountries(); const [market, setMarket] = useState<'india' | 'international'>('india'); const [cc, setCc] = useState(''); const [cur, setCur] = useState('');
+  const intlCountries = (countries.data ?? []).filter((c) => c.code !== 'IN'); const curList = [...new Set((countries.data ?? []).map((c) => c.currency))].sort();
   const save = async (form: HTMLFormElement, status: 'draft' | 'pending') => {
+    if (market === 'international' && !cc) { toast.error('Please choose the country for this international listing.'); return; }
     if (status === 'pending') {
       if (!form.reportValidity()) return;
       if (!cover.length) { toast.error('Please add a cover image.'); return; }
@@ -154,7 +173,7 @@ function ListingForm({ me }: { me: Me }) {
       const galleryUrls = await uploadFiles('property-media', me.user.id, gallery);
       const docPaths = await uploadFiles('property-docs', me.user.id, docs);
       const num = (k: string) => (f.get(k) ? Number(f.get(k)) : null);
-      const { error } = await supabase.from('properties').insert({ seller_id: me.user.id, status, image: 'villa', cover_url: coverUrl ?? null, gallery: galleryUrls, documents: docPaths, title: String(f.get('title') || 'Untitled property').slice(0, 160), location: String(f.get('location') || '—').slice(0, 160), category_id: String(f.get('category') || '') || null, property_type: String(f.get('type') || 'Villa'), price: num('price') ?? 0, area_sqft: num('area'), beds: num('beds'), baths: num('baths'), description: String(f.get('description') ?? '').slice(0, 4000), amenities: String(f.get('amenities') ?? '').split(',').map((s) => s.trim()).filter(Boolean).slice(0, 20) });
+      const { error } = await supabase.from('properties').insert({ seller_id: me.user.id, status, image: 'villa', cover_url: coverUrl ?? null, gallery: galleryUrls, documents: docPaths, title: String(f.get('title') || 'Untitled property').slice(0, 160), market, country_code: market === 'india' ? 'IN' : cc || 'AE', currency: market === 'india' ? 'INR' : cur || 'USD', region: String(f.get('region') ?? '').slice(0, 120) || null, city: String(f.get('city') ?? '').slice(0, 120) || null, locality: String(f.get('locality') ?? '').slice(0, 200) || null, postal_code: String(f.get('postal') ?? '').slice(0, 20) || null, location: [f.get('locality'), f.get('city'), f.get('region'), market === 'international' ? intlCountries.find((c) => c.code === cc)?.name : null].filter(Boolean).join(', ').slice(0, 160) || '—', category_id: String(f.get('category') || '') || null, property_type: String(f.get('type') || 'Villa'), price: num('price') ?? 0, area_sqft: num('area'), beds: num('beds'), baths: num('baths'), description: String(f.get('description') ?? '').slice(0, 4000), amenities: String(f.get('amenities') ?? '').split(',').map((s) => s.trim()).filter(Boolean).slice(0, 20) });
       if (error) throw error;
     } catch { setBusy(false); toast.error('Could not save the property. Please try again.'); return; }
     setBusy(false);
@@ -163,25 +182,34 @@ function ListingForm({ me }: { me: Me }) {
   };
   if (done) return <Panel><div className="empty-state"><BadgeCheck /><h3>{done === 'draft' ? 'Draft saved.' : 'Submitted for review.'}</h3><p>{done === 'draft' ? 'You can submit it anytime from My Properties.' : 'The Eliteoz team will check your documents. The property goes live only after approval — you will get a notification.'}</p><div className="form-actions"><Button variant="outline" onClick={() => setDone('')}>Add another</Button><Button asChild><SectionLink role="seller" slug="properties">My properties</SectionLink></Button></div></div></Panel>;
   return <form className="panel listing-form" onSubmit={(e) => { e.preventDefault(); save(e.currentTarget, 'pending'); }}>
-    <div className="form-section"><span className="eyebrow">STEP 1</span><h2>Property details</h2></div>
+    <div className="form-section"><span className="eyebrow">STEP 1</span><h2>Property market</h2><p className="muted">Where is this asset located?</p></div>
+    <div className="market-choice"><button type="button" className={market === 'india' ? 'active' : ''} onClick={() => setMarket('india')}><strong>INDIA</strong><small>Priced in INR</small></button><button type="button" className={market === 'international' ? 'active' : ''} onClick={() => setMarket('international')}><strong>INTERNATIONAL</strong><small>Any supported country, local currency</small></button></div>
+    <div className="form-grid">
+      {market === 'international' && <><div className="field"><label>Country *</label><input className="field-input" list="eo-countries" placeholder="Type to search" required onChange={(e) => { const c = intlCountries.find((x) => x.name.toLowerCase() === e.target.value.toLowerCase()); setCc(c?.code ?? ''); if (c) setCur(c.currency); }} /><datalist id="eo-countries">{intlCountries.map((c) => <option key={c.code} value={c.name} />)}</datalist></div>
+        <div className="field"><label>Currency *</label><select className="field-input" value={cur} onChange={(e) => setCur(e.target.value)} required><option value="" disabled>Select currency</option>{curList.map((c) => <option key={c}>{c}</option>)}</select></div></>}
+      <div className="field"><label>{market === 'india' ? 'State *' : 'State / Province / Region'}</label><input name="region" className="field-input" required={market === 'india'} /></div>
+      <div className="field"><label>City *</label><input name="city" className="field-input" required /></div>
+      <div className="field"><label>Locality / Address *</label><input name="locality" className="field-input" required /></div>
+      <div className="field"><label>Postal code</label><input name="postal" className="field-input" maxLength={20} /></div>
+    </div>
+    <div className="form-section"><span className="eyebrow">STEP 2</span><h2>Property details</h2></div>
     <div className="form-grid">
       <div className="field full"><label>Property title *</label><input name="title" className="field-input" required maxLength={160} placeholder="e.g. The Solstice Residence" /></div>
       <div className="field"><label>Category *</label><select name="category" className="field-input" required defaultValue=""><option value="" disabled>Select category</option>{(cats.data ?? []).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
       <div className="field"><label>Property type *</label><select name="type" className="field-input">{['Villa', 'Penthouse', 'Apartment', 'Estate', 'Farmhouse', 'Office', 'Retail', 'Plot', 'Warehouse', 'Hotel'].map((t) => <option key={t}>{t}</option>)}</select></div>
-      <div className="field full"><label>Location *</label><input name="location" className="field-input" required placeholder="Area, City, State" /></div>
-      <div className="field"><label>Asking price (₹) *</label><input name="price" type="number" min={0} className="field-input" required placeholder="125000000" /></div>
+      <div className="field"><label>Asking price ({market === 'india' ? '₹' : cur || 'local currency'}) *</label><input name="price" type="number" min={0} className="field-input" required placeholder="125000000" /></div>
       <div className="field"><label>Area (sq.ft)</label><input name="area" type="number" min={0} className="field-input" /></div>
       <div className="field"><label>Bedrooms</label><input name="beds" type="number" min={0} className="field-input" /></div>
       <div className="field"><label>Bathrooms</label><input name="baths" type="number" min={0} className="field-input" /></div>
       <div className="field full"><label>Description</label><textarea name="description" rows={4} className="field-input" placeholder="What makes this property special?" /></div>
       <div className="field full"><label>Amenities (comma separated)</label><input name="amenities" className="field-input" placeholder="Private pool, Garden, Parking" /></div>
     </div>
-    <div className="form-section"><span className="eyebrow">STEP 2</span><h2>Photos</h2><p className="muted">These are shown to buyers once the property is approved.</p></div>
+    <div className="form-section"><span className="eyebrow">STEP 3</span><h2>Photos</h2><p className="muted">These are shown to buyers once the property is approved.</p></div>
     <div className="form-grid">
       <FileDrop label="Cover image *" hint="JPG or PNG, up to 10 MB. This is the main photo." accept="image/*" files={cover} onChange={setCover} image />
       <FileDrop label="Gallery photos" hint="Up to 12 photos — rooms, views, exterior." accept="image/*" multiple files={gallery} onChange={setGallery} image />
     </div>
-    <div className="form-section"><span className="eyebrow">STEP 3</span><h2>Proof of ownership</h2><p className="muted"><LockKeyhole size={13} /> Private — visible only to the Eliteoz Master Admin for verification. Never shown to buyers.</p></div>
+    <div className="form-section"><span className="eyebrow">STEP 4</span><h2>Proof of ownership</h2><p className="muted"><LockKeyhole size={13} /> Private — visible only to the Eliteoz Master Admin for verification. Never shown to buyers.</p></div>
     <div className="form-grid"><FileDrop label="Ownership documents *" hint="Sale deed, property tax receipt, title papers — PDF or image, up to 10 MB each." accept="application/pdf,image/*" multiple files={docs} onChange={setDocs} /></div>
     <div className="form-actions"><Button type="button" variant="outline" disabled={busy} onClick={(e) => save(e.currentTarget.form!, 'draft')}>Save as draft</Button><Button type="submit" disabled={busy}>{busy ? 'Uploading…' : 'Submit for verification'}</Button></div>
   </form>;
