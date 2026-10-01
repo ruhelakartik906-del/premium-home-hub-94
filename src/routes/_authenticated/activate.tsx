@@ -7,6 +7,8 @@ import { PageShell } from '@/components/eliteoz';
 import { usePayActivation } from '@/components/activation-banner';
 import { supabase } from '@/integrations/supabase/client';
 import { accountAccess } from '@/lib/access';
+import { useServerFn } from '@tanstack/react-start';
+import { getActivationOptions, skipActivationPayment } from '@/lib/payments.functions';
 
 export const Route = createFileRoute('/_authenticated/activate')({
   beforeLoad: async () => {
@@ -28,6 +30,15 @@ function ActivatePage() {
   const navigate = useNavigate();
   const pay = usePayActivation();
   const [cfg, setCfg] = useState<{ enabled: boolean; fee: number } | null>(null);
+  const getOpts = useServerFn(getActivationOptions); const skip = useServerFn(skipActivationPayment);
+  const [bypass, setBypass] = useState(false);
+  useEffect(() => { getOpts().then((o) => setBypass(o.bypassAllowed)).catch(() => setBypass(false)); }, [getOpts]);
+  const doSkip = async () => {
+    setBusy(true); setErr('');
+    const r = await skip().catch(() => ({ ok: false as const, error: 'Could not activate. Please try again.' }));
+    if (r.ok) { const a = await accountAccess(); if (a && !a.pending) { toast.success('Test activation done — payment bypassed'); navigate({ to: a.dest, replace: true }); return; } }
+    setErr(r.ok ? 'Activated. Please refresh.' : r.error); setBusy(false);
+  };
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   useEffect(() => {
@@ -53,10 +64,12 @@ function ActivatePage() {
     <div className="panel pay-panel"><div className="pay-head"><div><span className="eyebrow">ACTIVATION FEE</span>
       <div className="payment-total">{cfg ? `₹${cfg.fee.toLocaleString('en-IN')}` : '—'}</div></div></div>
       <p className="muted">Your account opens only after the payment is confirmed securely by the payment provider. Your details are saved — you can close this page and return any time by logging in.</p></div>
-    {cfg && !cfg.enabled && <div className="preview-warning"><strong>Online payment is not connected yet.</strong> The Eliteoz team will share payment instructions, or you can <Link className="text-link" to="/contact">contact us</Link>. Your account stays saved.</div>}
+    {bypass && <div className="preview-warning"><strong>Testing Mode — Payment gateway is currently unavailable.</strong> You can skip payment for testing. This is recorded as a test activation, not a real payment.</div>}
+    {cfg && !cfg.enabled && !bypass && <div className="preview-warning"><strong>Online payment is not connected yet.</strong> The Eliteoz team will share payment instructions, or you can <Link className="text-link" to="/contact">contact us</Link>. Your account stays saved.</div>}
     {err && <p role="alert" className="form-error">{err}</p>}
     <div className="form-actions">
       <Button variant="outline" onClick={signOut}><LogOut /> Log out</Button>
+      {bypass && <Button variant="outline" disabled={busy} onClick={doSkip}>Skip Payment (Testing)</Button>}
       <Button disabled={busy || !cfg?.enabled} onClick={go}><Wallet /> {busy ? 'Processing…' : 'Complete payment'}</Button>
     </div>
   </div></main></PageShell>;
