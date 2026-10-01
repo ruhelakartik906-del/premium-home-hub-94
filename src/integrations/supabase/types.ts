@@ -467,6 +467,9 @@ export type Database = {
           account_type: string
           activated_at: string
           address: string | null
+          budget_currency: string | null
+          budget_max: number | null
+          budget_min: number | null
           business_type: string | null
           city: string | null
           company_name: string | null
@@ -478,9 +481,13 @@ export type Database = {
           full_name: string
           gender: string | null
           id: string
+          market_preference: string | null
           mobile: string | null
           mobile_verified: boolean
           pincode: string | null
+          preferred_asset_types: string[]
+          preferred_countries: string[]
+          preferred_regions: string | null
           reminder_sent_at: string | null
           state: string | null
           status: string
@@ -492,6 +499,9 @@ export type Database = {
           account_type?: string
           activated_at?: string
           address?: string | null
+          budget_currency?: string | null
+          budget_max?: number | null
+          budget_min?: number | null
           business_type?: string | null
           city?: string | null
           company_name?: string | null
@@ -503,9 +513,13 @@ export type Database = {
           full_name?: string
           gender?: string | null
           id: string
+          market_preference?: string | null
           mobile?: string | null
           mobile_verified?: boolean
           pincode?: string | null
+          preferred_asset_types?: string[]
+          preferred_countries?: string[]
+          preferred_regions?: string | null
           reminder_sent_at?: string | null
           state?: string | null
           status?: string
@@ -517,6 +531,9 @@ export type Database = {
           account_type?: string
           activated_at?: string
           address?: string | null
+          budget_currency?: string | null
+          budget_max?: number | null
+          budget_min?: number | null
           business_type?: string | null
           city?: string | null
           company_name?: string | null
@@ -528,9 +545,13 @@ export type Database = {
           full_name?: string
           gender?: string | null
           id?: string
+          market_preference?: string | null
           mobile?: string | null
           mobile_verified?: boolean
           pincode?: string | null
+          preferred_asset_types?: string[]
+          preferred_countries?: string[]
+          preferred_regions?: string | null
           reminder_sent_at?: string | null
           state?: string | null
           status?: string
@@ -545,11 +566,14 @@ export type Database = {
           admin_note: string | null
           amenities: string[]
           area_sqft: number | null
+          asset_category: string | null
           baths: number | null
           beds: number | null
           category_id: string | null
+          country: string
           cover_url: string | null
           created_at: string
+          currency: string
           description: string | null
           documents: string[]
           featured: boolean
@@ -557,11 +581,15 @@ export type Database = {
           id: string
           image: string
           location: string
+          market: string
+          postal_code: string | null
           price: number
           property_type: string
           ref: string
+          region: string | null
           seller_id: string | null
           status: string
+          time_zone: string | null
           title: string
           updated_at: string
         }
@@ -569,11 +597,14 @@ export type Database = {
           admin_note?: string | null
           amenities?: string[]
           area_sqft?: number | null
+          asset_category?: string | null
           baths?: number | null
           beds?: number | null
           category_id?: string | null
+          country?: string
           cover_url?: string | null
           created_at?: string
+          currency?: string
           description?: string | null
           documents?: string[]
           featured?: boolean
@@ -581,11 +612,15 @@ export type Database = {
           id?: string
           image?: string
           location: string
+          market?: string
+          postal_code?: string | null
           price?: number
           property_type?: string
           ref?: string
+          region?: string | null
           seller_id?: string | null
           status?: string
+          time_zone?: string | null
           title: string
           updated_at?: string
         }
@@ -593,11 +628,14 @@ export type Database = {
           admin_note?: string | null
           amenities?: string[]
           area_sqft?: number | null
+          asset_category?: string | null
           baths?: number | null
           beds?: number | null
           category_id?: string | null
+          country?: string
           cover_url?: string | null
           created_at?: string
+          currency?: string
           description?: string | null
           documents?: string[]
           featured?: boolean
@@ -605,11 +643,15 @@ export type Database = {
           id?: string
           image?: string
           location?: string
+          market?: string
+          postal_code?: string | null
           price?: number
           property_type?: string
           ref?: string
+          region?: string | null
           seller_id?: string | null
           status?: string
+          time_zone?: string | null
           title?: string
           updated_at?: string
         }
