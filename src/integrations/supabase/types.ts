@@ -65,6 +65,33 @@ export type Database = {
         }
         Relationships: []
       }
+      countries: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          currency: string
+          inr_rate: number | null
+          name: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          currency: string
+          inr_rate?: number | null
+          name: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          currency?: string
+          inr_rate?: number | null
+          name?: string
+        }
+        Relationships: []
+      }
       gateway_secrets: {
         Row: {
           id: number
@@ -570,7 +597,9 @@ export type Database = {
           baths: number | null
           beds: number | null
           category_id: string | null
+          city: string | null
           country: string
+          country_code: string
           cover_url: string | null
           created_at: string
           currency: string
@@ -580,10 +609,12 @@ export type Database = {
           gallery: string[]
           id: string
           image: string
+          locality: string | null
           location: string
           market: string
           postal_code: string | null
           price: number
+          price_in_inr: number | null
           property_type: string
           ref: string
           region: string | null
@@ -601,7 +632,9 @@ export type Database = {
           baths?: number | null
           beds?: number | null
           category_id?: string | null
+          city?: string | null
           country?: string
+          country_code?: string
           cover_url?: string | null
           created_at?: string
           currency?: string
@@ -611,10 +644,12 @@ export type Database = {
           gallery?: string[]
           id?: string
           image?: string
+          locality?: string | null
           location: string
           market?: string
           postal_code?: string | null
           price?: number
+          price_in_inr?: number | null
           property_type?: string
           ref?: string
           region?: string | null
@@ -632,7 +667,9 @@ export type Database = {
           baths?: number | null
           beds?: number | null
           category_id?: string | null
+          city?: string | null
           country?: string
+          country_code?: string
           cover_url?: string | null
           created_at?: string
           currency?: string
@@ -642,10 +679,12 @@ export type Database = {
           gallery?: string[]
           id?: string
           image?: string
+          locality?: string | null
           location?: string
           market?: string
           postal_code?: string | null
           price?: number
+          price_in_inr?: number | null
           property_type?: string
           ref?: string
           region?: string | null
