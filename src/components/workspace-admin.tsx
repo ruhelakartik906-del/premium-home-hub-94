@@ -1,7 +1,7 @@
 import { MarketBadge, MarketTabs, useCountries } from '@/components/market';
 import { formatMoney, flagOf } from '@/lib/eliteoz-data';
 import { Globe } from 'lucide-react';
-import { adminDeactivateUser, getGatewayStatus, saveGatewaySettings } from '@/lib/payments.functions';
+import { adminDeactivateUser, getGatewayStatus, saveGatewaySettings, setPaymentMode } from '@/lib/payments.functions';
 import { Link } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useServerFn } from '@tanstack/react-start';
@@ -295,7 +295,7 @@ function Tickets() {
 
 function Gateway() {
   const qc = useQueryClient(); const [busy, setBusy] = useState(false);
-  const getStatus = useServerFn(getGatewayStatus); const save = useServerFn(saveGatewaySettings);
+  const getStatus = useServerFn(getGatewayStatus); const save = useServerFn(saveGatewaySettings); const setMode = useServerFn(setPaymentMode);
   const q = useQuery({ queryKey: ['pay-settings'], queryFn: () => getStatus() });
   if (!q.data) return <Panel><p className="muted">Loading…</p></Panel>;
   const s = q.data;
@@ -309,6 +309,8 @@ function Gateway() {
     <h2>Razorpay settings</h2>
     <p className="muted">Buyers and sellers pay the activation fee through Razorpay. Accounts activate only after the payment is verified on the server. When switched off, registrations skip payment.</p>
     <div className="flex gap-2"><span className={`status ${s.mode === 'live' ? 'success' : 'pending'}`}>{s.mode === 'live' ? 'LIVE MODE' : 'TEST MODE'}</span><span className={`status ${s.enabled ? 'active' : 'suspended'}`}>{s.enabled ? 'Collecting payments' : 'Payments off'}</span></div>
+    <div className="field"><label>Payment Mode</label><select className="field-input" value={s.paymentMode} onChange={async (e) => { const r = await setMode({ data: { mode: e.target.value as 'test_bypass' | 'live_required' } }); if (!r.ok) toast.error(r.error); else toast.success('Payment mode updated'); qc.invalidateQueries({ queryKey: ['pay-settings'] }); }}><option value="test_bypass">Test / Temporary Bypass</option><option value="live_required">Live Payment Required</option></select>
+      <small className="muted">{s.paymentMode === 'test_bypass' && !(s.enabled && s.keyId && s.secretMasked) ? 'New members see “Skip Payment (Testing)” on the payment page.' : 'Skip Payment is hidden and blocked — a verified Razorpay payment is required.'} Saving a complete, switched-on Razorpay setup sets Live automatically.</small></div>
     <label className="gateway-toggle"><input type="checkbox" name="enabled" defaultChecked={s.enabled} /> <span><strong>Collect activation fee at registration</strong><small>Currently {s.enabled ? 'ON' : 'OFF (payment skipped)'}</small></span></label>
     <div className="form-grid">
       <div className="field"><label>Environment</label><select name="mode" className="field-input" defaultValue={s.mode}><option value="test">Test</option><option value="live">Live</option></select></div>

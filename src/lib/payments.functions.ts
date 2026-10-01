@@ -15,7 +15,8 @@ export const getGatewayStatus = createServerFn({ method: 'GET' })
     await assertAdmin(context);
     const { loadGateway } = await import('./razorpay.server');
     const c = await loadGateway();
-    return { enabled: c.enabled, mode: c.mode, keyId: c.keyId, fee: c.fee, secretMasked: mask(c.keySecret), webhookMasked: mask(c.webhookSecret) };
+    const { data: pm } = await context.supabase.from('payment_settings').select('payment_mode').eq('id', 1).maybeSingle();
+    return { paymentMode: (pm as { payment_mode?: string } | null)?.payment_mode === 'live_required' ? 'live_required' : 'test_bypass', enabled: c.enabled, mode: c.mode, keyId: c.keyId, fee: c.fee, secretMasked: mask(c.keySecret), webhookMasked: mask(c.webhookSecret) };
   });
 
 export const saveGatewaySettings = createServerFn({ method: 'POST' })
@@ -37,6 +38,8 @@ export const saveGatewaySettings = createServerFn({ method: 'POST' })
     if (data.keySecret) patch.key_secret = data.keySecret; if (data.webhookSecret) patch.webhook_secret = data.webhookSecret;
     const { error: e2 } = await supabaseAdmin.from('gateway_secrets').upsert({ id: 1, ...patch });
     if (e2) return { ok: false as const, error: 'Could not save secrets.' };
+    // A fully configured, switched-on gateway turns the testing bypass off automatically.
+    if (data.enabled && data.keyId && (data.keySecret || cur.keySecret)) await context.supabase.from('payment_settings').update({ payment_mode: 'live_required' }).eq('id', 1);
     return { ok: true as const };
   });
 
@@ -160,5 +163,47 @@ export const saveIntegrationSecrets = createServerFn({ method: 'POST' })
     const { error } = await supabaseAdmin.from('gateway_secrets').upsert({ id: 1, ...patch, updated_at: new Date().toISOString() });
     if (error) return { ok: false as const, error: 'Could not save private keys.' };
     await supabaseAdmin.from('audit_logs').insert({ actor_id: context.userId, action: 'settings_changed:secrets', details: { fields: Object.keys(patch) } });
+    return { ok: true as const };
+  });
+
+/** Server-side truth for whether the testing bypass may be used right now. */
+async function bypassState() {
+  const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+  const { loadGateway } = await import('./razorpay.server');
+  const [cfg, { data: s }] = await Promise.all([loadGateway(), supabaseAdmin.from('payment_settings').select('payment_mode').eq('id', 1).maybeSingle()]);
+  const configured = !!(cfg.enabled && cfg.keyId && cfg.keySecret);
+  const paymentMode = (s?.payment_mode === 'live_required' ? 'live_required' : 'test_bypass') as 'test_bypass' | 'live_required';
+  return { configured, paymentMode, allowed: !configured && paymentMode === 'test_bypass', cfg };
+}
+
+export const getActivationOptions = createServerFn({ method: 'GET' })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => {
+    const s = await bypassState();
+    return { bypassAllowed: s.allowed, gatewayReady: s.configured, paymentMode: s.paymentMode, fee: s.cfg.fee };
+  });
+
+export const skipActivationPayment = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const s = await bypassState();
+    if (!s.allowed) return { ok: false as const, error: 'Testing bypass is switched off. Please complete the payment.' };
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const { data: p } = await supabaseAdmin.from('profiles').select('full_name,email,status,account_type').eq('id', context.userId).maybeSingle();
+    if (!p) return { ok: false as const, error: 'Profile not found.' };
+    if (p.status !== 'pending_payment') return { ok: false as const, error: 'Your account does not need an activation payment.' };
+    const { error } = await supabaseAdmin.from('transactions').insert({ user_id: context.userId, amount: 0, currency: 'INR', purpose: 'activation', method: 'test_bypass', provider: 'test_bypass', status: 'test_bypass', verified_via: 'test_bypass', environment: 'test', account_role: p.account_type, payer_name: p.full_name, payer_email: p.email, notes: 'TEST ACTIVATION — payment bypassed, no money received' });
+    if (error) { console.error(error.message); return { ok: false as const, error: 'Could not activate the test account.' }; }
+    await supabaseAdmin.from('audit_logs').insert({ actor_id: context.userId, target_user_id: context.userId, action: 'test_payment_bypass_used', details: { user_type: p.account_type, at: new Date().toISOString(), payment_mode: s.paymentMode, gateway_configured: s.configured } });
+    return { ok: true as const };
+  });
+
+export const setPaymentMode = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ mode: z.enum(['test_bypass', 'live_required']) }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { error } = await context.supabase.from('payment_settings').update({ payment_mode: data.mode, updated_at: new Date().toISOString() }).eq('id', 1);
+    if (error) return { ok: false as const, error: 'Could not change payment mode.' };
     return { ok: true as const };
   });
