@@ -260,3 +260,5 @@
 .toolbar.wrap{flex-wrap:wrap}
 .price-sub{display:block;font-size:.72rem;color:var(--muted-foreground);font-weight:400}
 @media (max-width:640px){.market-choice{grid-template-columns:1fr}}
+.toolbar .market-tabs{flex:0 0 auto;min-width:max-content;width:auto;max-width:none}
+.cell-prop .market-badge,.listing-row .market-badge{white-space:normal;width:fit-content;max-width:100%;margin-top:.3rem;letter-spacing:.1em}
