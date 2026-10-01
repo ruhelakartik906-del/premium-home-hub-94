@@ -4,8 +4,7 @@ import logo from '@/assets/eliteoz-logo.webp.asset.json';
 import portrait from '@/assets/col-nk-yadav.webp.asset.json';
 import heroImg from '@/assets/home-hero-abstract.jpg';
 import { useReveal, SelectiveGrid, PrincipleMark, AssetSilhouettes, Horizon } from '@/components/nx-graphics';
-import { useState } from 'react';
-import { GlobeMark, MarketSplit, BeyondBorders, FeaturedDiscovery, goExplore, type Market } from '@/components/home-global';
+import { MarketSplit } from '@/components/home-global';
 
 export const Route = createFileRoute('/')({
   errorComponent: () => <div className="section container"><h2>Something went wrong. Please refresh.</h2></div>,
@@ -201,9 +200,9 @@ function Home() {
         <section className="nx-dark nx-sec nx-final nx-final-h">
           <Horizon />
           <div className="nx-wrap" data-reveal>
-            <h2>Your Next Exceptional Asset<br />May Be Beyond Borders.</h2>
-            <p className="nx-muted">Access a curated network of extraordinary properties across India and international markets.</p>
-            <div className="nx-ctas nx-center"><button type="button" className="nx-btn" onClick={() => explore('')}>Explore Properties</button><Link to="/register" className="nx-btn-ghost">Become a Member</Link></div>
+            <h2>For Those Who Value<br />Privacy Over Publicity.</h2>
+            <p className="nx-muted">If you own a trophy asset or are looking to acquire one in complete privacy, you have arrived at the right place.</p>
+            <div className="nx-ctas nx-center"><Link to="/register" className="nx-btn">Request Private Access</Link><Link to="/how-it-works" className="nx-btn-ghost">Learn How Eliteoz Works</Link></div>
             <p className="nx-eyebrow nx-mt">Eliteoz — Where 50 Crore+ Assets Change Hands in Complete Silence.</p>
           </div>
         </section>
