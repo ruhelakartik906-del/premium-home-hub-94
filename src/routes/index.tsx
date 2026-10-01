@@ -4,6 +4,8 @@ import logo from '@/assets/eliteoz-logo.webp.asset.json';
 import portrait from '@/assets/col-nk-yadav.webp.asset.json';
 import heroImg from '@/assets/home-hero-abstract.jpg';
 import { useReveal, SelectiveGrid, PrincipleMark, AssetSilhouettes, Horizon } from '@/components/nx-graphics';
+import { useState } from 'react';
+import { GlobeMark, MarketSplit, BeyondBorders, FeaturedDiscovery, goExplore, type Market } from '@/components/home-global';
 
 export const Route = createFileRoute('/')({
   errorComponent: () => <div className="section container"><h2>Something went wrong. Please refresh.</h2></div>,
@@ -45,24 +47,43 @@ const notFor = ['Casual property browsing', 'Mass-market property enquiries', 'U
 
 function Home() {
   useReveal();
+  const [market, setMarket] = useState<Market>('');
+  const explore = (m: Market) => goExplore(m, setMarket);
   return (
     <div className="nx">
       <NoirHeader />
       <main>
         <section className="nx-hero">
           <img src={heroImg} alt="" width={1920} height={1088} fetchPriority="high" decoding="async" />
+          <GlobeMark />
           <div className="nx-wrap nx-hero-inner nx-fade">
             <span className="nx-om" lang="sa">ॐ गणेशाय नमः</span>
             <span className="nx-eyebrow">An Exclusive Network for Ultra-Premium Assets</span>
             <h1>Exceptional Assets.<br />Privately Connected.</h1>
             <span className="nx-rule" />
             <span className="nx-hero-50">₹50 CRORE+</span>
-            <p className="nx-lead">Private access to exceptional assets, serious participants and discreet transactions.</p>
+            <p className="nx-lead">Discover extraordinary properties across India and select international markets, exclusively for a qualified network of buyers and sellers.</p>
             <div className="nx-ctas">
-              <Link to="/register" className="nx-btn">Request Private Access</Link>
-                          </div>
+              <button type="button" className="nx-btn" onClick={() => explore('india')}>Explore India</button>
+              <button type="button" className="nx-btn hg-btn-outline" onClick={() => explore('international')}>Explore International</button>
+            </div>
           </div>
         </section>
+
+        <MarketSplit onExplore={explore} />
+        <BeyondBorders />
+        <FeaturedDiscovery market={market} setMarket={setMarket} />
+
+        <section className="nx-dark nx-sec">
+          <div className="nx-wrap">
+            <span className="nx-eyebrow">Why Eliteoz</span><h2>One Private Network.<br />Exceptional Assets.</h2>
+            <ul className="hg-why" data-reveal>
+              {['₹50 Crore+ Asset Focus', 'Verified Sellers', 'Curated Properties', 'India & International Opportunities', 'Private Buyer Network', 'Document & Listing Verification'].map((t, i) => <li key={t}><span className="nx-num">0{i + 1}</span>{t}</li>)}
+            </ul>
+          </div>
+        </section>
+
+
 
         <section className="nx-dark nx-sec nx-grain">
           <div className="nx-wrap nx-split" data-reveal>
@@ -189,9 +210,9 @@ function Home() {
         <section className="nx-dark nx-sec nx-final nx-final-h">
           <Horizon />
           <div className="nx-wrap" data-reveal>
-            <h2>For Those Who Value<br />Privacy Over Publicity.</h2>
-            <p className="nx-muted">If you own a trophy asset or are looking to acquire one in complete privacy, you have arrived at the right place.</p>
-            <div className="nx-ctas nx-center"><Link to="/register" className="nx-btn">Request Private Access</Link><Link to="/how-it-works" className="nx-btn-ghost">Learn How Eliteoz Works</Link></div>
+            <h2>Your Next Exceptional Asset<br />May Be Beyond Borders.</h2>
+            <p className="nx-muted">Access a curated network of extraordinary properties across India and international markets.</p>
+            <div className="nx-ctas nx-center"><button type="button" className="nx-btn" onClick={() => explore('')}>Explore Properties</button><Link to="/register" className="nx-btn-ghost">Become a Member</Link></div>
             <p className="nx-eyebrow nx-mt">Eliteoz — Where 50 Crore+ Assets Change Hands in Complete Silence.</p>
           </div>
         </section>
