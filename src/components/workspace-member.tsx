@@ -162,6 +162,7 @@ function ListingForm({ me }: { me: Me }) {
   const intlCountries = (countries.data ?? []).filter((c) => c.code !== 'IN'); const curList = [...new Set((countries.data ?? []).map((c) => c.currency))].sort();
   const save = async (form: HTMLFormElement, status: 'draft' | 'pending') => {
     if (market === 'international' && !cc) { toast.error('Please choose the country for this international listing.'); return; }
+    if (market === 'international') { const fd = new FormData(form); if (!cur || !String(fd.get('region') ?? '').trim() || !String(fd.get('city') ?? '').trim()) { toast.error('International listings need a region, city and currency.'); return; } }
     if (status === 'pending') {
       if (!form.reportValidity()) return;
       if (!cover.length) { toast.error('Please add a cover image.'); return; }
@@ -187,7 +188,7 @@ function ListingForm({ me }: { me: Me }) {
     <div className="form-grid">
       {market === 'international' && <><div className="field"><label>Country *</label><input className="field-input" list="eo-countries" placeholder="Type to search" required onChange={(e) => { const c = intlCountries.find((x) => x.name.toLowerCase() === e.target.value.toLowerCase()); setCc(c?.code ?? ''); if (c) setCur(c.currency); }} /><datalist id="eo-countries">{intlCountries.map((c) => <option key={c.code} value={c.name} />)}</datalist></div>
         <div className="field"><label>Currency *</label><select className="field-input" value={cur} onChange={(e) => setCur(e.target.value)} required><option value="" disabled>Select currency</option>{curList.map((c) => <option key={c}>{c}</option>)}</select></div></>}
-      <div className="field"><label>{market === 'india' ? 'State *' : 'State / Province / Region'}</label><input name="region" className="field-input" required={market === 'india'} /></div>
+      <div className="field"><label>{market === 'india' ? 'State *' : 'State / Province / Region *'}</label><input name="region" className="field-input" required /></div>
       <div className="field"><label>City *</label><input name="city" className="field-input" required /></div>
       <div className="field"><label>Locality / Address *</label><input name="locality" className="field-input" required /></div>
       <div className="field"><label>Postal code</label><input name="postal" className="field-input" maxLength={20} /></div>
