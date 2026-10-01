@@ -204,12 +204,12 @@ function ListingForm({ me }: { me: Me }) {
       <div className="field full"><label>Description</label><textarea name="description" rows={4} className="field-input" placeholder="What makes this property special?" /></div>
       <div className="field full"><label>Amenities (comma separated)</label><input name="amenities" className="field-input" placeholder="Private pool, Garden, Parking" /></div>
     </div>
-    <div className="form-section"><span className="eyebrow">STEP 2</span><h2>Photos</h2><p className="muted">These are shown to buyers once the property is approved.</p></div>
+    <div className="form-section"><span className="eyebrow">STEP 3</span><h2>Photos</h2><p className="muted">These are shown to buyers once the property is approved.</p></div>
     <div className="form-grid">
       <FileDrop label="Cover image *" hint="JPG or PNG, up to 10 MB. This is the main photo." accept="image/*" files={cover} onChange={setCover} image />
       <FileDrop label="Gallery photos" hint="Up to 12 photos — rooms, views, exterior." accept="image/*" multiple files={gallery} onChange={setGallery} image />
     </div>
-    <div className="form-section"><span className="eyebrow">STEP 3</span><h2>Proof of ownership</h2><p className="muted"><LockKeyhole size={13} /> Private — visible only to the Eliteoz Master Admin for verification. Never shown to buyers.</p></div>
+    <div className="form-section"><span className="eyebrow">STEP 4</span><h2>Proof of ownership</h2><p className="muted"><LockKeyhole size={13} /> Private — visible only to the Eliteoz Master Admin for verification. Never shown to buyers.</p></div>
     <div className="form-grid"><FileDrop label="Ownership documents *" hint="Sale deed, property tax receipt, title papers — PDF or image, up to 10 MB each." accept="application/pdf,image/*" multiple files={docs} onChange={setDocs} /></div>
     <div className="form-actions"><Button type="button" variant="outline" disabled={busy} onClick={(e) => save(e.currentTarget.form!, 'draft')}>Save as draft</Button><Button type="submit" disabled={busy}>{busy ? 'Uploading…' : 'Submit for verification'}</Button></div>
   </form>;
