@@ -5,7 +5,8 @@ import { ArrowRight, ArrowUpRight, BadgeCheck, Heart, MapPin, Menu, Search, Shie
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import type { Listing } from '@/lib/eliteoz-data';
-import logo from '@/assets/eliteoz-logo.webp.asset.json';
+import logoSrc from '@/assets/eliteoz-logo.webp';
+const logo = { url: logoSrc };
 
 export function Brand({ light = false }: { light?: boolean }) { return <Link to="/" className={`brand ${light ? 'brand-light' : ''}`} aria-label="Eliteoz home">ELITEOZ<span className="brand-dot">.</span></Link>; }
 const nav = [['Properties','/properties'],['How It Works','/how-it-works'],['For Buyers','/buyers'],['For Sellers','/sellers'],['About','/about'],['Contact','/contact']] as const;

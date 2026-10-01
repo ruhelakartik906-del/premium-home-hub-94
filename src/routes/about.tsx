@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { NoirPage, noirMeta } from '@/components/noir-page';
-import portrait from '@/assets/col-nk-yadav.webp.asset.json';
+import portraitSrc from '@/assets/col-nk-yadav.webp';
+const portrait = { url: portraitSrc };
 
 export const Route = createFileRoute('/about')({
   head: () => noirMeta('About Eliteoz | A private network built around trust', 'Eliteoz is a discreet, verification-led network for ultra-premium assets valued at ₹50 Crore and above.'),

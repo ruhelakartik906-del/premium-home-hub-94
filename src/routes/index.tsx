@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { Footer, PublicHeader } from '@/components/eliteoz';
-import logo from '@/assets/eliteoz-logo.webp.asset.json';
-import portrait from '@/assets/col-nk-yadav.webp.asset.json';
+import logoSrc from '@/assets/eliteoz-logo.webp';
+const logo = { url: logoSrc };
+import portraitSrc from '@/assets/col-nk-yadav.webp';
+const portrait = { url: portraitSrc };
 import heroImg from '@/assets/home-hero-abstract.jpg';
 import { useReveal, SelectiveGrid, PrincipleMark, AssetSilhouettes, Horizon } from '@/components/nx-graphics';
 import { MarketSplit } from '@/components/home-global';
