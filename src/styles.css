@@ -261,4 +261,4 @@
 .price-sub{display:block;font-size:.72rem;color:var(--muted-foreground);font-weight:400}
 @media (max-width:640px){.market-choice{grid-template-columns:1fr}}
 .toolbar .market-tabs{flex:0 0 auto;min-width:max-content;width:auto;max-width:none}
-.cell-prop .market-badge,.listing-row .market-badge{display:flex;flex-wrap:wrap;white-space:normal;width:fit-content;max-width:240px;margin-top:.3rem;font-size:.6rem;letter-spacing:.08em}
+.cell-prop .market-badge,.listing-row .market-badge{display:flex;flex-wrap:wrap;white-space:normal;width:fit-content;max-width:190px;margin-top:.3rem;font-size:.6rem;letter-spacing:.08em}
