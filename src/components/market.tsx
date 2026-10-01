@@ -18,7 +18,7 @@ export function useCountries(all = false) {
 }
 
 /** INDIA / INTERNATIONAL label; international shows flag + country. */
-export function MarketBadge({ market, country, code }: { market?: string; country?: string; code?: string }) {
+export function MarketBadge({ market, country, code }: { market?: string | undefined; country?: string | undefined; code?: string | undefined }) {
   const intl = market === 'international';
   return (
     <span className={`market-badge ${intl ? 'intl' : ''}`}>
