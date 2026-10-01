@@ -343,6 +343,7 @@ export type Database = {
           id: number
           key_id: string | null
           mode: string
+          payment_mode: string
           provider: string
           updated_at: string
         }
@@ -352,6 +353,7 @@ export type Database = {
           id?: number
           key_id?: string | null
           mode?: string
+          payment_mode?: string
           provider?: string
           updated_at?: string
         }
@@ -361,6 +363,7 @@ export type Database = {
           id?: number
           key_id?: string | null
           mode?: string
+          payment_mode?: string
           provider?: string
           updated_at?: string
         }
