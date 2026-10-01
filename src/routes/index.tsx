@@ -47,42 +47,33 @@ const notFor = ['Casual property browsing', 'Mass-market property enquiries', 'U
 
 function Home() {
   useReveal();
-  const [market, setMarket] = useState<Market>('');
-  const explore = (m: Market) => goExplore(m, setMarket);
   return (
     <div className="nx">
       <NoirHeader />
       <main>
         <section className="nx-hero">
           <img src={heroImg} alt="" width={1920} height={1088} fetchPriority="high" decoding="async" />
-          <GlobeMark />
           <div className="nx-wrap nx-hero-inner nx-fade">
             <span className="nx-om" lang="sa">ॐ गणेशाय नमः</span>
-            <span className="nx-eyebrow">An Exclusive Network for Ultra-Premium Assets</span>
-            <h1>Exceptional Assets.<br />Privately Connected.</h1>
+            <span className="nx-eyebrow">Premium Properties • India &amp; International</span>
+            <h1>Exceptional Properties.<br />Trusted Connections.</h1>
             <span className="nx-rule" />
             <span className="nx-hero-50">₹50 CRORE+</span>
-            <p className="nx-lead">Discover extraordinary properties across India and select international markets, exclusively for a qualified network of buyers and sellers.</p>
+            <p className="nx-lead">Discover premium properties across India and international markets through the Eliteoz network.</p>
             <div className="nx-ctas">
-              <button type="button" className="nx-btn" onClick={() => explore('india')}>Explore India</button>
-              <button type="button" className="nx-btn hg-btn-outline" onClick={() => explore('international')}>Explore International</button>
+              <Link to="/properties" className="nx-btn">Explore Properties</Link>
+              <Link to="/register" className="nx-btn hg-btn-outline">Become a Member</Link>
             </div>
           </div>
         </section>
 
-        <MarketSplit onExplore={explore} />
-        <BeyondBorders />
-        <FeaturedDiscovery market={market} setMarket={setMarket} />
-
-        <section className="nx-dark nx-sec">
+        <section className="nx-dark nx-sec hg-intro">
           <div className="nx-wrap">
-            <span className="nx-eyebrow">Why Eliteoz</span><h2>One Private Network.<br />Exceptional Assets.</h2>
-            <ul className="hg-why" data-reveal>
-              {['₹50 Crore+ Asset Focus', 'Verified Sellers', 'Curated Properties', 'India & International Opportunities', 'Private Buyer Network', 'Document & Listing Verification'].map((t, i) => <li key={t}><span className="nx-num">0{i + 1}</span>{t}</li>)}
-            </ul>
+            <span className="nx-eyebrow">India &amp; International Properties</span>
+            <p className="nx-muted hg-sub">Explore premium properties across India and selected international markets, all available through one private platform.</p>
           </div>
         </section>
-
+        <MarketSplit />
 
 
         <section className="nx-dark nx-sec nx-grain">

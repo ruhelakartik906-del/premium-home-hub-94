@@ -304,3 +304,4 @@
 @media (max-width:860px){.hg-split{grid-template-columns:1fr}.hg-side{min-height:420px}.hg-why{grid-template-columns:1fr 1fr}.hg-globe{opacity:.18;width:70vw;right:-15%}.hg-dot b{display:none}.hg-dot.home b{display:inline}}
 @media (max-width:520px){.hg-why{grid-template-columns:1fr}.hg-tabs select{margin-left:0;width:100%}}
 @media (prefers-reduced-motion:reduce){.hg-globe,.hg-globe .hg-ring{animation:none}}
+.hg-intro{padding-bottom:3rem}.hg-side .nx-btn-ghost{margin-top:1rem}
