@@ -10,3 +10,5 @@
 - [x] n8n webhook endpoint + events log
 - [ ] n8n shared secret (waiting on user)
 - [ ] Full sign-up → payment → suspend → delete run-through with a real test account
+- [x] India + International property system (seller form, badges, buyer/seller/admin filters, countries manager, INR conversion)
+- [ ] Buyer onboarding preferences (countries, asset types, budget) + buyer matching — next phase
