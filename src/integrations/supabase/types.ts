@@ -987,6 +987,10 @@ export type Database = {
         }
         Returns: string
       }
+      admin_delete_user: {
+        Args: { _reason?: string; _target: string }
+        Returns: Json
+      }
       admin_exists: { Args: never; Returns: boolean }
       admin_list_members: {
         Args: never
