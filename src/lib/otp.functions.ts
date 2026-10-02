@@ -25,11 +25,23 @@ function randomToken() {
 export const sendOtp = createServerFn({ method: 'POST' })
   .inputValidator((d) => z.object({ mobile: mobileSchema, email: z.string().trim().email().max(200) }).parse(d))
   .handler(async ({ data }) => {
-    const { findExistingAccount, DUP_MESSAGES } = await import('@/lib/otp.server');
-    const existing = await findExistingAccount(data.email, data.mobile);
-    if (existing) return { ok: false as const, duplicate: existing, error: DUP_MESSAGES[existing] };
-    const authkey = process.env['APITXT_AUTHKEY'];
-    if (!authkey) return { ok: false as const, error: 'SMS service is not configured yet. Please try again later.' };
+    const missing = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'APITXT_AUTHKEY'].filter((k) => !process.env[k]);
+    if (missing.length) {
+      console.error('[OTP] missing server env vars:', missing.join(', '));
+      return { ok: false as const, error: 'SMS service is not configured yet. Please try again later.' };
+    }
+    const authkey = process.env['APITXT_AUTHKEY']!;
+    let existing: 'active' | 'pending' | null = null;
+    let DUP: Record<string, string> = {};
+    try {
+      const m = await import('@/lib/otp.server');
+      DUP = m.DUP_MESSAGES;
+      existing = await m.findExistingAccount(data.email, data.mobile);
+    } catch (e) {
+      console.error('[OTP] database check failed:', e instanceof Error ? e.message : String(e));
+      return { ok: false as const, error: 'Could not send OTP. Please try again.' };
+    }
+    if (existing) return { ok: false as const, duplicate: existing, error: DUP[existing]! };
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
     const mobile = data.mobile;
     const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
@@ -46,7 +58,7 @@ export const sendOtp = createServerFn({ method: 'POST' })
     const otp = randomOtp();
     const id = crypto.randomUUID();
     const { error: insErr } = await supabaseAdmin.from('otp_verifications').insert({ id, mobile, otp_hash: await sha256(`${id}:${otp}`), expires_at: new Date(Date.now() + OTP_TTL_MS).toISOString() });
-    if (insErr) { console.error('otp insert failed'); return { ok: false as const, error: 'Could not send OTP. Please try again.' }; }
+    if (insErr) { console.error('[OTP] otp insert failed:', insErr.code, insErr.message); return { ok: false as const, error: 'Could not send OTP. Please try again.' }; }
 
     let sent = false;
     try {
@@ -59,8 +71,8 @@ export const sendOtp = createServerFn({ method: 'POST' })
       let status = '';
       try { status = String((JSON.parse(text) as { status?: unknown }).status ?? '').toLowerCase(); } catch { status = ''; }
       sent = res.ok && status === 'success';
-      if (!sent) console.error('APITXT send failed', res.status);
-    } catch { console.error('APITXT request error'); }
+      if (!sent) console.error('[OTP] APITXT send failed', { httpStatus: res.status, mobile: `XXXXXX${mobile.slice(-4)}`, body: text.replaceAll(otp, '******').slice(0, 500) });
+    } catch (e) { console.error('[OTP] APITXT request error:', e instanceof Error ? e.message : String(e)); }
 
     if (!sent) {
       await supabaseAdmin.from('otp_verifications').update({ status: 'failed' }).eq('id', id);
