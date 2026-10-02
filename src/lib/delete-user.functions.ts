@@ -10,7 +10,9 @@ export const adminDeleteUserPermanently = createServerFn({ method: 'POST' })
     const { data: isAdmin } = await context.supabase.rpc('has_role', { _user_id: context.userId, _role: 'admin' });
     if (!isAdmin) return { ok: false as const, error: 'Only the Master Admin can permanently delete users.' };
     if (data.userId === context.userId) return { ok: false as const, error: 'You cannot delete your own account.' };
-    const { supabaseAdmin: db } = await import('@/integrations/supabase/client.server');
+    let db: Awaited<typeof import('@/integrations/supabase/client.server')>['supabaseAdmin'];
+    try { db = (await import('@/integrations/supabase/client.server')).supabaseAdmin; }
+    catch (e) { console.error('delete-user: admin client unavailable', (e as Error).message); return { ok: false as const, error: 'Server is missing its private admin key (SUPABASE_SERVICE_ROLE_KEY), so users cannot be deleted on this deployment.' }; }
     const { data: roles } = await db.from('user_roles').select('role').eq('user_id', data.userId);
     const r = (roles ?? []).map((x) => x.role as string);
     if (r.includes('admin')) return { ok: false as const, error: 'Master Admin accounts cannot be deleted.' };
@@ -49,6 +51,6 @@ export const adminDeleteUserPermanently = createServerFn({ method: 'POST' })
 
     // Deleting the auth user revokes sessions and cascades profile, roles, KYC, notifications, interests, tickets.
     const { error } = await db.auth.admin.deleteUser(data.userId);
-    if (error) { console.error('deleteUser failed', error.message); return { ok: false as const, error: 'Could not delete the account. Please try again.' }; }
+    if (error) { console.error('deleteUser failed', error.message); return { ok: false as const, error: `Login account could not be removed: ${error.message}` }; }
     return { ok: true as const };
   });
