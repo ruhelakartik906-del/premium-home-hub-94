@@ -16,7 +16,7 @@ export function DeleteUserDialog({ user, onClose }: { user: DeleteTarget | null;
   const close = () => { if (busy) return; setTyped(''); setReason(''); setOther(''); onClose(); };
   const run = async () => {
     if (!user || typed !== 'DELETE') return; setBusy(true);
-    const r = await del({ data: { userId: user.id, confirm: 'DELETE', reason: reason === 'Other' ? other || 'Other' : reason || undefined } }).catch(() => ({ ok: false as const, error: 'Could not delete the user.' }));
+    const r = await del({ data: { userId: user.id, confirm: 'DELETE', reason: reason === 'Other' ? other || 'Other' : reason || undefined } }).catch((e: unknown) => { console.error('delete user failed', e); const m = e instanceof Error ? e.message : String(e); return { ok: false as const, error: /unauthori[sz]ed|401/i.test(m) ? 'Your session expired. Please sign in again and retry.' : `Could not delete the user: ${m.slice(0, 160)}` }; });
     setBusy(false);
     if (!r.ok) { toast.error(r.error); return; }
     qc.setQueryData(['admin-users'], (old: { id: string }[] | undefined) => old?.filter((x) => x.id !== user.id));
