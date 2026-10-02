@@ -21,7 +21,7 @@ export function DeleteUserDialog({ user, onClose }: { user: DeleteTarget | null;
     if (!r.ok) { toast.error(r.error); return; }
     qc.setQueryData(['admin-users'], (old: { id: string }[] | undefined) => old?.filter((x) => x.id !== user.id));
     qc.invalidateQueries({ queryKey: ['admin-users'] });
-    toast.success('User permanently deleted.'); setTyped(''); setReason(''); setOther(''); onClose();
+    toast.success('User permanently deleted successfully.'); setTyped(''); setReason(''); setOther(''); onClose();
   };
   const rows: [string, string | null][] = user ? [['Name', user.full_name], ['Email', user.email], ['Mobile', user.mobile], ['Role', user.role], ['Account status', user.status], ['Payment status', user.payment_status], ['User ID', user.id]] : [];
   return <Dialog open={!!user} onOpenChange={(o) => !o && close()}>

@@ -14,22 +14,38 @@ export const adminDeleteUserPermanently = createServerFn({ method: 'POST' })
     const { data: roles } = await db.from('user_roles').select('role').eq('user_id', data.userId);
     const r = (roles ?? []).map((x) => x.role as string);
     if (r.includes('admin')) return { ok: false as const, error: 'Master Admin accounts cannot be deleted.' };
-    const { data: p } = await db.from('profiles').select('status,verification_status').eq('id', data.userId).maybeSingle();
+    const { data: p } = await db.from('profiles').select('status,verification_status,mobile').eq('id', data.userId).maybeSingle();
 
-    // Audit first (audit_logs has no FK to users, so it survives).
-    const { error: auditErr } = await db.from('audit_logs').insert({ actor_id: context.userId, target_user_id: data.userId, action: 'PERMANENT_USER_DELETION', details: { role: r[0] ?? null, reason: data.reason || null, status: p?.status ?? null, verification: p?.verification_status ?? null } });
+    // Audit first (audit_logs has no FK to users, so it survives). Minimal, no personal data.
+    const { error: auditErr } = await db.from('audit_logs').insert({ actor_id: context.userId, target_user_id: data.userId, action: 'PERMANENT_USER_DELETION', details: { deletion_type: 'PERMANENT', role: r[0] ?? null, reason: data.reason || null, deleted_at: new Date().toISOString() } });
     if (auditErr) { console.error('audit failed', auditErr.message); return { ok: false as const, error: 'Could not record the audit entry; deletion cancelled.' }; }
 
-    // Private verification files + rows without cascading FKs.
-    const { data: docs } = await db.from('kyc_documents').select('file_path').eq('user_id', data.userId);
-    const paths = (docs ?? []).map((d) => d.file_path);
-    if (paths.length) { const { data: b } = await db.storage.listBuckets(); for (const bk of b ?? []) await db.storage.from(bk.id).remove(paths).catch(() => null); }
-    await db.from('kyc_documents').delete().eq('user_id', data.userId);
-    await db.from('saved_properties').delete().eq('user_id', data.userId);
-    // Keep seller listings (not deleted) but take them off the market.
-    await db.from('properties').update({ status: 'unpublished', admin_note: 'Seller account permanently deleted' }).eq('seller_id', data.userId);
-    // Financial records are retained for accounting, personal data removed.
-    await db.from('transactions').update({ payer_name: null, payer_email: null }).eq('user_id', data.userId);
+    const fail = (step: string, e: { message: string } | null) => { if (e) { console.error(`delete-user ${step} failed`, e.message); throw new Error(step); } };
+    try {
+      // Owned files: KYC paths plus anything stored under the user's own folder in every bucket.
+      const { data: docs } = await db.from('kyc_documents').select('file_path').eq('user_id', data.userId);
+      const { data: buckets } = await db.storage.listBuckets();
+      for (const bk of buckets ?? []) {
+        const { data: files } = await db.storage.from(bk.id).list(data.userId, { limit: 1000 });
+        const paths = [...(docs ?? []).map((d) => d.file_path), ...(files ?? []).map((f) => `${data.userId}/${f.name}`)];
+        if (paths.length) await db.storage.from(bk.id).remove(paths).catch(() => null);
+      }
+      fail('documents', (await db.from('kyc_documents').delete().eq('user_id', data.userId)).error);
+      fail('saved', (await db.from('saved_properties').delete().eq('user_id', data.userId)).error);
+      // Seller properties and their dependent records are removed.
+      const { data: props } = await db.from('properties').select('id').eq('seller_id', data.userId);
+      const ids = (props ?? []).map((x) => x.id);
+      if (ids.length) {
+        fail('property interests', (await db.from('interests').delete().in('property_id', ids)).error);
+        fail('property saves', (await db.from('saved_properties').delete().in('property_id', ids)).error);
+        fail('properties', (await db.from('properties').delete().in('id', ids)).error);
+      }
+      if (p?.mobile) fail('otp', (await db.from('otp_verifications').delete().eq('mobile', p.mobile)).error);
+      // Financial records are retained for accounting, personal data removed.
+      fail('transactions', (await db.from('transactions').update({ payer_name: null, payer_email: null }).eq('user_id', data.userId)).error);
+    } catch (e) {
+      return { ok: false as const, error: `Deletion stopped at "${(e as Error).message}". The account was kept; please try again.` };
+    }
 
     // Deleting the auth user revokes sessions and cascades profile, roles, KYC, notifications, interests, tickets.
     const { error } = await db.auth.admin.deleteUser(data.userId);
