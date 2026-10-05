@@ -154,14 +154,14 @@ function FileDrop({ label, hint, accept, multiple, files, onChange, image }: { l
 }
 
 export type EditableProperty = { id: string; title: string; market: string; country_code: string; currency: string; region: string | null; city: string | null; locality: string | null; postal_code: string | null; category_id: string | null; property_type: string; price: number; area_sqft: number | null; beds: number | null; baths: number | null; description: string | null; amenities: string[]; cover_url: string | null; gallery: string[]; documents: string[]; status: string; country?: string };
-export function ListingForm({ me, admin, edit, onDone }: { me: Me; admin?: boolean; edit?: EditableProperty; onDone?: () => void }) {
+export function ListingForm({ me, admin, edit, onDone }: { me: Me; admin?: boolean; edit?: EditableProperty | undefined; onDone?: () => void }) {
   const qc = useQueryClient();
   const cats = useQuery({ queryKey: ['categories-active'], queryFn: async () => { const { data } = await supabase.from('categories').select('id,name').eq('active', true).order('name'); return data ?? []; } });
   const [cover, setCover] = useState<File[]>([]); const [gallery, setGallery] = useState<File[]>([]); const [docs, setDocs] = useState<File[]>([]);
   const [busy, setBusy] = useState(false); const [done, setDone] = useState('');
   const [keepCover, setKeepCover] = useState<string | null>(edit?.cover_url ?? null); const [keepGallery, setKeepGallery] = useState<string[]>(edit?.gallery ?? []); const [keepDocs, setKeepDocs] = useState<string[]>(edit?.documents ?? []);
   const countries = useCountries(); const [market, setMarket] = useState<'india' | 'international'>(edit?.market === 'international' ? 'international' : 'india'); const [cc, setCc] = useState(edit && edit.market === 'international' ? edit.country_code : ''); const [cur, setCur] = useState(edit && edit.market === 'international' ? edit.currency : '');
-  const moveImg = (i: number, d: number) => setKeepGallery((g) => { const n = [...g]; const j = i + d; if (j < 0 || j >= n.length) return g; [n[i], n[j]] = [n[j], n[i]]; return n; });
+  const moveImg = (i: number, d: number) => setKeepGallery((g) => { const n = [...g]; const j = i + d; if (j < 0 || j >= n.length) return g; const t = n[i]!; n[i] = n[j]!; n[j] = t; return n; });
   const intlCountries = (countries.data ?? []).filter((c) => c.code !== 'IN'); const curList = [...new Set((countries.data ?? []).map((c) => c.currency))].sort();
   const save = async (form: HTMLFormElement, status: string) => {
     if (market === 'international' && !cc) { toast.error('Please choose the country for this international listing.'); return; }
