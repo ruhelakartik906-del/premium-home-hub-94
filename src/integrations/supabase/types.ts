@@ -605,6 +605,8 @@ export type Database = {
           country_code: string
           cover_url: string | null
           created_at: string
+          created_by: string | null
+          created_by_role: string
           currency: string
           description: string | null
           documents: string[]
@@ -640,6 +642,8 @@ export type Database = {
           country_code?: string
           cover_url?: string | null
           created_at?: string
+          created_by?: string | null
+          created_by_role?: string
           currency?: string
           description?: string | null
           documents?: string[]
@@ -675,6 +679,8 @@ export type Database = {
           country_code?: string
           cover_url?: string | null
           created_at?: string
+          created_by?: string | null
+          created_by_role?: string
           currency?: string
           description?: string | null
           documents?: string[]
