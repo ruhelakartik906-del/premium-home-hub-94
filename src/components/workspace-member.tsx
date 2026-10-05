@@ -131,7 +131,7 @@ function SellerProperties({ me }: { me: Me }) {
   </Panel>;
 }
 
-async function uploadFiles(bucket: 'property-media' | 'property-docs', uid: string, files: File[]) {
+export async function uploadFiles(bucket: 'property-media' | 'property-docs', uid: string, files: File[]) {
   const out: string[] = [];
   for (const file of files) {
     const path = `${uid}/${crypto.randomUUID()}-${file.name.replace(/[^\w.-]+/g, '_').slice(-80)}`;
@@ -153,20 +153,23 @@ function FileDrop({ label, hint, accept, multiple, files, onChange, image }: { l
   </div>;
 }
 
-function ListingForm({ me }: { me: Me }) {
+export type EditableProperty = { id: string; title: string; market: string; country_code: string; currency: string; region: string | null; city: string | null; locality: string | null; postal_code: string | null; category_id: string | null; property_type: string; price: number; area_sqft: number | null; beds: number | null; baths: number | null; description: string | null; amenities: string[]; cover_url: string | null; gallery: string[]; documents: string[]; status: string; country?: string };
+export function ListingForm({ me, admin, edit, onDone }: { me: Me; admin?: boolean; edit?: EditableProperty; onDone?: () => void }) {
   const qc = useQueryClient();
   const cats = useQuery({ queryKey: ['categories-active'], queryFn: async () => { const { data } = await supabase.from('categories').select('id,name').eq('active', true).order('name'); return data ?? []; } });
   const [cover, setCover] = useState<File[]>([]); const [gallery, setGallery] = useState<File[]>([]); const [docs, setDocs] = useState<File[]>([]);
   const [busy, setBusy] = useState(false); const [done, setDone] = useState('');
-  const countries = useCountries(); const [market, setMarket] = useState<'india' | 'international'>('india'); const [cc, setCc] = useState(''); const [cur, setCur] = useState('');
+  const [keepCover, setKeepCover] = useState<string | null>(edit?.cover_url ?? null); const [keepGallery, setKeepGallery] = useState<string[]>(edit?.gallery ?? []); const [keepDocs, setKeepDocs] = useState<string[]>(edit?.documents ?? []);
+  const countries = useCountries(); const [market, setMarket] = useState<'india' | 'international'>(edit?.market === 'international' ? 'international' : 'india'); const [cc, setCc] = useState(edit && edit.market === 'international' ? edit.country_code : ''); const [cur, setCur] = useState(edit && edit.market === 'international' ? edit.currency : '');
+  const moveImg = (i: number, d: number) => setKeepGallery((g) => { const n = [...g]; const j = i + d; if (j < 0 || j >= n.length) return g; [n[i], n[j]] = [n[j], n[i]]; return n; });
   const intlCountries = (countries.data ?? []).filter((c) => c.code !== 'IN'); const curList = [...new Set((countries.data ?? []).map((c) => c.currency))].sort();
-  const save = async (form: HTMLFormElement, status: 'draft' | 'pending') => {
+  const save = async (form: HTMLFormElement, status: string) => {
     if (market === 'international' && !cc) { toast.error('Please choose the country for this international listing.'); return; }
     if (market === 'international') { const fd = new FormData(form); if (!cur || !String(fd.get('region') ?? '').trim() || !String(fd.get('city') ?? '').trim()) { toast.error('International listings need a region, city and currency.'); return; } }
-    if (status === 'pending') {
+    if (status !== 'draft') {
       if (!form.reportValidity()) return;
-      if (!cover.length) { toast.error('Please add a cover image.'); return; }
-      if (!docs.length) { toast.error('Please upload at least one ownership / proof document.'); return; }
+      if (!cover.length && !keepCover) { toast.error('Please add a cover image.'); return; }
+      if (!admin && !docs.length && !keepDocs.length) { toast.error('Please upload at least one ownership / proof document.'); return; }
     }
     const f = new FormData(form); setBusy(true);
     try {
@@ -174,11 +177,13 @@ function ListingForm({ me }: { me: Me }) {
       const galleryUrls = await uploadFiles('property-media', me.user.id, gallery);
       const docPaths = await uploadFiles('property-docs', me.user.id, docs);
       const num = (k: string) => (f.get(k) ? Number(f.get(k)) : null);
-      const { error } = await supabase.from('properties').insert({ seller_id: me.user.id, status, image: 'villa', cover_url: coverUrl ?? null, gallery: galleryUrls, documents: docPaths, title: String(f.get('title') || 'Untitled property').slice(0, 160), market, country_code: market === 'india' ? 'IN' : cc || 'AE', currency: market === 'india' ? 'INR' : cur || 'USD', region: String(f.get('region') ?? '').slice(0, 120) || null, city: String(f.get('city') ?? '').slice(0, 120) || null, locality: String(f.get('locality') ?? '').slice(0, 200) || null, postal_code: String(f.get('postal') ?? '').slice(0, 20) || null, location: [f.get('locality'), f.get('city'), f.get('region'), market === 'international' ? intlCountries.find((c) => c.code === cc)?.name : null].filter(Boolean).join(', ').slice(0, 160) || '—', category_id: String(f.get('category') || '') || null, property_type: String(f.get('type') || 'Villa'), price: num('price') ?? 0, area_sqft: num('area'), beds: num('beds'), baths: num('baths'), description: String(f.get('description') ?? '').slice(0, 4000), amenities: String(f.get('amenities') ?? '').split(',').map((s) => s.trim()).filter(Boolean).slice(0, 20) });
+      const payload = { image: 'villa', cover_url: coverUrl ?? keepCover ?? null, gallery: [...keepGallery, ...galleryUrls], documents: [...keepDocs, ...docPaths], title: String(f.get('title') || 'Untitled property').slice(0, 160), market, country_code: market === 'india' ? 'IN' : cc || 'AE', currency: market === 'india' ? 'INR' : cur || 'USD', region: String(f.get('region') ?? '').slice(0, 120) || null, city: String(f.get('city') ?? '').slice(0, 120) || null, locality: String(f.get('locality') ?? '').slice(0, 200) || null, postal_code: String(f.get('postal') ?? '').slice(0, 20) || null, location: [f.get('locality'), f.get('city'), f.get('region'), market === 'international' ? intlCountries.find((c) => c.code === cc)?.name : null].filter(Boolean).join(', ').slice(0, 160) || '—', category_id: String(f.get('category') || '') || null, property_type: String(f.get('type') || 'Villa'), price: num('price') ?? 0, area_sqft: num('area'), beds: num('beds'), baths: num('baths'), description: String(f.get('description') ?? '').slice(0, 4000), amenities: String(f.get('amenities') ?? '').split(',').map((s) => s.trim()).filter(Boolean).slice(0, 20) };
+      const { error } = edit ? await supabase.from('properties').update(status === edit.status ? payload : { ...payload, status }).eq('id', edit.id) : await supabase.from('properties').insert({ ...payload, status, seller_id: admin ? null : me.user.id });
       if (error) throw error;
-    } catch { setBusy(false); toast.error('Could not save the property. Please try again.'); return; }
+    } catch (e) { setBusy(false); toast.error(e instanceof Error && e.message ? `Could not save the property: ${e.message}` : 'Could not save the property. Please try again.'); return; }
     setBusy(false);
-    qc.invalidateQueries({ queryKey: ['seller-properties'] }); form.reset(); setCover([]); setGallery([]); setDocs([]); setDone(status);
+    ['seller-properties', 'admin-props', 'approved-properties'].forEach((k) => qc.invalidateQueries({ queryKey: [k] }));
+    if (onDone) { toast.success(edit ? 'Property updated' : status === 'published' ? 'Property published' : 'Property saved'); onDone(); return; } form.reset(); setCover([]); setGallery([]); setDocs([]); setDone(status);
     toast.success(status === 'draft' ? 'Saved as draft' : 'Submitted for admin review');
   };
   if (done) return <Panel><div className="empty-state"><BadgeCheck /><h3>{done === 'draft' ? 'Draft saved.' : 'Submitted for review.'}</h3><p>{done === 'draft' ? 'You can submit it anytime from My Properties.' : 'The Eliteoz team will check your documents. The property goes live only after approval — you will get a notification.'}</p><div className="form-actions"><Button variant="outline" onClick={() => setDone('')}>Add another</Button><Button asChild><SectionLink role="seller" slug="properties">My properties</SectionLink></Button></div></div></Panel>;
@@ -186,24 +191,24 @@ function ListingForm({ me }: { me: Me }) {
     <div className="form-section"><span className="eyebrow">STEP 1</span><h2>Property market</h2><p className="muted">Where is this asset located?</p></div>
     <div className="market-choice"><button type="button" className={market === 'india' ? 'active' : ''} onClick={() => setMarket('india')}><strong>INDIA</strong><small>Priced in INR</small></button><button type="button" className={market === 'international' ? 'active' : ''} onClick={() => setMarket('international')}><strong>INTERNATIONAL</strong><small>Any supported country, local currency</small></button></div>
     <div className="form-grid">
-      {market === 'international' && <><div className="field"><label>Country *</label><input className="field-input" list="eo-countries" placeholder="Type to search" required onChange={(e) => { const c = intlCountries.find((x) => x.name.toLowerCase() === e.target.value.toLowerCase()); setCc(c?.code ?? ''); if (c) setCur(c.currency); }} /><datalist id="eo-countries">{intlCountries.map((c) => <option key={c.code} value={c.name} />)}</datalist></div>
+      {market === 'international' && <><div className="field"><label>Country *</label><input className="field-input" list="eo-countries" placeholder="Type to search" required defaultValue={edit?.country ?? (edit ? intlCountries.find((c) => c.code === edit.country_code)?.name : undefined)} onChange={(e) => { const c = intlCountries.find((x) => x.name.toLowerCase() === e.target.value.toLowerCase()); setCc(c?.code ?? ''); if (c) setCur(c.currency); }} /><datalist id="eo-countries">{intlCountries.map((c) => <option key={c.code} value={c.name} />)}</datalist></div>
         <div className="field"><label>Currency *</label><select className="field-input" value={cur} onChange={(e) => setCur(e.target.value)} required><option value="" disabled>Select currency</option>{curList.map((c) => <option key={c}>{c}</option>)}</select></div></>}
-      <div className="field"><label>{market === 'india' ? 'State *' : 'State / Province / Region *'}</label><input name="region" className="field-input" required /></div>
-      <div className="field"><label>City *</label><input name="city" className="field-input" required /></div>
-      <div className="field"><label>Locality / Address *</label><input name="locality" className="field-input" required /></div>
-      <div className="field"><label>Postal code</label><input name="postal" className="field-input" maxLength={20} /></div>
+      <div className="field"><label>{market === 'india' ? 'State *' : 'State / Province / Region *'}</label><input name="region" defaultValue={edit?.region ?? undefined} className="field-input" required /></div>
+      <div className="field"><label>City *</label><input name="city" defaultValue={edit?.city ?? undefined} className="field-input" required /></div>
+      <div className="field"><label>Locality / Address *</label><input name="locality" defaultValue={edit?.locality ?? undefined} className="field-input" required /></div>
+      <div className="field"><label>Postal code</label><input name="postal" defaultValue={edit?.postal_code ?? undefined} className="field-input" maxLength={20} /></div>
     </div>
     <div className="form-section"><span className="eyebrow">STEP 2</span><h2>Property details</h2></div>
     <div className="form-grid">
-      <div className="field full"><label>Property title *</label><input name="title" className="field-input" required maxLength={160} placeholder="e.g. The Solstice Residence" /></div>
-      <div className="field"><label>Category *</label><select name="category" className="field-input" required defaultValue=""><option value="" disabled>Select category</option>{(cats.data ?? []).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
-      <div className="field"><label>Property type *</label><select name="type" className="field-input">{['Villa', 'Penthouse', 'Apartment', 'Estate', 'Farmhouse', 'Office', 'Retail', 'Plot', 'Warehouse', 'Hotel'].map((t) => <option key={t}>{t}</option>)}</select></div>
-      <div className="field"><label>Asking price ({market === 'india' ? '₹' : cur || 'local currency'}) *</label><input name="price" type="number" min={0} className="field-input" required placeholder="125000000" /></div>
-      <div className="field"><label>Area (sq.ft)</label><input name="area" type="number" min={0} className="field-input" /></div>
-      <div className="field"><label>Bedrooms</label><input name="beds" type="number" min={0} className="field-input" /></div>
-      <div className="field"><label>Bathrooms</label><input name="baths" type="number" min={0} className="field-input" /></div>
-      <div className="field full"><label>Description</label><textarea name="description" rows={4} className="field-input" placeholder="What makes this property special?" /></div>
-      <div className="field full"><label>Amenities (comma separated)</label><input name="amenities" className="field-input" placeholder="Private pool, Garden, Parking" /></div>
+      <div className="field full"><label>Property title *</label><input name="title" defaultValue={edit?.title ?? undefined} className="field-input" required maxLength={160} placeholder="e.g. The Solstice Residence" /></div>
+      <div className="field"><label>Category *</label><select name="category" className="field-input" required defaultValue={edit?.category_id ?? ""}><option value="" disabled>Select category</option>{(cats.data ?? []).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
+      <div className="field"><label>Property type *</label><select name="type" className="field-input" defaultValue={edit?.property_type}>{['Villa', 'Penthouse', 'Apartment', 'Estate', 'Farmhouse', 'Office', 'Retail', 'Plot', 'Warehouse', 'Hotel'].map((t) => <option key={t}>{t}</option>)}</select></div>
+      <div className="field"><label>Asking price ({market === 'india' ? '₹' : cur || 'local currency'}) *</label><input name="price" defaultValue={edit?.price ?? undefined} type="number" min={0} className="field-input" required placeholder="125000000" /></div>
+      <div className="field"><label>Area (sq.ft)</label><input name="area" defaultValue={edit?.area_sqft ?? undefined} type="number" min={0} className="field-input" /></div>
+      <div className="field"><label>Bedrooms</label><input name="beds" defaultValue={edit?.beds ?? undefined} type="number" min={0} className="field-input" /></div>
+      <div className="field"><label>Bathrooms</label><input name="baths" defaultValue={edit?.baths ?? undefined} type="number" min={0} className="field-input" /></div>
+      <div className="field full"><label>Description</label><textarea name="description" defaultValue={edit?.description ?? undefined} rows={4} className="field-input" placeholder="What makes this property special?" /></div>
+      <div className="field full"><label>Amenities (comma separated)</label><input name="amenities" defaultValue={edit?.amenities.join(", ")} className="field-input" placeholder="Private pool, Garden, Parking" /></div>
     </div>
     <div className="form-section"><span className="eyebrow">STEP 3</span><h2>Photos</h2><p className="muted">These are shown to buyers once the property is approved.</p></div>
     <div className="form-grid">
