@@ -1,11 +1,9 @@
 import { Link } from '@tanstack/react-router';
 import indiaImg from '@/assets/property-estate.jpg';
-import intlImg from '@/assets/property-penthouse.jpg';
 
 export function MarketSplit() {
   const sides: [string, string, string, string][] = [
     ['India', 'IN', "Explore ultra-premium assets across India's leading locations.", indiaImg],
-    ['Global', 'WORLD', 'Explore ultra-premium assets available across global markets.', intlImg],
   ];
   return (
     <section className="hg-split" aria-label="India and global assets">
