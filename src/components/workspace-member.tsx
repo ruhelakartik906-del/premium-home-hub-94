@@ -79,7 +79,7 @@ function Explore() {
     {sel(type, setType, 'Property type', pair(uniq((p) => p.type)))}{sel(cat, setCat, 'All categories', pair(uniq((p) => p.category)))}{sel(cur, setCur, 'Currency', pair(uniq((p) => p.currency)))}
     <input className="field-input" type="number" min={0} placeholder="Min ₹ Cr" value={min} onChange={(e) => setMin(e.target.value)} /><input className="field-input" type="number" min={0} placeholder="Max ₹ Cr" value={max} onChange={(e) => setMax(e.target.value)} />
     {cmp.length > 0 && <Button asChild variant="outline"><SectionLink role="buyer" slug="compare">Compare ({cmp.length})</SectionLink></Button>}</div>
-    <p className="muted">{list.length} of {all.length} properties · price range compares the INR value (converted for international listings, approximate).</p>
+    <p className="muted">{list.length} of {all.length} properties · price range compares the INR value (converted for global listings, approximate).</p>
     <div className="property-grid compact">{list.map((p) => <PropertyCard key={p.id} property={p} compared={cmp.includes(p.id)} onCompare={toggle} />)}</div>{!list.length && !props.isLoading && <div className="empty-state"><p>No properties match your search.</p></div>}</>;
 }
 
@@ -164,8 +164,8 @@ export function ListingForm({ me, admin, edit, onDone }: { me: Me; admin?: boole
   const moveImg = (i: number, d: number) => setKeepGallery((g) => { const n = [...g]; const j = i + d; if (j < 0 || j >= n.length) return g; const t = n[i]!; n[i] = n[j]!; n[j] = t; return n; });
   const intlCountries = (countries.data ?? []).filter((c) => c.code !== 'IN'); const curList = [...new Set((countries.data ?? []).map((c) => c.currency))].sort();
   const save = async (form: HTMLFormElement, status: string) => {
-    if (market === 'international' && !cc) { toast.error('Please choose the country for this international listing.'); return; }
-    if (market === 'international') { const fd = new FormData(form); if (!cur || !String(fd.get('region') ?? '').trim() || !String(fd.get('city') ?? '').trim()) { toast.error('International listings need a region, city and currency.'); return; } }
+    if (market === 'international' && !cc) { toast.error('Please choose the country for this global listing.'); return; }
+    if (market === 'international') { const fd = new FormData(form); if (!cur || !String(fd.get('region') ?? '').trim() || !String(fd.get('city') ?? '').trim()) { toast.error('Global listings need a region, city and currency.'); return; } }
     if (status !== 'draft') {
       if (!form.reportValidity()) return;
       if (!cover.length && !keepCover) { toast.error('Please add a cover image.'); return; }
@@ -189,7 +189,7 @@ export function ListingForm({ me, admin, edit, onDone }: { me: Me; admin?: boole
   if (done) return <Panel><div className="empty-state"><BadgeCheck /><h3>{done === 'draft' ? 'Draft saved.' : 'Submitted for review.'}</h3><p>{done === 'draft' ? 'You can submit it anytime from My Properties.' : 'The Eliteoz team will check your documents. The property goes live only after approval — you will get a notification.'}</p><div className="form-actions"><Button variant="outline" onClick={() => setDone('')}>Add another</Button><Button asChild><SectionLink role="seller" slug="properties">My properties</SectionLink></Button></div></div></Panel>;
   return <form className="panel listing-form" onSubmit={(e) => { e.preventDefault(); save(e.currentTarget, 'pending'); }}>
     <div className="form-section"><span className="eyebrow">STEP 1</span><h2>Property market</h2><p className="muted">Where is this asset located?</p></div>
-    <div className="market-choice"><button type="button" className={market === 'india' ? 'active' : ''} onClick={() => setMarket('india')}><strong>INDIA</strong><small>Priced in INR</small></button><button type="button" className={market === 'international' ? 'active' : ''} onClick={() => setMarket('international')}><strong>INTERNATIONAL</strong><small>Any supported country, local currency</small></button></div>
+    <div className="market-choice"><button type="button" className={market === 'india' ? 'active' : ''} onClick={() => setMarket('india')}><strong>INDIA</strong><small>Priced in INR</small></button><button type="button" className={market === 'international' ? 'active' : ''} onClick={() => setMarket('international')}><strong>GLOBAL</strong><small>Any supported country, local currency</small></button></div>
     <div className="form-grid">
       {market === 'international' && <><div className="field"><label>Country *</label><input className="field-input" list="eo-countries" placeholder="Type to search" required defaultValue={edit?.country ?? (edit ? intlCountries.find((c) => c.code === edit.country_code)?.name : undefined)} onChange={(e) => { const c = intlCountries.find((x) => x.name.toLowerCase() === e.target.value.toLowerCase()); setCc(c?.code ?? ''); if (c) setCur(c.currency); }} /><datalist id="eo-countries">{intlCountries.map((c) => <option key={c.code} value={c.name} />)}</datalist></div>
         <div className="field"><label>Currency *</label><select className="field-input" value={cur} onChange={(e) => setCur(e.target.value)} required><option value="" disabled>Select currency</option>{curList.map((c) => <option key={c}>{c}</option>)}</select></div></>}

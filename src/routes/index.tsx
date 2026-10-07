@@ -12,9 +12,9 @@ export const Route = createFileRoute('/')({
   errorComponent: () => <div className="section container"><h2>Something went wrong. Please refresh.</h2></div>,
   head: () => ({
     meta: [
-      { title: 'ELITEOZ | Private network for ₹50 Crore+ assets' },
-      { name: 'description', content: 'Eliteoz is an exclusive, invitation-based portal for off-market, verified ultra-premium assets valued at ₹50 Crore and above.' },
-      { property: 'og:title', content: 'ELITEOZ | Where ₹50 Crore+ assets change hands in complete silence' },
+      { title: 'ELITEOZ | The Private Realm of Ultra-Premium Assets' },
+      { name: 'description', content: 'Eliteoz is an exclusive, invitation-based portal for off-market, verified ultra-premium assets valued at INR 25 Crore & above.' },
+      { property: 'og:title', content: 'ELITEOZ | Where INR 25 Cr.+ assets change hands in complete silence' },
       { property: 'og:description', content: 'A private network connecting verified owners and qualified buyers of ultra-premium assets with complete discretion.' },
       { property: 'og:type', content: 'website' },
       { name: 'twitter:card', content: 'summary_large_image' },
@@ -26,21 +26,22 @@ export const Route = createFileRoute('/')({
 const NoirHeader = PublicHeader;
 
 const faqs: [string, string][] = [
-  ['What is Eliteoz?', 'Eliteoz is an exclusive, invitation-based network for ultra-premium assets valued at INR 50 Crores and above, connecting verified owners and qualified buyers privately.'],
-  ['What does the ₹50 Crore threshold mean?', 'Eliteoz considers only assets valued at INR 50 Crores and above. This keeps the network focused on serious owners, qualified buyers and significant transactions.'],
-  ['Is Eliteoz a public property portal?', 'No. Eliteoz is a private network. There are no public property listings.'],
+  ['What is Eliteoz?', 'Eliteoz is an exclusive, invitation-based network for ultra-premium assets valued at INR 25 Crore & above, connecting verified owners and qualified buyers privately.'],
+  ['What does the ₹25 Crore threshold mean?', 'Eliteoz considers only assets valued at INR 25 Crore & above. This keeps the network focused on serious owners, qualified buyers and significant transactions.'],
+  ['Is Eliteoz a public property portal?', 'No. Eliteoz is a private network. There are no public asset listings.'],
   ['Who can register?', 'Owners of qualifying assets, serious buyers, and their authorized representatives can register as a Buyer or Seller.'],
-  ['Can anyone view properties?', 'No. Property information is visible only to registered, verified and activated members, according to their role.'],
+  ['Can anyone view assets?', 'No. Asset information is visible only to registered, verified and activated members, according to their role.'],
   ['How does buyer access work?', 'Buyers register, complete verification and activation, and then receive access to qualifying opportunities.'],
   ['How does seller access work?', 'Sellers register, complete verification and activation, and then present qualifying assets within the private environment. Each asset is reviewed before it is shown to members.'],
   ['Why is verification required?', 'Verification keeps the network limited to genuine participants and genuine mandates.'],
   ['Does registration automatically provide dashboard access?', 'No. Registration is the first step. Access follows verification and completion of the applicable activation requirements.'],
   ['What happens if payment is incomplete?', 'Your registration is saved, but dashboard access stays locked until the activation payment is completed.'],
   ['How is private information controlled?', 'Private information is visible only according to account status, role and authorization. Identity documents are reviewed only by the Eliteoz team.'],
-  ['What types of assets can be enlisted?', 'Companies, factories, industries, commercial buildings, luxury houses, farmhouses, plots, residences and other high-value holdings valued at ₹50 Crores and above.'],
+  ['What types of assets can be enlisted?', 'Companies, factories, industries, commercial buildings, luxury houses, farmhouses, plots, residences and other high-value holdings valued at ₹25 Crore & above.'],
   ['Can an authorized representative register?', 'Yes. Authorized representatives of owners or buyers may register on their behalf.'],
 ];
 
+const way = ['No Market Noise.', 'Verified Mandates Only.', 'No Broker Chains.', 'No Casual Enquiries.', 'Principal to Principal.', 'Your identity, your asset, and your transaction are protected with absolute secrecy.', 'Buyer & Seller confidentiality is non-negotiable.', 'If you own a trophy asset worth over INR 25 Crore or wish to acquire one in complete privacy, you have come to the right place.', 'We value your time and your privacy.'];
 const assets = ['Companies', 'Factories', 'Industries', 'Commercial Buildings', 'Luxury Houses', 'Farmhouses', 'Plots', 'Residences', 'Other High-Value Holdings'];
 const owners = ['Trophy asset owners', 'HNI / UHNI families', 'Industrialists', 'Promoters', 'Family offices', 'Authorized representatives'];
 const buyers = ['Serious investors', 'HNI / UHNI buyers', 'Industrial groups', 'Family offices', 'Strategic acquirers', 'Authorized representatives'];
@@ -56,22 +57,29 @@ function Home() {
           <img src={heroImg} alt="" width={1920} height={1088} fetchPriority="high" decoding="async" />
           <div className="nx-wrap nx-hero-inner nx-fade">
             <span className="nx-om" lang="sa">ॐ गणेशाय नमः</span>
-            <span className="nx-eyebrow">Premium Properties • India &amp; International</span>
-            <h1>Exceptional Properties.<br />Trusted Connections.</h1>
+            <span className="nx-eyebrow">Off-Market. Discreet. Genuine.</span>
+            <h1 className="nx-hero-title">Eliteoz - The Private Realm of Ultra-Premium Assets</h1>
             <span className="nx-rule" />
-            <span className="nx-hero-50">₹50 CRORE+</span>
-            <p className="nx-lead">Discover premium properties across India and international markets through the Eliteoz network.</p>
+            <p className="nx-lead">Absolute Confidentiality for Buyers &amp; Sellers Where Assets Worth INR 25 Cr. &amp; Above Change Hands in Complete Silence.</p>
             <div className="nx-ctas">
-              <Link to="/properties" className="nx-btn">Explore Properties</Link>
-              <Link to="/register" className="nx-btn hg-btn-outline">Become a Member</Link>
+              <Link to="/properties" className="nx-btn">Explore Assets</Link>
+              <Link to="/register" className="nx-btn hg-btn-outline">Private Access</Link>
             </div>
           </div>
         </section>
 
         <section className="nx-dark nx-sec hg-intro">
-          <div className="nx-wrap">
-            <span className="nx-eyebrow">India &amp; International Properties</span>
-            <p className="nx-muted hg-sub">Explore premium properties across India and selected international markets, all available through one private platform.</p>
+          <div className="nx-wrap nx-split">
+            <div className="nx-body">
+              <p className="nx-quote">Absolute Confidentiality for Buyers &amp; Sellers.</p>
+              <p>Eliteoz is not for everyone. And that&apos;s intentional.</p>
+              <p>We are a private, by-invitation-only network for UHNI individuals, families, and serious investors who value privacy over publicity.</p>
+              <p>We operate exclusively in the realm of ultra-premium assets and properties valued at INR 25 Crore &amp; above.</p>
+            </div>
+            <div>
+              <span className="nx-eyebrow">The Eliteoz Way</span>
+              <ul className="nx-way">{way.map((w) => <li key={w}>{w}</li>)}</ul>
+            </div>
           </div>
         </section>
         <MarketSplit />
@@ -82,7 +90,7 @@ function Home() {
             <div><span className="nx-eyebrow">Not a Property Portal.</span><h2>Not Listed.<br />Not Advertised.<br />Not Open to Everyone.</h2></div>
             <div className="nx-body">
               <p>Eliteoz is a private network — not a public marketplace.</p>
-              <p>There are no public property listings, unnecessary enquiries or uncontrolled exposure.</p>
+              <p>There are no public asset listings, unnecessary enquiries or uncontrolled exposure.</p>
               <p>Access is restricted to registered, verified and appropriately activated participants.</p>
               <SelectiveGrid />
             </div>
@@ -92,11 +100,11 @@ function Home() {
         <section className="nx-dark nx-sec nx-threshold">
           <div className="nx-wrap" data-reveal>
             <span className="nx-eyebrow">The Eliteoz Threshold</span>
-            <span className="nx-big nx-big-lit">₹50 CRORE+</span>
+            <span className="nx-big nx-big-lit">₹25 CRORE+</span>
             <div className="nx-split">
               <h2>A Different Class of Asset.<br />A Different Standard of Access.</h2>
               <div className="nx-body">
-                <p>Eliteoz operates exclusively within the ultra-premium segment, focusing on assets valued at INR 50 Crores and above.</p>
+                <p>Eliteoz operates exclusively within the ultra-premium segment, focusing on assets valued at INR 25 Crore &amp; above.</p>
                 <p className="nx-quote">This threshold is intentional.</p>
                 <p>It keeps the network focused on serious owners, qualified buyers and significant transactions.</p>
               </div>
@@ -120,7 +128,7 @@ function Home() {
             <div className="nx-body">
               <p>Not intended for:</p>
               <ul className="nx-assets">{notFor.map((a) => <li key={a}>{a}</li>)}</ul>
-              <p className="nx-quote">If the requirement is below ₹50 Crores, Eliteoz may not be the right platform.</p>
+              <p className="nx-quote">If the requirement is below ₹25 Crore, Eliteoz may not be the right platform.</p>
             </div>
           </div>
         </section>
@@ -205,7 +213,7 @@ function Home() {
             <h2>For Those Who Value<br />Privacy Over Publicity.</h2>
             <p className="nx-muted">If you own a trophy asset or are looking to acquire one in complete privacy, you have arrived at the right place.</p>
             <div className="nx-ctas nx-center"><Link to="/register" className="nx-btn">Request Private Access</Link><Link to="/how-it-works" className="nx-btn-ghost">Learn How Eliteoz Works</Link></div>
-            <p className="nx-eyebrow nx-mt">Eliteoz — Where 50 Crore+ Assets Change Hands in Complete Silence.</p>
+            <p className="nx-eyebrow nx-mt">Eliteoz — Where INR 25 Cr. &amp; Above Assets Change Hands in Complete Silence.</p>
           </div>
         </section>
       </main>

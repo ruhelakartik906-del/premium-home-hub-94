@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { NoirPage, noirMeta } from '@/components/noir-page';
 
 export const Route = createFileRoute('/sellers')({
-  head: () => noirMeta('For Sellers | Eliteoz — Present your asset, preserve its privacy', 'Enlist ₹50 Crore+ assets under a private mandate, presented only to verified buyers.'),
+  head: () => noirMeta('For Sellers | Eliteoz — Present your asset, preserve its privacy', 'Enlist ₹25 Crore+ assets under a private mandate, presented only to verified buyers.'),
   component: () => (
     <NoirPage
       eyebrow="For Sellers"

@@ -96,7 +96,7 @@
 @media (max-width:480px){.alert-band{flex-wrap:wrap}.alert-band>div{flex:1 1 200px;min-width:0}}
 
 /* ===== Homepage — Noir Gold ===== */
-:root{--nx-black:oklch(.145 0 0);--nx-charcoal:oklch(.22 0 0);--nx-gold:oklch(.74 .06 75);--nx-ivory:oklch(.965 .005 75);--nx-taupe:oklch(.6 .02 70);--nx-serif:"Cormorant Garamond","DM Serif Display",Georgia,serif}
+:root{--nx-black:oklch(.2 .05 262);--nx-charcoal:oklch(.25 .04 262);--nx-gold:oklch(.74 .06 75);--nx-ivory:oklch(.965 .005 75);--nx-taupe:oklch(.6 .02 70);--nx-serif:"Cormorant Garamond","DM Serif Display",Georgia,serif}
 .nx{background:var(--nx-ivory);color:var(--nx-charcoal);font-family:Manrope,system-ui,sans-serif;overflow-x:hidden}
 .nx-wrap{width:min(1240px,100% - 3rem);margin-inline:auto}
 .nx h1,.nx h2,.nx h3{font-family:var(--nx-serif);font-weight:500;letter-spacing:-.01em;line-height:1.05;overflow-wrap:anywhere}
@@ -305,3 +305,16 @@
 @media (max-width:520px){.hg-why{grid-template-columns:1fr}.hg-tabs select{margin-left:0;width:100%}}
 @media (prefers-reduced-motion:reduce){.hg-globe,.hg-globe .hg-ring{animation:none}}
 .hg-intro{padding-bottom:3rem}.hg-side .nx-btn-ghost{margin-top:1rem}
+
+/* Hero copy + Eliteoz Way */
+.nx-hero .nx-hero-title{font-size:clamp(2.4rem,5.4vw,5rem);max-width:18ch}
+.nx-way{list-style:none;padding:0;margin:1rem 0 0;display:grid;gap:.1rem}
+.nx-way li{padding:.75rem 0 .75rem 1.4rem;border-bottom:1px solid oklch(.74 .06 75/.2);position:relative;color:oklch(.85 .01 75);line-height:1.5}
+.nx-way li::before{content:"";position:absolute;left:0;top:1.25rem;width:6px;height:6px;border:1px solid var(--nx-gold);transform:rotate(45deg)}
+/* Mobile readability + header */
+@media (max-width:640px){
+.nx-header-row{height:auto;min-height:64px;padding:.6rem 0 .7rem}.nx-logo img{height:44px}
+.nx-eyebrow{font-size:.8rem;letter-spacing:.2em}.nx-caption,.nx-why figcaption span,.hg-locs li,.nx-form label{font-size:.78rem}
+.nx-footer a,.nx-footer-bottom{font-size:.92rem}.nx-btn,.nx-btn-ghost{font-size:.8rem}.nx-login{font-size:.9rem}
+.nx-steps p,.nx-cols3 p,.nx-way li{font-size:1rem}
+}
