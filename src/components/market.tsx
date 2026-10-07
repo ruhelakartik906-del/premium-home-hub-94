@@ -22,7 +22,7 @@ export function MarketBadge({ market, country, code }: { market?: string | undef
   const intl = market === 'international';
   return (
     <span className={`market-badge ${intl ? 'intl' : ''}`}>
-      {intl ? <>{flagOf(code ?? '')} INTERNATIONAL · {country}</> : 'INDIA'}
+      {intl ? <>{flagOf(code ?? '')} GLOBAL · {country}</> : 'INDIA'}
     </span>
   );
 }
@@ -30,7 +30,7 @@ export function MarketBadge({ market, country, code }: { market?: string | undef
 export function MarketTabs({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   return (
     <div className="market-tabs" role="tablist">
-      {[['', 'All'], ['india', 'India'], ['international', 'International']].map(([v, l]) => (
+      {[['', 'All'], ['india', 'India'], ['international', 'Global']].map(([v, l]) => (
         <button key={v} type="button" role="tab" aria-selected={value === v} className={value === v ? 'active' : ''} onClick={() => onChange(v!)}>{l}</button>
       ))}
     </div>

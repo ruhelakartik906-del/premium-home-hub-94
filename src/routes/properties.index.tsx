@@ -11,10 +11,10 @@ export const Route = createFileRoute('/properties/')({
           <div className="nx-wrap">
             <span className="nx-eyebrow">Members Only</span>
             <h1 className="nx-page-title">Private Access Required</h1>
-            <p className="nx-page-intro">Eliteoz properties and mandates are available only to verified and activated members.</p>
+            <p className="nx-page-intro">Eliteoz assets and mandates are available only to verified and activated members.</p>
             <div className="nx-ctas nx-center">
               <Link to="/login" className="nx-btn">Log In</Link>
-              <Link to="/register" className="nx-btn-ghost">Become a Member</Link>
+              <Link to="/register" className="nx-btn-ghost">Private Access</Link>
             </div>
           </div>
         </section>

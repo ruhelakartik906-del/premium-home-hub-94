@@ -16,7 +16,7 @@ export const Route = createFileRoute('/privacy')({
         s('Data Retention', 'We retain information for as long as needed for the purposes above, including incomplete registrations, and as required by law.'),
         s('Account Suspension', 'Suspension restricts access but does not by itself delete your data.'),
         s('Your Rights', 'You may request access to, correction of, or deletion of your personal information, subject to legal and operational requirements.'),
-        s('Contact', 'Privacy questions: privacy@eliteoz.com'),
+        s('Contact', 'Privacy questions: Privacy@eliteoz.com'),
       ]} />
   ),
 });

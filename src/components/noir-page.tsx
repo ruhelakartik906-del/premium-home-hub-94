@@ -5,7 +5,7 @@ import { PageShell } from '@/components/eliteoz';
 export type NoirSection = { title: string; body: ReactNode };
 
 export function NoirPage({ eyebrow, title, intro, sections, aside, cta = true, legal = false, children }: { eyebrow: string; title: ReactNode; intro?: ReactNode; sections?: NoirSection[]; aside?: ReactNode; cta?: boolean | { label: string; to: '/register' | '/login' }; legal?: boolean; children?: ReactNode }) {
-  const ctaLink = typeof cta === 'object' ? cta : { label: 'Become a Member', to: '/register' as const };
+  const ctaLink = typeof cta === 'object' ? cta : { label: 'Private Access', to: '/register' as const };
   return (
     <PageShell>
       <main className="nx">

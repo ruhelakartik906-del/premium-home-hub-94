@@ -9,7 +9,7 @@ export const Route = createFileRoute('/terms')({
     <NoirPage legal cta={false} eyebrow="Legal" title="Terms & Conditions" intro="By registering with or using Eliteoz you agree to these terms."
       sections={[
         s('Eligibility', 'You must be at least 18 years old and legally able to enter binding agreements, or be an authorised representative of such a person or entity.'),
-        s('Asset Value Positioning', 'Eliteoz is intended for assets valued at ₹50 Crore and above. Eliteoz may decline mandates or members outside this positioning.'),
+        s('Asset Value Positioning', 'Eliteoz is intended for assets valued at ₹25 Crore & above. Eliteoz may decline mandates or members outside this positioning.'),
         s('Account Registration & Accurate Information', 'Users are responsible for providing accurate, complete and current information, including during mobile/email verification.'),
         s('Buyer and Seller Roles', 'Each account is registered as Buyer or Seller and receives access appropriate to that role.'),
         s('Account Verification', 'Eliteoz may suspend or restrict accounts where required information or verification is incomplete, inaccurate, suspicious, or otherwise fails platform requirements.'),
@@ -25,7 +25,7 @@ export const Route = createFileRoute('/terms')({
         s('Platform Availability & Third-Party Services', 'The platform is provided as available. Some features depend on third-party providers outside our control.'),
         s('Limitation of Liability', 'To the extent permitted by law, Eliteoz is not liable for indirect or consequential losses arising from use of the platform or transactions between members.'),
         s('Governing Law', 'These terms are governed by the laws of India, with courts at New Delhi having jurisdiction.'),
-        s('Contact', 'privacy@eliteoz.com'),
+        s('Contact', 'Privacy@eliteoz.com'),
       ]} />
   ),
 });

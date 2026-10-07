@@ -15,13 +15,12 @@ function Contact() {
       title="A Private Conversation."
       cta={false}
       sections={[
-        { title: 'Phone', body: <p><a href="tel:+919315089933">9315089933</a></p> },
-        { title: 'Email', body: <p><a href="mailto:privacy@eliteoz.com">privacy@eliteoz.com</a><br /><a href="mailto:satish@eliteoz.com">satish@eliteoz.com</a></p> },
+        { title: 'Email', body: <p><a href="mailto:Privacy@eliteoz.com">Privacy@eliteoz.com</a></p> },
         { title: 'Registered Address', body: <p>3/4/28, Gopi Nath Bazar,<br />Delhi Cantt,<br />New Delhi — 110010</p> },
         { title: 'Head Office', body: <p>14 School Lane,<br />Barakhamba Avenue, Connaught Place,<br />New Delhi — 110001</p> },
       ]}
     >
-      <form className="nx-form" onSubmit={(e) => { e.preventDefault(); setNote('Messages cannot be sent from the website yet. Please write to privacy@eliteoz.com or call 9315089933.'); }}>
+      <form className="nx-form" onSubmit={(e) => { e.preventDefault(); setNote('Messages cannot be sent from the website yet. Please write to Privacy@eliteoz.com.'); }}>
         <label>Name<input required autoComplete="name" /></label>
         <label>Email<input type="email" required autoComplete="email" /></label>
         <label>Mobile<input type="tel" required autoComplete="tel" /></label>
