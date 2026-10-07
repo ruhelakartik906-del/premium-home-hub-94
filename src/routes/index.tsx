@@ -45,7 +45,7 @@ const way = ['No Market Noise.', 'Verified Mandates Only.', 'No Broker Chains.',
 const assets = ['Companies', 'Factories', 'Industries', 'Commercial Buildings', 'Luxury Houses', 'Farmhouses', 'Plots', 'Residences', 'Other High-Value Holdings'];
 const owners = ['Trophy asset owners', 'HNI / UHNI families', 'Industrialists', 'Promoters', 'Family offices', 'Authorized representatives'];
 const buyers = ['Serious investors', 'HNI / UHNI buyers', 'Industrial groups', 'Family offices', 'Strategic acquirers', 'Authorized representatives'];
-const notFor = ['Casual property browsing', 'Mass-market property enquiries', 'Unverified intermediaries', 'Low-value property searches', 'Unnecessary broker chains', 'Public marketplace-style transactions'];
+const notFor = ['Casual asset browsing', 'Mass-market asset enquiries', 'Unverified intermediaries', 'Low-value asset searches', 'Unnecessary broker chains', 'Public marketplace-style transactions'];
 
 function Home() {
   useReveal();
@@ -74,7 +74,7 @@ function Home() {
               <p className="nx-quote">Absolute Confidentiality for Buyers &amp; Sellers.</p>
               <p>Eliteoz is not for everyone. And that&apos;s intentional.</p>
               <p>We are a private, by-invitation-only network for UHNI individuals, families, and serious investors who value privacy over publicity.</p>
-              <p>We operate exclusively in the realm of ultra-premium assets and properties valued at INR 25 Crore &amp; above.</p>
+              <p>We operate exclusively in the realm of ultra-premium assets valued at INR 25 Crore &amp; above.</p>
             </div>
             <div>
               <span className="nx-eyebrow">The Eliteoz Way</span>
