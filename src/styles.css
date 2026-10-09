@@ -318,3 +318,9 @@
 .nx-footer a,.nx-footer-bottom{font-size:.92rem}.nx-btn,.nx-btn-ghost{font-size:.8rem}.nx-login{font-size:.9rem}
 .nx-steps p,.nx-cols3 p,.nx-way li{font-size:1rem}
 }
+
+/* REGD brand mark */
+.nx-logo { display: inline-flex; align-items: center; gap: .55rem; }
+.nx-footer-brand { display: inline-flex; align-items: center; gap: .6rem; }
+.nx-regd { font-size: .6rem; letter-spacing: .22em; font-weight: 600; color: var(--gold, currentColor); border: 1px solid color-mix(in oklab, currentColor 45%, transparent); padding: .2rem .4rem; border-radius: 2px; line-height: 1; white-space: nowrap; flex-shrink: 0; }
+@media (max-width: 480px) { .nx-regd { font-size: .52rem; padding: .16rem .32rem; } }
