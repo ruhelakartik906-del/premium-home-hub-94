@@ -330,3 +330,4 @@
 .nx-footer-brand { display: inline-flex; }
 .nx-regd { color: var(--nx-gold); line-height: 1; }
 .nx-header .nx-logo .nx-regd, .nx-footer .nx-footer-brand .nx-regd { color: var(--nx-gold); }
+.nx-header-row{height:auto;min-height:76px;padding:.45rem 0}
