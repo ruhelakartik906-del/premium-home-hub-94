@@ -332,5 +332,6 @@
 .nx-header .nx-logo .nx-regd, .nx-footer .nx-footer-brand .nx-regd { color: var(--nx-gold); }
 .nx-header-row{height:auto;min-height:76px;padding:.45rem 0}
 .auth-hero-title{font-size:64px!important;line-height:1.05}
-.auth-regd-tag{display:inline-block;font-size:20px;font-weight:800;letter-spacing:.25em;color:var(--primary);margin:2px 0 6px}
-@media(max-width:600px){.auth-hero-title{font-size:44px!important}.auth-regd-tag{font-size:16px}}
+.auth-hero-keep{white-space:nowrap}
+.auth-regd-tag{display:inline-block;font-size:.42em;font-weight:800;letter-spacing:.16em;color:var(--primary);margin-left:.4em;vertical-align:.2em;white-space:nowrap}
+@media(max-width:600px){.auth-hero-title{font-size:44px!important}}

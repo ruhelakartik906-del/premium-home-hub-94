@@ -124,8 +124,7 @@ export function RegisterFlow({ initialRole }: { initialRole?: string }) {
       <button className="role-card" onClick={() => setRole('buyer')}><UserRound size={27} /><strong>Buyer</strong><span>Discover verified high-value properties and manage your interests privately.</span></button>
       <button className="role-card" onClick={() => setRole('seller')}><BriefcaseBusiness size={27} /><strong>Seller</strong><span>Present and manage high-value properties for a considered audience.</span></button>
     </div></> : <>
-      <h1 className={step === 0 ? 'auth-hero-title' : ''}>{step === 0 ? 'Welcome to Eliteoz' : step === 1 ? 'Verify your mobile' : 'Activate your membership'}</h1>
-      {step === 0 && <span className="auth-regd-tag">REGD</span>}
+      <h1 className={step === 0 ? 'auth-hero-title' : ''}>{step === 0 ? <>Welcome to <span className="auth-hero-keep">Eliteoz <span className="auth-regd-tag">REGD</span></span></> : step === 1 ? 'Verify your mobile' : 'Activate your membership'}</h1>
       <p>{step === 0 ? 'Personal, address and business details are collected later in Verification.' : step === 1 ? `Enter the 6-digit code sent to ${masked || 'your mobile'}.` : 'One final step and your dashboard opens automatically.'}</p>
       <div className="steps">{steps.map((x, i) => <div className={`step ${i === step ? 'active' : ''} ${i < step ? 'done' : ''}`} key={x}><span>{i < step ? '✓' : i + 1}</span>{x}</div>)}</div>
 
