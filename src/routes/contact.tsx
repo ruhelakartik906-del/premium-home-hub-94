@@ -16,6 +16,7 @@ function Contact() {
       cta={false}
       sections={[
         { title: 'Email', body: <p><a href="mailto:Privacy@eliteoz.com">Privacy@eliteoz.com</a></p> },
+        { title: 'Phone', body: <p><a href="tel:+919315089933">+91 93150 89933</a><br /><a href="tel:+918383935585">+91 83839 35585</a></p> },
         { title: 'Registered Address', body: <p>3/4/28, Gopi Nath Bazar,<br />Delhi Cantt,<br />New Delhi — 110010</p> },
         { title: 'Head Office', body: <p>14 School Lane,<br />Barakhamba Avenue, Connaught Place,<br />New Delhi — 110001</p> },
       ]}
