@@ -319,19 +319,5 @@
 .nx-steps p,.nx-cols3 p,.nx-way li{font-size:1rem}
 }
 
-/* REGD brand mark */
-.nx-logo { display: inline-flex; align-items: center; gap: .55rem; }
-.nx-footer-brand { display: inline-flex; align-items: center; gap: .6rem; }
-.nx-regd { font-size: .6rem; letter-spacing: .22em; font-weight: 600; color: var(--gold, currentColor); border: 1px solid color-mix(in oklab, currentColor 45%, transparent); padding: .2rem .4rem; border-radius: 2px; line-height: 1; white-space: nowrap; flex-shrink: 0; }
-@media (max-width: 480px) { .nx-regd { font-size: .52rem; padding: .16rem .32rem; } }
-/* REGD stacked under logo */
-.nx-logo, .nx-footer-brand { flex-direction: column; align-items: center; gap: .3rem; }
-.nx-regd { border: 0; padding: 0; font-size: .58rem; letter-spacing: .4em; padding-left: .4em; font-weight: 500; }
-.nx-footer-brand { display: inline-flex; }
-.nx-regd { color: var(--nx-gold); line-height: 1; }
-.nx-header .nx-logo .nx-regd, .nx-footer .nx-footer-brand .nx-regd { color: var(--nx-gold); }
-.nx-header-row{height:auto;min-height:76px;padding:.45rem 0}
 .auth-hero-title{font-size:64px!important;line-height:1.05}
-.auth-hero-keep{white-space:nowrap}
-.auth-regd-tag{display:inline-block;font-size:.42em;font-weight:800;letter-spacing:.16em;color:var(--primary);margin-left:.4em;vertical-align:.2em;white-space:nowrap}
 @media(max-width:600px){.auth-hero-title{font-size:44px!important}}
