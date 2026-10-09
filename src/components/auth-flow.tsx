@@ -21,15 +21,6 @@ const fields: { key: FieldKey; label: string; type?: string; required?: boolean;
   { key: 'email', label: 'Email address', type: 'email', required: true },
   { key: 'mobile', label: 'Mobile number', type: 'tel', required: true },
   { key: 'password', label: 'Create password (min 8 characters)', type: 'password', required: true },
-  { key: 'dob', label: 'Date of birth', type: 'date' },
-  { key: 'gender', label: 'Gender' },
-  { key: 'country', label: 'Country' },
-  { key: 'state', label: 'State' },
-  { key: 'city', label: 'City' },
-  { key: 'pincode', label: 'Pincode' },
-  { key: 'address', label: 'Full address', full: true },
-  { key: 'company_name', label: 'Company / business name', seller: true },
-  { key: 'business_type', label: 'Business type', seller: true },
 ];
 
 export function OtpInput({ value, onChange, onComplete }: { value: string[]; onChange: (v: string[]) => void; onComplete?: (code: string) => void }) {
@@ -133,8 +124,9 @@ export function RegisterFlow({ initialRole }: { initialRole?: string }) {
       <button className="role-card" onClick={() => setRole('buyer')}><UserRound size={27} /><strong>Buyer</strong><span>Discover verified high-value properties and manage your interests privately.</span></button>
       <button className="role-card" onClick={() => setRole('seller')}><BriefcaseBusiness size={27} /><strong>Seller</strong><span>Present and manage high-value properties for a considered audience.</span></button>
     </div></> : <>
-      <h1>{step === 0 ? `${role === 'buyer' ? 'Buyer' : 'Seller'} registration` : step === 1 ? 'Verify your mobile' : 'Activate your membership'}</h1>
-      <p>{step === 0 ? 'Tell us a little about yourself. Identity documents are collected later in Verification.' : step === 1 ? `Enter the 6-digit code sent to ${masked || 'your mobile'}.` : 'One final step and your dashboard opens automatically.'}</p>
+      <h1>{step === 0 ? 'Welcome to Eliteoz' : step === 1 ? 'Verify your mobile' : 'Activate your membership'}</h1>
+      {step === 0 && <span className="eyebrow">REGD · {role === 'buyer' ? 'BUYER' : 'SELLER'}</span>}
+      <p>{step === 0 ? 'Personal, address and business details are collected later in Verification.' : step === 1 ? `Enter the 6-digit code sent to ${masked || 'your mobile'}.` : 'One final step and your dashboard opens automatically.'}</p>
       <div className="steps">{steps.map((x, i) => <div className={`step ${i === step ? 'active' : ''} ${i < step ? 'done' : ''}`} key={x}><span>{i < step ? '✓' : i + 1}</span>{x}</div>)}</div>
 
       {step === 0 && <form id="details-form" className="form-grid" onSubmit={(e) => { e.preventDefault(); const f = new FormData(e.currentTarget); const d: Record<string, string> = {}; f.forEach((v, k) => { d[k] = String(v); }); if ((d['password'] ?? '').length < 8) { setError('Password must be at least 8 characters.'); return; } if (!/^[6-9]\d{9}$/.test((d['mobile'] ?? '').replace(/\D/g, '').slice(-10))) { setError('Please enter a valid 10-digit Indian mobile number.'); return; } setDetails(d as Details); setError(''); void requestOtp(d['mobile'] ?? '', d['email'] ?? '').then((ok) => { if (ok) setStep(1); }); }}>
