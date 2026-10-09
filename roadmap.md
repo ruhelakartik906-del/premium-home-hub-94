@@ -13,3 +13,4 @@
 - [x] India + International property system (seller form, badges, buyer/seller/admin filters, countries manager, INR conversion)
 - [ ] Buyer onboarding preferences (countries, asset types, budget) + buyer matching — next phase
 - [x] Final copy-only corrections and visible-term audit (no design or functionality changes).
+- [ ] Remove registered-status labels and exclusive styling throughout the website; check branding on desktop and mobile.
