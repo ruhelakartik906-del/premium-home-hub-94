@@ -166,6 +166,29 @@ export const saveIntegrationSecrets = createServerFn({ method: 'POST' })
     return { ok: true as const };
   });
 
+async function hasAcceptedTerms(userId: string) {
+  const { TERMS_VERSION } = await import('./terms');
+  const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+  const { data } = await supabaseAdmin.from('terms_acceptances').select('id').eq('user_id', userId).eq('terms_version', TERMS_VERSION).eq('accepted', true).maybeSingle();
+  return !!data;
+}
+
+export const getTermsStatus = createServerFn({ method: 'GET' })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => ({ accepted: await hasAcceptedTerms(context.userId) }));
+
+/** Records Sale Mandate terms acceptance once per user and version (idempotent on retries). */
+export const acceptTerms = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ accepted: z.literal(true) }).parse(d))
+  .handler(async ({ context }) => {
+    const { TERMS_VERSION } = await import('./terms');
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const { error } = await supabaseAdmin.from('terms_acceptances').upsert({ user_id: context.userId, terms_version: TERMS_VERSION, accepted: true }, { onConflict: 'user_id,terms_version', ignoreDuplicates: true });
+    if (error) { console.error('acceptTerms', error.message); return { ok: false as const, error: 'Could not save your acceptance. Please try again.' }; }
+    return { ok: true as const };
+  });
+
 /** Server-side truth for whether the testing bypass may be used right now. */
 async function bypassState() {
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
