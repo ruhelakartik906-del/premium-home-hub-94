@@ -6,6 +6,8 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Notice, PageShell } from '@/components/eliteoz';
 import { hero } from '@/lib/eliteoz-data';
+import { SOURCING_NOTE } from '@/lib/terms';
+import { TermsPanel } from '@/components/terms-panel';
 import { registerMember, ACTIVATION_FEE } from '@/lib/members.functions';
 import { sendOtp, verifyOtp } from '@/lib/otp.functions';
 import { recordAuthEvent } from '@/lib/admin-users.functions';
@@ -120,10 +122,10 @@ export function RegisterFlow({ initialRole }: { initialRole?: string }) {
 
   return <PageShell><div className="auth-wrap"><aside className="auth-image"><img src={hero} alt="Luxury residence" /><div className="auth-caption">A more considered<br />way to move.</div></aside><main className="auth-main"><div className="auth-panel">
     <span className="eyebrow">ELITEOZ MEMBERSHIP</span>
-    {!role ? <><h1 className="auth-hero-title">Welcome to Eliteoz</h1><p>Membership opens a private dashboard for you. Choose how you'd like to use Eliteoz — Buyer or Seller. You can switch later with our team's help.</p><div className="role-grid">
+    {!role ? <><h1 className="auth-hero-title">Welcome to Eliteoz</h1><p>Membership opens a private dashboard for you. Choose how you'd like to use Eliteoz — Buyer or Seller. You can switch later with our team's help.</p><div className="preview-warning" role="note">{SOURCING_NOTE}</div><div className="role-grid">
       <button className="role-card" onClick={() => setRole('buyer')}><UserRound size={27} /><strong>Buyer</strong><span>Explore verified high-value assets, compare and save the ones you like, and send your interest — our team will contact you.</span></button>
       <button className="role-card" onClick={() => setRole('seller')}><BriefcaseBusiness size={27} /><strong>Seller</strong><span>Present high-value assets to a considered audience, and manage your listings and documents from one dashboard.</span></button>
-    </div></> : <>
+    </div><TermsPanel /></> : <>
       <h1 className={step === 0 ? 'auth-hero-title' : ''}>{step === 0 ? <>Welcome to Eliteoz</> : step === 1 ? 'Verify your mobile' : 'Activate your membership'}</h1>
       <p>{step === 0 ? 'Personal, address and business details are collected later in Verification.' : step === 1 ? `Enter the 6-digit code sent to ${masked || 'your mobile'}.` : 'One final step and your dashboard opens automatically.'}</p>
       <div className="steps">{steps.map((x, i) => <div className={`step ${i === step ? 'active' : ''} ${i < step ? 'done' : ''}`} key={x}><span>{i < step ? '✓' : i + 1}</span>{x}</div>)}</div>

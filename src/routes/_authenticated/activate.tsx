@@ -8,7 +8,9 @@ import { usePayActivation } from '@/components/activation-banner';
 import { supabase } from '@/integrations/supabase/client';
 import { accountAccess } from '@/lib/access';
 import { useServerFn } from '@tanstack/react-start';
-import { getActivationOptions, skipActivationPayment } from '@/lib/payments.functions';
+import { getActivationOptions, skipActivationPayment, getTermsStatus, acceptTerms } from '@/lib/payments.functions';
+import { TermsPanel } from '@/components/terms-panel';
+import { TERMS_CHECKBOX_LABEL, TERMS_REQUIRED_MSG } from '@/lib/terms';
 
 export const Route = createFileRoute('/_authenticated/activate')({
   beforeLoad: async () => {
@@ -32,9 +34,20 @@ function ActivatePage() {
   const [cfg, setCfg] = useState<{ enabled: boolean; fee: number } | null>(null);
   const getOpts = useServerFn(getActivationOptions); const skip = useServerFn(skipActivationPayment);
   const [bypass, setBypass] = useState(false);
+  const termsStatus = useServerFn(getTermsStatus); const saveTerms = useServerFn(acceptTerms);
+  const [agreed, setAgreed] = useState(false); const [termsSaved, setTermsSaved] = useState(false);
+  useEffect(() => { termsStatus().then((t) => { if (t.accepted) { setTermsSaved(true); setAgreed(true); } }).catch(() => undefined); }, [termsStatus]);
+  const ensureTerms = async () => {
+    if (termsSaved) return true;
+    if (!agreed) { setErr(TERMS_REQUIRED_MSG); return false; }
+    const r = await saveTerms({ data: { accepted: true } }).catch(() => ({ ok: false as const, error: 'Could not save your acceptance. Please try again.' }));
+    if (!r.ok) { setErr(r.error); return false; }
+    setTermsSaved(true); return true;
+  };
   useEffect(() => { getOpts().then((o) => setBypass(o.bypassAllowed)).catch(() => setBypass(false)); }, [getOpts]);
   const doSkip = async () => {
     setBusy(true); setErr('');
+    if (!(await ensureTerms())) { setBusy(false); return; }
     const r = await skip().catch(() => ({ ok: false as const, error: 'Could not activate. Please try again.' }));
     if (r.ok) { const a = await accountAccess(); if (a && !a.pending) { toast.success('Test activation done — payment bypassed'); navigate({ to: a.dest, replace: true }); return; } }
     setErr(r.ok ? 'Activated. Please refresh.' : r.error); setBusy(false);
@@ -47,6 +60,7 @@ function ActivatePage() {
   }, []);
   const go = async () => {
     setBusy(true); setErr('');
+    if (!(await ensureTerms())) { setBusy(false); return; }
     const r = await pay();
     if (r.status === 'paid') {
       const a = await accountAccess();
@@ -64,6 +78,11 @@ function ActivatePage() {
     <div className="panel pay-panel"><div className="pay-head"><div><span className="eyebrow">ACTIVATION FEE</span>
       <div className="payment-total">{cfg ? `₹${cfg.fee.toLocaleString('en-IN')}` : '—'}</div></div></div>
       <p className="muted">Your account opens only after the payment is confirmed securely by the payment provider. Your details are saved — you can close this page and return any time by logging in.</p></div>
+    <TermsPanel />
+    <label className="flex items-start gap-3" style={{ cursor: 'pointer' }}>
+      <input type="checkbox" checked={agreed} disabled={termsSaved} onChange={(e) => { setAgreed(e.target.checked); if (e.target.checked) setErr(''); }} style={{ marginTop: 4, width: 18, height: 18 }} />
+      <span>{TERMS_CHECKBOX_LABEL}</span>
+    </label>
     {bypass && <div className="preview-warning"><strong>Testing Mode — Payment gateway is currently unavailable.</strong> You can skip payment for testing. This is recorded as a test activation, not a real payment.</div>}
     {cfg && !cfg.enabled && !bypass && <div className="preview-warning"><strong>Online payment is not connected yet.</strong> The Eliteoz team will share payment instructions, or you can <Link className="text-link" to="/contact">contact us</Link>. Your account stays saved.</div>}
     {err && <p role="alert" className="form-error">{err}</p>}

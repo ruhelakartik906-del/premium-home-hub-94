@@ -52,6 +52,7 @@ export const createActivationOrder = createServerFn({ method: 'POST' })
     const { data: p } = await supabaseAdmin.from('profiles').select('full_name,email,mobile,status,account_type').eq('id', context.userId).maybeSingle();
     if (!p) return { ok: false as const, error: 'Profile not found.' };
     if (p.status !== 'pending_payment') return { ok: false as const, error: 'Your account does not need an activation payment.' };
+    if (!(await hasAcceptedTerms(context.userId))) return { ok: false as const, error: 'Please accept the Terms & Conditions to continue.' };
     const { data: paid } = await supabaseAdmin.from('transactions').select('id').eq('user_id', context.userId).eq('purpose', 'activation').eq('status', 'success').limit(1);
     if (paid?.length) return { ok: false as const, error: 'Your activation payment is already confirmed. Please refresh the page.' };
     const cfg = await loadGateway();
@@ -166,6 +167,29 @@ export const saveIntegrationSecrets = createServerFn({ method: 'POST' })
     return { ok: true as const };
   });
 
+async function hasAcceptedTerms(userId: string) {
+  const { TERMS_VERSION } = await import('./terms');
+  const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+  const { data } = await supabaseAdmin.from('terms_acceptances').select('id').eq('user_id', userId).eq('terms_version', TERMS_VERSION).eq('accepted', true).maybeSingle();
+  return !!data;
+}
+
+export const getTermsStatus = createServerFn({ method: 'GET' })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => ({ accepted: await hasAcceptedTerms(context.userId) }));
+
+/** Records Sale Mandate terms acceptance once per user and version (idempotent on retries). */
+export const acceptTerms = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ accepted: z.literal(true) }).parse(d))
+  .handler(async ({ context }) => {
+    const { TERMS_VERSION } = await import('./terms');
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const { error } = await supabaseAdmin.from('terms_acceptances').upsert({ user_id: context.userId, terms_version: TERMS_VERSION, accepted: true }, { onConflict: 'user_id,terms_version', ignoreDuplicates: true });
+    if (error) { console.error('acceptTerms', error.message); return { ok: false as const, error: 'Could not save your acceptance. Please try again.' }; }
+    return { ok: true as const };
+  });
+
 /** Server-side truth for whether the testing bypass may be used right now. */
 async function bypassState() {
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
@@ -192,6 +216,7 @@ export const skipActivationPayment = createServerFn({ method: 'POST' })
     const { data: p } = await supabaseAdmin.from('profiles').select('full_name,email,status,account_type').eq('id', context.userId).maybeSingle();
     if (!p) return { ok: false as const, error: 'Profile not found.' };
     if (p.status !== 'pending_payment') return { ok: false as const, error: 'Your account does not need an activation payment.' };
+    if (!(await hasAcceptedTerms(context.userId))) return { ok: false as const, error: 'Please accept the Terms & Conditions to continue.' };
     const { error } = await supabaseAdmin.from('transactions').insert({ user_id: context.userId, amount: 0, currency: 'INR', purpose: 'activation', method: 'test_bypass', provider: 'test_bypass', status: 'test_bypass', verified_via: 'test_bypass', environment: 'test', account_role: p.account_type, payer_name: p.full_name, payer_email: p.email, notes: 'TEST ACTIVATION — payment bypassed, no money received' });
     if (error) { console.error(error.message); return { ok: false as const, error: 'Could not activate the test account.' }; }
     await supabaseAdmin.from('audit_logs').insert({ actor_id: context.userId, target_user_id: context.userId, action: 'test_payment_bypass_used', details: { user_type: p.account_type, at: new Date().toISOString(), payment_mode: s.paymentMode, gateway_configured: s.configured } });
