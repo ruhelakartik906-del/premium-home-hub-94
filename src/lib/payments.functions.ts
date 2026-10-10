@@ -52,6 +52,7 @@ export const createActivationOrder = createServerFn({ method: 'POST' })
     const { data: p } = await supabaseAdmin.from('profiles').select('full_name,email,mobile,status,account_type').eq('id', context.userId).maybeSingle();
     if (!p) return { ok: false as const, error: 'Profile not found.' };
     if (p.status !== 'pending_payment') return { ok: false as const, error: 'Your account does not need an activation payment.' };
+    if (!(await hasAcceptedTerms(context.userId))) return { ok: false as const, error: 'Please accept the Terms & Conditions to continue.' };
     const { data: paid } = await supabaseAdmin.from('transactions').select('id').eq('user_id', context.userId).eq('purpose', 'activation').eq('status', 'success').limit(1);
     if (paid?.length) return { ok: false as const, error: 'Your activation payment is already confirmed. Please refresh the page.' };
     const cfg = await loadGateway();
@@ -215,6 +216,7 @@ export const skipActivationPayment = createServerFn({ method: 'POST' })
     const { data: p } = await supabaseAdmin.from('profiles').select('full_name,email,status,account_type').eq('id', context.userId).maybeSingle();
     if (!p) return { ok: false as const, error: 'Profile not found.' };
     if (p.status !== 'pending_payment') return { ok: false as const, error: 'Your account does not need an activation payment.' };
+    if (!(await hasAcceptedTerms(context.userId))) return { ok: false as const, error: 'Please accept the Terms & Conditions to continue.' };
     const { error } = await supabaseAdmin.from('transactions').insert({ user_id: context.userId, amount: 0, currency: 'INR', purpose: 'activation', method: 'test_bypass', provider: 'test_bypass', status: 'test_bypass', verified_via: 'test_bypass', environment: 'test', account_role: p.account_type, payer_name: p.full_name, payer_email: p.email, notes: 'TEST ACTIVATION — payment bypassed, no money received' });
     if (error) { console.error(error.message); return { ok: false as const, error: 'Could not activate the test account.' }; }
     await supabaseAdmin.from('audit_logs').insert({ actor_id: context.userId, target_user_id: context.userId, action: 'test_payment_bypass_used', details: { user_type: p.account_type, at: new Date().toISOString(), payment_mode: s.paymentMode, gateway_configured: s.configured } });
