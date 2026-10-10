@@ -808,6 +808,30 @@ export type Database = {
         }
         Relationships: []
       }
+      terms_acceptances: {
+        Row: {
+          accepted: boolean
+          accepted_at: string
+          id: string
+          terms_version: string
+          user_id: string
+        }
+        Insert: {
+          accepted?: boolean
+          accepted_at?: string
+          id?: string
+          terms_version: string
+          user_id: string
+        }
+        Update: {
+          accepted?: boolean
+          accepted_at?: string
+          id?: string
+          terms_version?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       transactions: {
         Row: {
           account_role: string | null
