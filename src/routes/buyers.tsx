@@ -12,7 +12,7 @@ export const Route = createFileRoute('/buyers')({
       sections={[
         { title: 'Private Access', body: <p>Mandates are visible only inside your member workspace, never on public pages.</p> },
         { title: 'Verified Participants', body: <p>Every seller and mandate is reviewed before presentation.</p> },
-        { title: 'High-Value Assets', body: <p>Companies, industries, commercial buildings, estates and landmark residences of ₹25 Crore & above.</p> },
+        { title: 'High-Value Assets', body: <p>Companies, industries, commercial buildings, estates and landmark residences, private colleges, private universities, hospitals and business entities of ₹25 Crore & above.</p> },
         { title: 'Confidential Communication', body: <p>Your interest is shared only through Eliteoz — not broadcast.</p> },
         { title: 'Controlled Visibility', body: <p>You decide what you reveal, and when.</p> },
         { title: 'Serious Transactions', body: <p>A network designed for decisive buyers, not casual browsing.</p> },

@@ -37,12 +37,12 @@ const faqs: [string, string][] = [
   ['Does registration automatically provide dashboard access?', 'No. Registration is the first step. Access follows verification and completion of the applicable activation requirements.'],
   ['What happens if payment is incomplete?', 'Your registration is saved, but dashboard access stays locked until the activation payment is completed.'],
   ['How is private information controlled?', 'Private information is visible only according to account status, role and authorization. Identity documents are reviewed only by the Eliteoz team.'],
-  ['What types of assets can be enlisted?', 'Companies, factories, industries, commercial buildings, luxury houses, farmhouses, plots, residences and other high-value holdings valued at ₹25 Crore & above.'],
+  ['What types of assets can be enlisted?', 'Companies, factories, industries, commercial buildings, luxury houses, farmhouses, plots, residences, private colleges, private universities, hospitals, business entities and other high-value holdings valued at ₹25 Crore & above.'],
   ['Can an authorized representative register?', 'Yes. Authorized representatives of owners or buyers may register on their behalf.'],
 ];
 
 const way = ['No Market Noise.', 'Verified Mandates Only.', 'No Broker Chains.', 'No Casual Enquiries.', 'Principal to Principal.', 'Your identity, your asset, and your transaction are protected with absolute secrecy.', 'Buyer & Seller confidentiality is non-negotiable.', 'If you own a trophy asset worth over INR 25 Crore or wish to acquire one in complete privacy, you have come to the right place.', 'We value your time and your privacy.'];
-const assets = ['Companies', 'Factories', 'Industries', 'Commercial Buildings', 'Luxury Houses', 'Farmhouses', 'Plots', 'Residences', 'Other High-Value Holdings'];
+const assets = ['Companies', 'Factories', 'Industries', 'Commercial Buildings', 'Luxury Houses', 'Farmhouses', 'Plots', 'Residences', 'Private Colleges', 'Private Universities', 'Hospitals', 'Business Entities', 'Other High-Value Holdings'];
 const owners = ['Trophy asset owners', 'HNI / UHNI families', 'Industrialists', 'Promoters', 'Family offices', 'Authorized representatives'];
 const buyers = ['Serious investors', 'HNI / UHNI buyers', 'Industrial groups', 'Family offices', 'Strategic acquirers', 'Authorized representatives'];
 const notFor = ['Casual asset browsing', 'Mass-market asset enquiries', 'Unverified intermediaries', 'Low-value asset searches', 'Unnecessary broker chains', 'Public marketplace-style transactions'];
