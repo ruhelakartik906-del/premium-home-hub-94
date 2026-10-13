@@ -28,17 +28,18 @@ function ContactForm({ propertyUuid, propertyName }: { propertyUuid: string; pro
   const p = me.profile;
   return <form className="contact-card" onSubmit={async (e) => {
     e.preventDefault(); const f = new FormData(e.currentTarget); setBusy(true);
-    const { error } = await supabase.from('interests').insert({ property_id: propertyUuid, buyer_id: me.user.id, name: String(f.get('name')).slice(0, 120), phone: String(f.get('phone')).slice(0, 20), email: String(f.get('email')).slice(0, 200), message: String(f.get('message') ?? '').slice(0, 1000), preferred_time: String(f.get('time') ?? '') });
+    const { error } = await supabase.from('interests').insert({ property_id: propertyUuid, buyer_id: me.user.id, name: String(f.get('name')).slice(0, 120), phone: String(f.get('phone')).slice(0, 20), email: String(f.get('email')).slice(0, 200), message: String(f.get('message') ?? '').slice(0, 1000), preferred_time: String(f.get('time') ?? ''), request_type: String(f.get('type') ?? 'enquiry') });
     setBusy(false);
-    if (error) toast.error('Could not send your request. Please try again.'); else { setDone(true); toast.success('Contact request sent'); }
+    if (error) toast.error(error.message.includes('DUPLICATE_REQUEST') ? 'You already have an open request of this type for this property. Our team will be in touch.' : 'Could not send your request. Please try again.'); else { setDone(true); toast.success('Contact request sent'); }
   }}>
-    <span className="eyebrow">CONTACT THE TEAM</span><h3>Enquire about {propertyName}</h3>
+    <span className="eyebrow">VIA ELITEOZ ONLY</span><h3>Enquire about {propertyName}</h3><p className="muted" style={{ fontSize: 12 }}>All requests go to the Eliteoz team, who coordinate with the seller on your behalf. Seller contact details are never shared directly.</p>
+    <select className="field-input" name="type" defaultValue="enquiry" aria-label="Request type"><option value="enquiry">Request Information</option><option value="viewing">Request a Viewing</option><option value="purchase_interest">Submit Purchase Interest</option></select>
     <input className="field-input" name="name" required defaultValue={p?.full_name ?? ''} placeholder="Full name" />
     <input className="field-input" name="phone" required defaultValue={p?.mobile ?? ''} placeholder="Mobile number" />
     <input className="field-input" name="email" type="email" required defaultValue={p?.email ?? me.user.email ?? ''} placeholder="Email" />
     <select className="field-input" name="time" defaultValue="Anytime"><option>Anytime</option><option>Morning</option><option>Afternoon</option><option>Evening</option></select>
     <textarea className="field-input" name="message" rows={3} placeholder="Your message (optional)" />
-    <Button type="submit" disabled={busy}><Send /> {busy ? 'Sending…' : 'Send contact request'}</Button>
+    <Button type="submit" disabled={busy}><Send /> {busy ? 'Sending…' : 'Send to Eliteoz'}</Button>
   </form>;
 }
 
