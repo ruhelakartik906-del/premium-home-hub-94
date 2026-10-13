@@ -350,3 +350,4 @@
 .nx-dark .nx-ico{border-color:oklch(.76 .055 78/.3)}
 .nx-faq summary{font-size:1.25rem;transition:color .3s}.nx-faq summary:hover{color:oklch(.55 .05 75)}
 @media (max-width:520px){.nx{font-size:14.5px}.nx-ico{width:36px;height:36px}.nx-ico svg{width:16px;height:16px}.nx-hero h1{max-width:none}}
+.nx-light .nx-ico,.nx-ivory .nx-ico{color:oklch(.5 .06 70);border-color:oklch(.5 .06 70/.35)}
