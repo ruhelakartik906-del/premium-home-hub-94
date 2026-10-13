@@ -19,7 +19,8 @@ const cols = PROPERTY_COLS;
 function useApproved() { return useQuery({ queryKey: ['approved-properties'], queryFn: async () => { const { data } = await supabase.from('properties').select(cols).eq('status', 'published').order('featured', { ascending: false }); return ((data ?? []) as unknown as PropertyRow[]).map(toListing); } }); }
 function useMyInterests(uid: string) { return useQuery({ queryKey: ['my-interests', uid], queryFn: async () => { const { data } = await supabase.from('interests').select('id,status,message,preferred_time,admin_note,created_at,properties(ref,title,location,price,image,cover_url)').eq('buyer_id', uid).order('created_at', { ascending: false }); return data ?? []; } }); }
 function useSellerProps(uid: string) { return useQuery({ queryKey: ['seller-properties', uid], queryFn: async () => { const { data } = await supabase.from('properties').select(cols + ',admin_note,created_at,category_id').eq('seller_id', uid).order('created_at', { ascending: false }); return (data ?? []) as unknown as (PropertyRow & { admin_note: string | null; created_at: string; category_id: string | null })[]; } }); }
-function useSellerInterests(uid: string) { return useQuery({ queryKey: ['seller-interests', uid], queryFn: async () => { const { data } = await supabase.from('interests').select('id,status,created_at,preferred_time,properties!inner(ref,title,seller_id)').eq('properties.seller_id', uid).order('created_at', { ascending: false }); return data ?? []; } }); }
+const REQ_LABEL: Record<string, string> = { enquiry: 'Information', viewing: 'Viewing', purchase_interest: 'Purchase interest', general: 'General' };
+function useSellerInterests(uid: string) { return useQuery({ queryKey: ['seller-interests', uid], queryFn: async () => { const { data } = await supabase.rpc('seller_interest_summary'); return (data ?? []).map((r) => ({ id: r.id, status: r.status, created_at: r.created_at, preferred_time: null as string | null, request_type: r.request_type, request_code: r.request_code, properties: { ref: r.property_ref, title: r.property_title, seller_id: uid } })); } }); }
 
 import { SavedProperties } from '@/components/workspace-extra';
 import { KycDocumentsUploader, DOC_LABELS } from '@/components/kyc-documents';
@@ -227,7 +228,7 @@ export function ListingForm({ me, admin, edit, onDone }: { me: Me; admin?: boole
 
 function SellerInterests({ me }: { me: Me }) {
   const ints = useSellerInterests(me.user.id);
-  return <Panel title="Interest in your properties"><p className="muted">Buyer contact details are handled privately by the Eliteoz team, who coordinate next steps with you.</p><Table headers={['Property', 'Preferred time', 'Status', 'Received']} empty="No buyer interest yet." rows={(ints.data ?? []).map((i) => [<strong>{i.properties?.title}</strong>, i.preferred_time ?? '—', <Status value={i.status} />, fmtDate(i.created_at)])} /></Panel>;
+  return <Panel title="Interest in your properties"><p className="muted">Buyer contact details are handled privately by the Eliteoz team, who coordinate next steps with you.</p><Table headers={['Request', 'Property', 'Type', 'Status', 'Received']} empty="No buyer interest yet." rows={(ints.data ?? []).map((i) => [<small>{i.request_code}</small>, <strong>{i.properties?.title}</strong>, REQ_LABEL[i.request_type] ?? i.request_type, <Status value={i.status} />, fmtDate(i.created_at)])} /></Panel>;
 }
 
 function Notifications({ me }: { me: Me }) {

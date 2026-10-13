@@ -128,45 +128,95 @@ export type Database = {
         }
         Relationships: []
       }
+      interest_activity: {
+        Row: {
+          actor_id: string | null
+          body: string
+          created_at: string
+          id: string
+          interest_id: string
+          kind: string
+        }
+        Insert: {
+          actor_id?: string | null
+          body: string
+          created_at?: string
+          id?: string
+          interest_id: string
+          kind?: string
+        }
+        Update: {
+          actor_id?: string | null
+          body?: string
+          created_at?: string
+          id?: string
+          interest_id?: string
+          kind?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interest_activity_interest_id_fkey"
+            columns: ["interest_id"]
+            isOneToOne: false
+            referencedRelation: "interests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       interests: {
         Row: {
           admin_note: string | null
+          assigned_to: string | null
           buyer_id: string
           created_at: string
           email: string
           id: string
+          internal_notes: string | null
           message: string | null
           name: string
           phone: string
           preferred_time: string | null
           property_id: string
+          request_code: string | null
+          request_type: string
           status: string
+          updated_at: string
         }
         Insert: {
           admin_note?: string | null
+          assigned_to?: string | null
           buyer_id: string
           created_at?: string
           email: string
           id?: string
+          internal_notes?: string | null
           message?: string | null
           name: string
           phone: string
           preferred_time?: string | null
           property_id: string
+          request_code?: string | null
+          request_type?: string
           status?: string
+          updated_at?: string
         }
         Update: {
           admin_note?: string | null
+          assigned_to?: string | null
           buyer_id?: string
           created_at?: string
           email?: string
           id?: string
+          internal_notes?: string | null
           message?: string | null
           name?: string
           phone?: string
           preferred_time?: string | null
           property_id?: string
+          request_code?: string | null
+          request_type?: string
           status?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -1043,6 +1093,18 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      seller_interest_summary: {
+        Args: never
+        Returns: {
+          created_at: string
+          id: string
+          property_ref: string
+          property_title: string
+          request_code: string
+          request_type: string
+          status: string
+        }[]
       }
     }
     Enums: {
