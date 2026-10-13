@@ -15,6 +15,13 @@
       "when": 1791614381965,
       "tag": "0001_terms_acceptances",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791877055916,
+      "tag": "0002_intermediary_requests",
+      "breakpoints": true
     }
   ]
 }
