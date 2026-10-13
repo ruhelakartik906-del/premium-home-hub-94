@@ -7,6 +7,8 @@ const portrait = { url: portraitSrc };
 import heroImg from '@/assets/home-hero-abstract.jpg';
 import { useReveal, SelectiveGrid, PrincipleMark, AssetSilhouettes, Horizon } from '@/components/nx-graphics';
 import { MarketSplit } from '@/components/home-global';
+import { Building2, Factory, Warehouse, Landmark, Home as HomeIcon, Trees, Map, Building, GraduationCap, Library, HeartPulse, Briefcase, Gem, type LucideIcon } from 'lucide-react';
+const assetIcons: Record<string, LucideIcon> = { Companies: Briefcase, Factories: Factory, Industries: Warehouse, 'Commercial Buildings': Building2, 'Luxury Houses': HomeIcon, Farmhouses: Trees, Plots: Map, Residences: Building, 'Private Colleges': GraduationCap, 'Private Universities': Library, Hospitals: HeartPulse, 'Business Entities': Landmark, 'Other High-Value Holdings': Gem };
 
 export const Route = createFileRoute('/')({
   errorComponent: () => <div className="section container"><h2>Something went wrong. Please refresh.</h2></div>,
@@ -156,7 +158,7 @@ function Home() {
         <section className="nx-light nx-sec">
           <div className="nx-wrap nx-split">
             <div><span className="nx-eyebrow">Asset Categories</span><h2>Significant Assets.<br />Considered Broadly.</h2></div>
-            <ul className="nx-assets">{assets.map((a) => <li key={a}>{a}</li>)}</ul>
+            <ul className="nx-assets nx-assets-icon">{assets.map((a) => { const I = assetIcons[a] ?? Gem; return <li key={a}><span className="nx-ico" aria-hidden="true"><I strokeWidth={1.25} /></span>{a}</li>; })}</ul>
           </div>
           <div className="nx-wrap" data-reveal><AssetSilhouettes /></div>
         </section>
