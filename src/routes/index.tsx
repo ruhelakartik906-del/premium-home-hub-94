@@ -7,8 +7,8 @@ const portrait = { url: portraitSrc };
 import heroImg from '@/assets/home-hero-abstract.jpg';
 import { useReveal, SelectiveGrid, PrincipleMark, AssetSilhouettes, Horizon } from '@/components/nx-graphics';
 import { MarketSplit } from '@/components/home-global';
-import { Building2, Factory, Warehouse, Landmark, Home, Trees, Map, Building, GraduationCap, Library, HeartPulse, Briefcase, Gem, type LucideIcon } from 'lucide-react';
-const assetIcons: Record<string, LucideIcon> = { Companies: Briefcase, Factories: Factory, Industries: Warehouse, 'Commercial Buildings': Building2, 'Luxury Houses': Home, Farmhouses: Trees, Plots: Map, Residences: Building, 'Private Colleges': GraduationCap, 'Private Universities': Library, Hospitals: HeartPulse, 'Business Entities': Landmark, 'Other High-Value Holdings': Gem };
+import { Building2, Factory, Warehouse, Landmark, Home as HomeIcon, Trees, Map, Building, GraduationCap, Library, HeartPulse, Briefcase, Gem, type LucideIcon } from 'lucide-react';
+const assetIcons: Record<string, LucideIcon> = { Companies: Briefcase, Factories: Factory, Industries: Warehouse, 'Commercial Buildings': Building2, 'Luxury Houses': HomeIcon, Farmhouses: Trees, Plots: Map, Residences: Building, 'Private Colleges': GraduationCap, 'Private Universities': Library, Hospitals: HeartPulse, 'Business Entities': Landmark, 'Other High-Value Holdings': Gem };
 
 export const Route = createFileRoute('/')({
   errorComponent: () => <div className="section container"><h2>Something went wrong. Please refresh.</h2></div>,
