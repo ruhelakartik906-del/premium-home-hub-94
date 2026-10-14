@@ -144,6 +144,7 @@
 .nx-sourcing{max-width:820px}
 .nx-sourcing .nx-eyebrow{color:oklch(.38 .06 70)}
 .nx-sourcing-quote{font-size:clamp(1.3rem,2.6vw,1.75rem)!important;line-height:1.45;color:oklch(.16 .03 262)!important;border-left:2px solid oklch(.35 .06 70);padding:.25rem 0 .25rem clamp(1.2rem,3vw,1.8rem);margin:1.4rem 0 0}
+.nx-sourcing-panel{background:oklch(.905 .018 75);border-top:1px solid oklch(.6 .02 70/.18);border-bottom:1px solid oklch(.6 .02 70/.18)}
 .nx-cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:3rem;margin-top:4rem}
 .nx-cols3 article{border-top:1px solid var(--nx-gold);padding-top:2rem}.nx-cols3 p{color:var(--nx-taupe)}
 .nx-num{font-family:var(--nx-serif);font-size:1.1rem;color:var(--nx-gold);letter-spacing:.1em}
