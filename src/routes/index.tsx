@@ -194,7 +194,7 @@ function Home() {
           </div>
         </section>
 
-        <section className="nx-ivory nx-sec" aria-label="Property sourcing">
+        <section className="nx-sourcing-panel nx-sec" aria-label="Property sourcing">
           <div className="nx-wrap nx-sourcing">
             <span className="nx-eyebrow">Private Sourcing</span>
             <p className="nx-quote nx-sourcing-quote">{SOURCING_NOTE}</p>
