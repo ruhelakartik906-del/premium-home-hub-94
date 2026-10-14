@@ -419,3 +419,5 @@ img{max-width:100%}
 }
 @media(max-width:360px){.nx-big,.nx-giant{font-size:clamp(2.6rem,15vw,3.4rem)}.auth-panel h1{font-size:34px}}
 @media(max-width:768px){.nx-hero>img{object-position:76% 62%}}
+/* Hero content must never fade or shift out of view on scroll */
+.nx-hero-inner{opacity:1!important;transform:none!important}
