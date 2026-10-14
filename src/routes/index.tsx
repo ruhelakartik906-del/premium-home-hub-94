@@ -7,6 +7,7 @@ const portrait = { url: portraitSrc };
 import heroImg from '@/assets/home-hero-abstract.jpg';
 import { useReveal, SelectiveGrid, PrincipleMark, AssetSilhouettes, Horizon } from '@/components/nx-graphics';
 import { MarketSplit } from '@/components/home-global';
+import { SOURCING_NOTE } from '@/lib/terms';
 import { Building2, Factory, Warehouse, Landmark, Home as HomeIcon, Trees, Map, Building, GraduationCap, Library, HeartPulse, Briefcase, Gem, type LucideIcon } from 'lucide-react';
 const assetIcons: Record<string, LucideIcon> = { Companies: Briefcase, Factories: Factory, Industries: Warehouse, 'Commercial Buildings': Building2, 'Luxury Houses': HomeIcon, Farmhouses: Trees, Plots: Map, Residences: Building, 'Private Colleges': GraduationCap, 'Private Universities': Library, Hospitals: HeartPulse, 'Business Entities': Landmark, 'Other High-Value Holdings': Gem };
 
@@ -190,6 +191,14 @@ function Home() {
           <div className="nx-wrap nx-journeys">
             <article><span className="nx-eyebrow">Sellers</span><h3>Your Asset.<br />Your Privacy.</h3><p>Present qualifying assets within a controlled private environment rather than exposing them to the public market.</p><Link to="/register" search={{ role: 'seller' }} className="nx-btn">Request Seller Access</Link></article>
             <article><span className="nx-eyebrow">Buyers</span><h3>Access the<br />Extraordinary.</h3><p>Gain access to qualifying opportunities after registration, verification and activation.</p><Link to="/register" search={{ role: 'buyer' }} className="nx-btn">Request Buyer Access</Link></article>
+          </div>
+        </section>
+
+        <section className="nx-ivory nx-sec" aria-label="Property sourcing">
+          <div className="nx-wrap" style={{ maxWidth: 820, textAlign: 'center' }}>
+            <span className="nx-eyebrow">Private Sourcing</span>
+            <span className="nx-rule" style={{ margin: '1rem auto' }} />
+            <p className="nx-quote">{SOURCING_NOTE}</p>
           </div>
         </section>
 
