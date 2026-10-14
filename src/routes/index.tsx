@@ -195,10 +195,9 @@ function Home() {
         </section>
 
         <section className="nx-ivory nx-sec" aria-label="Property sourcing">
-          <div className="nx-wrap" style={{ maxWidth: 820, textAlign: 'center' }}>
+          <div className="nx-wrap nx-sourcing">
             <span className="nx-eyebrow">Private Sourcing</span>
-            <span className="nx-rule" style={{ margin: '1rem auto' }} />
-            <p className="nx-quote">{SOURCING_NOTE}</p>
+            <p className="nx-quote nx-sourcing-quote">{SOURCING_NOTE}</p>
           </div>
         </section>
 
