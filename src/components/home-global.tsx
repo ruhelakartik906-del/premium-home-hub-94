@@ -11,7 +11,7 @@ export function MarketSplit() {
         <article key={t} className="hg-side" data-reveal>
           <img src={img} alt="" loading="lazy" width={1200} height={800} />
           <div className="hg-side-inner">
-            <span className="nx-eyebrow">{t} / {code}</span>
+            <span className="nx-eyebrow" data-code={code}>{t}</span>
             <h2>{t}</h2>
             <p>{d}</p>
             <Link to="/properties" className="nx-btn-ghost">View {t} Assets</Link>
