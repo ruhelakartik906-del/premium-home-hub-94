@@ -375,3 +375,31 @@ input::placeholder,textarea::placeholder{color:oklch(.52 .016 240);opacity:1}
 .nx-statement .nx-eyebrow{display:block;margin:0 auto!important;text-align:center}
 .nx-statement .nx-wrap>*{align-self:center!important;margin-left:auto!important;margin-right:auto!important;text-align:center!important}
 .nx-statement p{width:100%}
+
+/* Spacing optimization layer — consistent rhythm, trims oversized gaps */
+:root{--sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--sp-6:32px;--sp-7:48px;--sp-8:64px;--sp-section:clamp(48px,7vw,96px)}
+.section{padding:var(--sp-section) 0}
+.nx-sec{padding:var(--sp-section) 0}
+.nx-statement{padding:clamp(56px,7.5vw,100px) 0!important}
+.nx-page-hero{padding:clamp(4rem,9vw,6.5rem) 0 clamp(3rem,6vw,4.5rem)}
+.nx-hero{min-height:min(80vh,740px)}
+.nx-hero-inner{padding:clamp(3.5rem,7vw,5rem) 0}
+.nx-big{margin-bottom:var(--sp-6)}
+.nx-giant{margin-bottom:var(--sp-5)}
+.nx-steps{margin-top:var(--sp-7)}
+.nx-journeys{margin-top:var(--sp-7)}
+.nx-ctas{margin-top:var(--sp-6)}
+.nx-rule{margin:var(--sp-5) 0}
+.nx-gfx-wide{margin-top:var(--sp-7)}
+.nx-footer{padding:var(--sp-8) 0 var(--sp-5)}
+.nx-footer-bottom{margin-top:var(--sp-7)}
+.dark-band{padding:var(--sp-section) 0}
+.footer{padding:var(--sp-8) 0 var(--sp-5)}
+.footer-bottom{margin-top:var(--sp-7)}
+.feature-row h3{margin:var(--sp-5) 0 var(--sp-3)}
+.role-card{height:auto;min-height:190px}
+.stats-grid{margin:var(--sp-5) 0 var(--sp-6)}
+.stat-card{min-height:100px}
+.auth-main{padding:clamp(32px,5vw,56px) clamp(20px,3vw,35px)}
+.role-grid{margin:var(--sp-6) 0}
+@media(max-width:768px){.section,.nx-sec{padding:clamp(40px,10vw,56px) 0}.nx-statement{padding:56px 0!important}.nx-page-hero{padding:3.5rem 0 2.5rem}.nx-hero-inner{padding:3.25rem 0}.workspace-content{padding:20px}.nx-footer{padding:48px 0 20px}}
