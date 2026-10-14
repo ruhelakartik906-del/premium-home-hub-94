@@ -373,3 +373,5 @@ input::placeholder,textarea::placeholder{color:oklch(.52 .016 240);opacity:1}
 .nx-statement p:first-of-type{font-size:clamp(17px,1.8vw,21px);opacity:.95}
 .nx-statement p:nth-of-type(2){font-size:clamp(15px,1.4vw,17px);opacity:.78;margin-bottom:28px!important}
 .nx-statement .nx-eyebrow{display:block;margin:0 auto!important;text-align:center}
+.nx-statement .nx-wrap>*{align-self:center!important;margin-left:auto!important;margin-right:auto!important;text-align:center!important}
+.nx-statement p{width:100%}
