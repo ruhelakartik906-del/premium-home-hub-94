@@ -4,7 +4,8 @@ import logoSrc from '@/assets/eliteoz-logo.webp';
 const logo = { url: logoSrc };
 import portraitSrc from '@/assets/col-nk-yadav.webp';
 const portrait = { url: portraitSrc };
-import heroImg from '@/assets/home-hero-abstract.jpg';
+import heroAsset from '@/assets/golden-hour-mountain-villa.png.asset.json';
+const heroImg = heroAsset.url;
 import { useReveal, SelectiveGrid, PrincipleMark, AssetSilhouettes, Horizon } from '@/components/nx-graphics';
 import { MarketSplit } from '@/components/home-global';
 import { SOURCING_NOTE } from '@/lib/terms';
@@ -57,7 +58,7 @@ function Home() {
       <NoirHeader />
       <main>
         <section className="nx-hero">
-          <img src={heroImg} alt="" width={1920} height={1088} fetchPriority="high" decoding="async" />
+          <img src={heroImg} alt="Golden hour view over a hillside estate with an infinity pool" width={1672} height={941} fetchPriority="high" decoding="async" />
           <div className="nx-wrap nx-hero-inner nx-fade">
             <span className="nx-om" lang="sa">ॐ गणेशाय नमः</span>
             <span className="nx-eyebrow">Off-Market. Discreet. Genuine.</span>
