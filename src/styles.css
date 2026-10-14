@@ -406,3 +406,15 @@ input::placeholder,textarea::placeholder{color:oklch(.52 .016 240);opacity:1}
 /* Collapse doubled gaps between consecutive same-tone sections */
 :root{--sp-section:clamp(48px,6vw,80px)}
 .nx-dark.nx-sec+.nx-dark.nx-sec,.nx-ivory.nx-sec+.nx-ivory.nx-sec,.nx-light.nx-sec+.nx-light.nx-sec{padding-top:clamp(16px,2.5vw,32px)}
+/* Mobile responsiveness safety layer */
+h1,h2,h3,.nx-page-title,.nx-giant,.nx-big{overflow-wrap:break-word;hyphens:manual}
+img{max-width:100%}
+@media(max-width:480px){
+  .nx-wrap{width:min(1240px,100% - 2.5rem)}
+  .nx-ctas{gap:12px}.nx-ctas>a,.nx-ctas>button{width:100%}
+  .nx-mobile-nav a{min-height:44px;display:flex;align-items:center}
+  .form-grid,.nx-form{grid-template-columns:1fr}
+  .otp-inputs{gap:6px}.otp-inputs input{width:42px;height:50px}
+  .table-wrap,table{display:block;overflow-x:auto}
+}
+@media(max-width:360px){.nx-big,.nx-giant{font-size:clamp(2.6rem,15vw,3.4rem)}.auth-panel h1{font-size:34px}}
