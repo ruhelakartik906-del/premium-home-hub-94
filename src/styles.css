@@ -365,3 +365,13 @@ input::placeholder,textarea::placeholder{color:oklch(.52 .016 240);opacity:1}
 .property-location,.intro-facts span{font-size:14px}.property-type,.verified-pill{font-size:11px}
 .text-link{font-size:14px}.intro-grid p,.page-hero p{font-size:17px}
 @media (max-width:640px){body{font-size:15px}.intro-grid p,.page-hero p{font-size:16px}}
+/* Discretion statement: one centered block */
+.nx-statement{padding:clamp(64px,9vw,112px) 0!important;text-align:center}
+.nx-statement .nx-wrap{max-width:960px;margin-inline:auto;display:flex;flex-direction:column;align-items:center;text-align:center;padding-inline:clamp(20px,5vw,40px)}
+.nx-statement h2{font-size:clamp(2rem,4.6vw,3.6rem)!important;line-height:1.12!important;margin:0 0 20px!important;text-wrap:balance;max-width:none}
+.nx-statement p{margin:0 auto 12px!important;max-width:680px;text-wrap:balance}
+.nx-statement p:first-of-type{font-size:clamp(17px,1.8vw,21px);opacity:.95}
+.nx-statement p:nth-of-type(2){font-size:clamp(15px,1.4vw,17px);opacity:.78;margin-bottom:28px!important}
+.nx-statement .nx-eyebrow{display:block;margin:0 auto!important;text-align:center}
+.nx-statement .nx-wrap>*{align-self:center!important;margin-left:auto!important;margin-right:auto!important;text-align:center!important}
+.nx-statement p{width:100%}
