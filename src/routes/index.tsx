@@ -58,7 +58,7 @@ function Home() {
       <NoirHeader />
       <main>
         <section className="nx-hero">
-          <img src={heroImg} alt="" width={1920} height={1088} fetchPriority="high" decoding="async" />
+          <img src={heroImg} alt="Golden hour view over a hillside estate with an infinity pool" width={1672} height={941} fetchPriority="high" decoding="async" />
           <div className="nx-wrap nx-hero-inner nx-fade">
             <span className="nx-om" lang="sa">ॐ गणेशाय नमः</span>
             <span className="nx-eyebrow">Off-Market. Discreet. Genuine.</span>
