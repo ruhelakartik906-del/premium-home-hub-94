@@ -4,8 +4,8 @@ import logoSrc from '@/assets/eliteoz-logo.webp';
 const logo = { url: logoSrc };
 import portraitSrc from '@/assets/col-nk-yadav.webp';
 const portrait = { url: portraitSrc };
-import heroAsset from '@/assets/golden-hour-mountain-villa.png.asset.json';
-const heroImg = heroAsset.url;
+// Bundled locally so the hero works on any host (e.g. Hostinger), not only Lovable's asset CDN.
+import heroImg from '@/assets/golden-hour-mountain-villa.jpg';
 import { useReveal, SelectiveGrid, PrincipleMark, AssetSilhouettes, Horizon } from '@/components/nx-graphics';
 import { MarketSplit } from '@/components/home-global';
 import { SOURCING_NOTE } from '@/lib/terms';
@@ -23,6 +23,7 @@ export const Route = createFileRoute('/')({
       { property: 'og:type', content: 'website' },
       { name: 'twitter:card', content: 'summary_large_image' },
     ],
+    links: [{ rel: 'preload', as: 'image', href: heroImg, fetchPriority: 'high' }],
   }),
   component: Home,
 });
