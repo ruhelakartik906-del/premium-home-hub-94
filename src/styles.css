@@ -403,3 +403,6 @@ input::placeholder,textarea::placeholder{color:oklch(.52 .016 240);opacity:1}
 .auth-main{padding:clamp(32px,5vw,56px) clamp(20px,3vw,35px)}
 .role-grid{margin:var(--sp-6) 0}
 @media(max-width:768px){.section,.nx-sec{padding:clamp(40px,10vw,56px) 0}.nx-statement{padding:56px 0!important}.nx-page-hero{padding:3.5rem 0 2.5rem}.nx-hero-inner{padding:3.25rem 0}.workspace-content{padding:20px}.nx-footer{padding:48px 0 20px}}
+/* Collapse doubled gaps between consecutive same-tone sections */
+:root{--sp-section:clamp(48px,6vw,80px)}
+.nx-dark.nx-sec+.nx-dark.nx-sec,.nx-ivory.nx-sec+.nx-ivory.nx-sec,.nx-light.nx-sec+.nx-light.nx-sec{padding-top:clamp(16px,2.5vw,32px)}
