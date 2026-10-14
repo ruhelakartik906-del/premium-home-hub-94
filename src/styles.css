@@ -418,3 +418,4 @@ img{max-width:100%}
   .table-wrap,table{display:block;overflow-x:auto}
 }
 @media(max-width:360px){.nx-big,.nx-giant{font-size:clamp(2.6rem,15vw,3.4rem)}.auth-panel h1{font-size:34px}}
+@media(max-width:768px){.nx-hero>img{object-position:76% 62%}}
