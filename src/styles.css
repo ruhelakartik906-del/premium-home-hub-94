@@ -421,3 +421,13 @@ img{max-width:100%}
 @media(max-width:768px){.nx-hero>img{object-position:76% 62%}}
 /* Hero content must never fade or shift out of view on scroll */
 .nx-hero-inner{opacity:1!important;transform:none!important}
+
+/* Homepage excellence: restrained editorial band, using existing theme tokens. */
+.nx-excellence{color:var(--nx-charcoal)}
+.nx-excellence .nx-excellence-inner{max-width:900px}
+.nx-excellence-rule{display:block;width:64px;height:2px;background:var(--primary);margin-bottom:var(--sp-5)}
+.nx .nx-excellence h2{font-family:var(--nx-serif);font-size:44px;line-height:1.15;letter-spacing:0;text-wrap:balance;margin:0 0 var(--sp-5)}
+.nx-excellence p{font-family:var(--font-sans);font-size:18px;line-height:1.8;color:var(--nx-charcoal);margin:0 0 var(--sp-4)}
+.nx-excellence p:last-child{margin-bottom:0}
+@media(max-width:900px){.nx .nx-excellence h2{font-size:38px}.nx-excellence p{font-size:17px}}
+@media(max-width:600px){.nx .nx-excellence h2{font-size:32px}.nx-excellence p{font-size:16px;line-height:1.75}}
