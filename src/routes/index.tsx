@@ -87,6 +87,14 @@ function Home() {
             </div>
           </div>
         </section>
+        <section className="nx-light nx-sec nx-excellence" aria-labelledby="excellence-heading">
+          <div className="nx-wrap nx-excellence-inner">
+            <span className="nx-excellence-rule" aria-hidden="true" />
+            <h2 id="excellence-heading">At Eliteoz, excellence is non-negotiable.</h2>
+            <p>While the allure of FREE offerings often entails hidden compromises, we adhere to an uncompromising standard of execution.</p>
+            <p>Our premium pricing reflects our dedication to mastery, bespoke attention, and measurable impact. We do not cut corners, dilute our focus, or settle for mediocrity—for any client, under any circumstance. This steadfast devotion to quality defines the Eliteoz distinction.</p>
+          </div>
+        </section>
         <MarketSplit />
 
 
