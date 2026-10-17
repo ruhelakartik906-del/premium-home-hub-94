@@ -199,8 +199,8 @@ function Home() {
 
         <section className="nx-dark nx-sec">
           <div className="nx-wrap nx-journeys">
-            <article><span className="nx-eyebrow">Sellers</span><h3>Your Asset.<br />Your Privacy.</h3><p>Present qualifying assets within a controlled private environment rather than exposing them to the public market.</p><Link to="/register" search={{ role: 'seller' }} className="nx-btn">Request Seller Access</Link></article>
-            <article><span className="nx-eyebrow">Buyers</span><h3>Access the<br />Extraordinary.</h3><p>Gain access to qualifying opportunities after registration, verification and activation.</p><Link to="/register" search={{ role: 'buyer' }} className="nx-btn">Request Buyer Access</Link></article>
+            <article><span className="nx-eyebrow">Sellers</span><h3>Your Asset.<br />Your Privacy.</h3><p>Present qualifying assets within a controlled private environment rather than exposing them to the public market.</p><Link to="/register" search={{ role: 'seller' }} className="nx-btn">Request Private Seller Access</Link></article>
+            <article><span className="nx-eyebrow">Buyers</span><h3>Access the<br />Extraordinary.</h3><p>Gain access to qualifying opportunities after registration, verification and activation.</p><Link to="/register" search={{ role: 'buyer' }} className="nx-btn">Request Private Buyer Access</Link></article>
           </div>
         </section>
 
@@ -233,7 +233,7 @@ function Home() {
             <h2>For Those Who Value<br />Privacy Over Publicity.</h2>
             <p className="nx-muted">If you own a trophy asset or are looking to acquire one in complete privacy, you have arrived at the right place.</p>
             <div className="nx-ctas nx-center"><Link to="/register" className="nx-btn">Request Private Access</Link><Link to="/how-it-works" className="nx-btn-ghost">Learn How Eliteoz Works</Link></div>
-            <p className="nx-eyebrow nx-mt">Eliteoz — Where INR 25 Cr. &amp; Above Assets Change Hands in Complete Silence.</p>
+            <p className="nx-eyebrow nx-mt nx-final-tagline">Eliteoz — Where INR 25 Cr. &amp; Above Assets Change Hands in Complete Silence.</p>
           </div>
         </section>
       </main>
