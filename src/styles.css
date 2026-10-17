@@ -437,7 +437,8 @@ img{max-width:100%}
 
 /* Readable public surfaces and balanced closing content. */
 :root{--nx-readable-secondary:oklch(.83 .012 80);--nx-label-ink:var(--primary);--nx-footer-divider:color-mix(in oklab,var(--nx-gold) 22%,transparent)}
-.nx-light .nx-eyebrow,.nx-ivory .nx-eyebrow,.nx-light .nx-caption,.nx-ivory .nx-caption,.nx-light .nx-ico,.nx-ivory .nx-ico{color:var(--nx-label-ink)}
+.nx-light .nx-eyebrow,.nx-ivory .nx-eyebrow,.nx-light .nx-caption,.nx-ivory .nx-caption,.nx-light .nx-ico,.nx-ivory .nx-ico,.nx-light .nx-num,.nx-ivory .nx-num{color:var(--nx-label-ink)}
+.nx-light .nx-btn:hover,.nx-ivory .nx-btn:hover,.nx-light .nx-btn-ghost:hover,.nx-ivory .nx-btn-ghost:hover{color:var(--nx-label-ink)}
 .nx-light .nx-muted,.nx-ivory .nx-muted,.nx-legal .nx-page-body,.nx-light .nx-page-body,.nx-ivory .nx-page-body,.nx-light .nx-form label,.nx-ivory .nx-form label{color:var(--muted-foreground)}
 .nx-dark .nx-muted,.nx-dark .nx-page-body,.nx-dark .nx-page-intro,.nx-dark .nx-caption,.nx-dark .nx-form label,.nx-dark .nx-form input,.nx-dark .nx-form textarea{color:var(--nx-readable-secondary)}
 .nx-dark .nx-form input::placeholder,.nx-dark .nx-form textarea::placeholder{color:var(--nx-readable-secondary);opacity:1}
