@@ -1,4 +1,5 @@
 - [x] Build public marketplace, content pages, and account flow previews.
+- [ ] Apply and verify final navy/gold Private Sourcing styling and larger Devanagari invocation on desktop, tablet, and mobile.
 - [x] Build distinct buyer, seller, and admin UI panels and requested modules.
 - [x] Verify key navigation and responsive layouts.
 - [x] SMS OTP via APITXT; existing-account check before OTP; unique email/mobile in database
