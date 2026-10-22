@@ -139,7 +139,7 @@ export function RegisterFlow({ initialRole }: { initialRole?: string }) {
           {x.key === 'gender' ? <select id={x.key} name={x.key} className="field-input" defaultValue={details[x.key] ?? ''}><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select>
             : x.key === 'dob' ? <DobInput name="dob" defaultValue={details['dob']} />
             : x.key === 'password' ? <PasswordInput id={x.key} name={x.key} required={x.required} defaultValue={details[x.key] ?? ''} minLength={8} placeholder={x.label} autoComplete="new-password" />
-            : <input id={x.key} name={x.key} className="field-input" type={x.type ?? 'text'} required={x.required} defaultValue={details[x.key] ?? ''} minLength={x.key === 'password' ? 8 : undefined} placeholder={x.label} />}
+            : <input id={x.key} name={x.key} className="field-input" type={x.type ?? 'text'} required={x.required} defaultValue={details[x.key] ?? ''} placeholder={x.label} />}
           {x.seller && <small className="muted">Set once. Later changes are handled by the Eliteoz team via a support ticket.</small>}</div>)}
       </form>}
 
@@ -184,7 +184,7 @@ export function LoginPage({ kind }: { kind: 'login' | 'forgot-password' | 'reset
       if (error) { setBusy(false); setMsg('Incorrect email or password.'); return; }
       void recordAuth({ data: { event: 'login' } }).catch(() => null);
       const nextParam = new URLSearchParams(window.location.search).get('next');
-      if (nextParam && nextParam.startsWith('/') && !nextParam.startsWith('//')) { window.location.href = nextParam; return; }
+      if (nextParam && nextParam.startsWith('/') && !nextParam.startsWith('//')) { setBusy(false); await routerNavigate(nextParam); return; }
       const to = await routeForUser(); setBusy(false); navigate({ to: to ?? '/' });
     } else if (kind === 'forgot-password') {
       await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` });
