@@ -29,6 +29,13 @@
       "when": 1792661592147,
       "tag": "0003_atomic_registration_otp",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792661741659,
+      "tag": "0004_protect_registration_mobile_proof",
+      "breakpoints": true
     }
   ]
 }
