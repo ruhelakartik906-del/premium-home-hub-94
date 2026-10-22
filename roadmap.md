@@ -1,4 +1,5 @@
 - [x] Build public marketplace, content pages, and account flow previews.
+- [ ] Prepare all 20 Armani PDF units as isolated Master Admin preview drafts; preserve exact AED prices and specifications, and verify records and access.
 - [x] Final finishing pass: optimized referenced photographs by 24.9%, added responsive mobile hero and locally served fonts, removed homepage reveal observer, polished shared controls; verified 22 public pages at three widths and all footer destinations/Back/Forward/anchors.
 - [x] Add shared password visibility controls, remove delayed scroll reveals, and verify Home/Register/Seller Back/Forward with in-memory registration draft preservation on desktop/mobile.
 - [x] Correct shared text contrast; public pages, registration details, FAQs and available Seller account sections pass contrast/overflow checks at desktop, tablet and mobile widths.
