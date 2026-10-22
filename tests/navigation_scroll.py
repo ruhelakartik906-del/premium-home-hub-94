@@ -3,7 +3,7 @@ from playwright.async_api import async_playwright
 async def main():
  async with async_playwright() as p:
   browser=await p.chromium.launch(headless=True)
-  for width in [1280,390]:
+  for width in [1280,768,390]:
    page=await browser.new_page(viewport={'width':width,'height':1800})
    errors=[]
    page.on('pageerror', lambda error: errors.append(str(error)))
@@ -11,8 +11,9 @@ async def main():
    await page.wait_for_timeout(1000)
    destinations=await page.locator('footer a[href^="/"]').evaluate_all('(links)=>links.map(a=>({href:a.getAttribute("href"),text:a.textContent}))')
    for destination in destinations:
-    await page.goto('http://localhost:8080')
-    await page.wait_for_timeout(350)
+    await page.goto('http://localhost:8080', wait_until='networkidle')
+    await page.evaluate('document.fonts.ready')
+    await page.wait_for_function("document.querySelector('.nx-hero>img').complete")
     link=page.locator('footer').get_by_role('link',name=destination['text'],exact=True)
     await link.scroll_into_view_if_needed()
     await page.evaluate('''()=>{window.outgoingTop=false;window.sampling=true;function sample(){if(location.pathname==='/' && scrollY<20)window.outgoingTop=true;if(window.sampling)requestAnimationFrame(sample)}requestAnimationFrame(sample)}''')

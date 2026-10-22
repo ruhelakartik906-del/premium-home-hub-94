@@ -1,4 +1,5 @@
 - [x] Build public marketplace, content pages, and account flow previews.
+- [ ] Final finishing pass: optimize bundled images/fonts, remove unnecessary scroll work, polish shared controls, and verify public loading/navigation at desktop/tablet/mobile sizes.
 - [x] Add shared password visibility controls, remove delayed scroll reveals, and verify Home/Register/Seller Back/Forward with in-memory registration draft preservation on desktop/mobile.
 - [x] Correct shared text contrast; public pages, registration details, FAQs and available Seller account sections pass contrast/overflow checks at desktop, tablet and mobile widths.
 - [ ] Verify contrast on populated Buyer/Admin workspaces and private property records — blocked by current account's Seller-only role and suspended listing access.
