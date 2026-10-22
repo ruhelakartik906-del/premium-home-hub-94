@@ -1,3 +1,4 @@
+import { PasswordInput } from '@/components/password-input';
 import { MarketBadge, MarketTabs, useCountries } from '@/components/market';
 import { formatMoney, flagOf } from '@/lib/eliteoz-data';
 import { Globe } from 'lucide-react';
@@ -88,7 +89,7 @@ function CreateUser({ onDone }: { onDone: () => void }) {
     <div className="panel-head"><h2>Create user</h2><Button type="button" variant="ghost" size="icon" onClick={onDone} aria-label="Close"><X /></Button></div>
     <p className="muted">Same details as registration. No OTP needed — the account is active immediately and the member can log in with this email and password.</p>
     <Tabs value={role} onChange={(v) => setRole(v as 'buyer' | 'seller')} options={[['buyer', 'Buyer'], ['seller', 'Seller']]} />
-    <div className="form-grid">{fields.map(([k, l, t]) => <div key={k} className={`field ${k === 'address' ? 'full' : ''}`}><label>{l}</label><input name={k} type={t ?? 'text'} className="field-input" required={l.includes('*')} minLength={k === 'password' ? 8 : undefined} defaultValue={blank[k]} /></div>)}
+    <div className="form-grid">{fields.map(([k, l, t]) => <div key={k} className={`field ${k === 'address' ? 'full' : ''}`}><label>{l}</label>{k === 'password' ? <PasswordInput name={k} required minLength={8} defaultValue={blank[k]} /> : <input name={k} type={t ?? 'text'} className="field-input" required={l.includes('*')} defaultValue={blank[k]} />}</div>)}
       <div className="field full"><label>Date of birth</label><DobInput name="dob" /></div>
       {role === 'seller' && <><div className="field"><label>Company / business name</label><input name="company_name" className="field-input" /></div><div className="field"><label>Business type</label><input name="business_type" className="field-input" /></div></>}
       <div className="field full"><label>Activation fee</label><select className="field-input" value={pay} onChange={(e) => setPay(e.target.value as typeof pay)}><option value="offline_paid">Paid offline — record transaction</option><option value="waived">Waived — record as waived</option><option value="none">Do not record</option></select></div></div>
@@ -331,8 +332,8 @@ function Gateway() {
       <div className="field"><label>Environment</label><select name="mode" className="field-input" defaultValue={s.mode}><option value="test">Test</option><option value="live">Live</option></select></div>
       <div className="field"><label>Activation fee (₹)</label><input name="fee" type="number" min={1} className="field-input" defaultValue={s.fee} /></div>
       <div className="field"><label>Razorpay Key ID</label><input name="key_id" className="field-input" defaultValue={s.keyId ?? ''} placeholder="rzp_test_…" /></div>
-      <div className="field"><label>Key Secret {s.secretMasked && <small className="muted">saved {s.secretMasked} — leave blank to keep</small>}</label><input name="key_secret" type="password" autoComplete="off" className="field-input" /></div>
-      <div className="field full"><label>Webhook Secret {s.webhookMasked && <small className="muted">saved {s.webhookMasked} — leave blank to keep</small>}</label><input name="webhook_secret" type="password" autoComplete="off" className="field-input" /></div>
+      <div className="field"><label>Key Secret {s.secretMasked && <small className="muted">saved {s.secretMasked} — leave blank to keep</small>}</label><PasswordInput name="key_secret" autoComplete="off" className="field-input" /></div>
+      <div className="field full"><label>Webhook Secret {s.webhookMasked && <small className="muted">saved {s.webhookMasked} — leave blank to keep</small>}</label><PasswordInput name="webhook_secret" autoComplete="off" className="field-input" /></div>
     </div>
     <div className="preview-warning"><strong>Webhook URL:</strong> {hookUrl} — add it in Razorpay Dashboard → Webhooks with events payment.captured, payment.failed, order.paid and refund.processed, using the same webhook secret. Secrets are never shown again after saving.</div>
     <div className="form-actions"><Button type="submit" disabled={busy}><Wallet /> Save Razorpay settings</Button></div>

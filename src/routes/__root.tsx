@@ -1,3 +1,4 @@
+import { RegistrationDraftProvider } from '@/components/registration-draft';
 import type { ErrorComponentProps } from "@tanstack/react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
@@ -136,7 +137,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <RegistrationDraftProvider><Outlet /></RegistrationDraftProvider>
       <Toaster position="top-right" richColors />
     </QueryClientProvider>
   );

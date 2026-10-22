@@ -132,7 +132,7 @@
 .nx-hero p{max-width:36rem;color:oklch(.82 .01 75)}.nx-hero .nx-lead{font-family:var(--nx-serif);font-size:clamp(1.3rem,2.2vw,1.65rem);line-height:1.45;color:var(--nx-ivory)}
 .nx-om{display:block;font-family:"Noto Sans Devanagari",system-ui,sans-serif;font-size:26px;line-height:1.65;color:var(--nx-notice-gold);margin-bottom:1.6rem;letter-spacing:0;overflow-wrap:normal}
 @media(max-width:600px){.nx-om{font-size:22px}}
-.nx-fade{animation:nxFade 1.6s ease-out both}@keyframes nxFade{from{opacity:0}to{opacity:1}}
+.nx-fade{animation:nxFade .2s ease-out both}@keyframes nxFade{from{opacity:0}to{opacity:1}}
 .nx-strip{background:var(--nx-black);border-top:1px solid oklch(.74 .06 75/.25)}
 .nx-strip-grid{display:grid;grid-template-columns:repeat(4,1fr)}
 .nx-strip-grid div{padding:2.2rem 1rem;border-left:1px solid oklch(1 0 0/.08);text-align:center}.nx-strip-grid div:first-child{border-left:0}
@@ -230,10 +230,10 @@
 .nx-hero>img{transform:translateY(calc(var(--nx-s,0)*40px)) scale(1.04);filter:brightness(.8)}
 .nx-hero-inner{opacity:calc(1 - var(--nx-s,0)*.6);transform:translateY(calc(var(--nx-s,0)*-30px))}
 .nx-hero-50{display:block;font-family:var(--nx-serif);font-size:clamp(2rem,5vw,3.6rem);letter-spacing:.06em;color:transparent;-webkit-text-stroke:1px var(--nx-gold);margin:1.2rem 0 .4rem}
-[data-reveal]{opacity:0;transform:translateY(18px);transition:opacity 1.4s ease,transform 1.4s ease}
+[data-reveal]{opacity:1;transform:none;transition:none}
 [data-reveal].nx-in{opacity:1;transform:none}
 .nx-gfx{width:100%;height:auto;max-width:520px;display:block}.nx-gfx-wide{max-width:none;margin-top:4rem;opacity:.85}
-.nx-draw *{stroke-dasharray:1400;stroke-dashoffset:1400;transition:stroke-dashoffset 3.2s ease}
+.nx-draw *{stroke-dasharray:1400;stroke-dashoffset:0;transition:none}
 .nx-in .nx-draw *{stroke-dashoffset:0}
 .nx-grain{background:radial-gradient(ellipse at 70% 30%,oklch(.22 .02 75/.6),transparent 60%),var(--nx-black)}
 .nx-threshold{position:relative;overflow:hidden;background:linear-gradient(oklch(.74 .06 75/.06) 1px,transparent 1px) 0 0/48px 48px,linear-gradient(90deg,oklch(.74 .06 75/.06) 1px,transparent 1px) 0 0/48px 48px,radial-gradient(ellipse at 30% 35%,oklch(.3 .03 75/.55),transparent 55%),var(--nx-black)}
@@ -478,6 +478,8 @@ img{max-width:100%}
 .nx-light .hg-tabs button:not(.on),.nx-ivory .hg-tabs button:not(.on){color:var(--muted-foreground)}
 input:disabled,select:disabled,textarea:disabled{background:var(--disabled-surface);color:var(--disabled-ink);-webkit-text-fill-color:var(--disabled-ink);opacity:1}
 .nx-dark .nx-form input:disabled,.nx-dark .nx-form textarea:disabled{background:var(--nx-charcoal);color:var(--nx-ivory);-webkit-text-fill-color:var(--nx-ivory)}
+/* Browser history restores the destination immediately, without a page-length scroll animation. */
+html{scroll-behavior:auto}
 
 /* Permanent black text on light surfaces, including interaction states. */
 :root{--light-text:#000;--foreground:var(--light-text);--ink:oklch(.20 .027 235);--nx-charcoal:var(--light-text);--muted-foreground:var(--light-text);--nx-label-ink:var(--light-text);--disabled-ink:var(--light-text)}
