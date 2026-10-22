@@ -19,7 +19,7 @@ function ConnState({ ready, enabled }: { ready: boolean; enabled: boolean }) {
   return <div className="flex flex-wrap gap-2"><span className={`status ${ready ? 'pending' : 'suspended'}`}>{ready ? 'Configured' : 'Not configured'}</span><span className="status suspended">Not connected</span><span className={`status ${enabled ? 'active' : 'suspended'}`}>{enabled ? 'Enabled' : 'Disabled'}</span></div>;
 }
 function SecretField({ label, name, masked, value, onChange }: { label: string; name: string; masked?: string | null | undefined; value: string; onChange: (n: string, v: string) => void }) {
-  return <div className="field"><label>{label}</label><input type="password" autoComplete="new-password" className="field-input" value={value} onChange={(e) => onChange(name, e.target.value)} placeholder={masked ?? 'Not configured'} /><small className="muted">{masked ? `Saved ${masked}. Leave blank to keep it.` : 'Not configured. Stored privately on the server only.'}</small></div>;
+  return <div className="field"><label>{label}</label><PasswordInput autoComplete="new-password" className="field-input" value={value} onChange={(e) => onChange(name, e.target.value)} placeholder={masked ?? 'Not configured'} /><small className="muted">{masked ? `Saved ${masked}. Leave blank to keep it.` : 'Not configured. Stored privately on the server only.'}</small></div>;
 }
 function Toggle({ name, checked, title, note }: { name: string; checked?: boolean | undefined; title: string; note: string }) {
   return <label className="gateway-toggle"><input type="checkbox" name={name} defaultChecked={!!checked} /> <span><strong>{title}</strong><small>{note}</small></span></label>;
