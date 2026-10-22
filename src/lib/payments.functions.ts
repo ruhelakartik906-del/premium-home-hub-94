@@ -49,8 +49,9 @@ export const createActivationOrder = createServerFn({ method: 'POST' })
   .handler(async ({ context }) => {
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
     const { loadGateway, rzp } = await import('./razorpay.server');
-    const { data: p } = await supabaseAdmin.from('profiles').select('full_name,email,mobile,status,account_type').eq('id', context.userId).maybeSingle();
+    const { data: p } = await supabaseAdmin.from('profiles').select('full_name,email,mobile,status,account_type,mobile_verified,created_by_admin').eq('id', context.userId).maybeSingle();
     if (!p) return { ok: false as const, error: 'Profile not found.' };
+    if (!p.created_by_admin && !p.mobile_verified) return { ok: false as const, error: 'Verify your mobile number before activation payment.' };
     if (p.status !== 'pending_payment') return { ok: false as const, error: 'Your account does not need an activation payment.' };
     if (!(await hasAcceptedTerms(context.userId))) return { ok: false as const, error: 'Please accept the Terms & Conditions to continue.' };
     const { data: paid } = await supabaseAdmin.from('transactions').select('id').eq('user_id', context.userId).eq('purpose', 'activation').eq('status', 'success').limit(1);
@@ -72,6 +73,8 @@ export const verifyActivationPayment = createServerFn({ method: 'POST' })
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
     const { loadGateway, rzp, hmac, safeEqualHex, markOrderPaid } = await import('./razorpay.server');
+    const { data: profile } = await context.supabase.from('profiles').select('mobile_verified,created_by_admin').eq('id', context.userId).maybeSingle();
+    if (!profile || (!profile.created_by_admin && !profile.mobile_verified)) return { ok: false as const, error: 'Mobile verification is required before activation.' };
     const { data: t } = await supabaseAdmin.from('transactions').select('id,status,amount,currency,user_id').eq('order_id', data.orderId).maybeSingle();
     if (!t || t.user_id !== context.userId) return { ok: false as const, error: 'Payment not found.' };
     if (t.status === 'success') return { ok: true as const, already: true };
@@ -213,8 +216,9 @@ export const skipActivationPayment = createServerFn({ method: 'POST' })
     const s = await bypassState();
     if (!s.allowed) return { ok: false as const, error: 'Testing bypass is switched off. Please complete the payment.' };
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
-    const { data: p } = await supabaseAdmin.from('profiles').select('full_name,email,status,account_type').eq('id', context.userId).maybeSingle();
+    const { data: p } = await supabaseAdmin.from('profiles').select('full_name,email,status,account_type,mobile_verified,created_by_admin').eq('id', context.userId).maybeSingle();
     if (!p) return { ok: false as const, error: 'Profile not found.' };
+    if (!p.created_by_admin && !p.mobile_verified) return { ok: false as const, error: 'Verify your mobile number before activation.' };
     if (p.status !== 'pending_payment') return { ok: false as const, error: 'Your account does not need an activation payment.' };
     if (!(await hasAcceptedTerms(context.userId))) return { ok: false as const, error: 'Please accept the Terms & Conditions to continue.' };
     const { error } = await supabaseAdmin.from('transactions').insert({ user_id: context.userId, amount: 0, currency: 'INR', purpose: 'activation', method: 'test_bypass', provider: 'test_bypass', status: 'test_bypass', verified_via: 'test_bypass', environment: 'test', account_role: p.account_type, payer_name: p.full_name, payer_email: p.email, notes: 'TEST ACTIVATION — payment bypassed, no money received' });

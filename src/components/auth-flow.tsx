@@ -12,6 +12,7 @@ import { SOURCING_NOTE } from '@/lib/terms';
 import { TermsPanel } from '@/components/terms-panel';
 import { registerMember, ACTIVATION_FEE } from '@/lib/members.functions';
 import { sendOtp, verifyOtp } from '@/lib/otp.functions';
+import { mobileSchema } from '@/lib/otp-security';
 import { recordAuthEvent } from '@/lib/admin-users.functions';
 import { createFirstAdmin } from '@/lib/admin-setup.functions';
 import { supabase } from '@/integrations/supabase/client';
@@ -91,12 +92,12 @@ export function RegisterFlow({ initialRole }: { initialRole?: string }) {
   const resendLeft = Math.max(0, Math.ceil((resendAt - now) / 1000));
   const requestOtp = async (mobile: string, email: string) => {
     setBusy(true); setError(''); setInfo(''); setDup(false);
-    const r = await send({ data: { mobile, email } }).catch(() => ({ ok: false as const, error: 'Please enter a valid 10-digit Indian mobile number.' }));
+    const r = await send({ data: { mobile, email } }).catch(() => ({ ok: false as const, error: 'Could not send OTP. Check your number and try again.' }));
     setBusy(false);
     if (!r.ok) { setError(r.error); if ('duplicate' in r && r.duplicate) setDup(r.duplicate); if ('retryAfter' in r && r.retryAfter) setResendAt(Date.now() + r.retryAfter * 1000); return false; }
     setMasked(r.masked); setOtp(['', '', '', '', '', '']); setOtpToken('');
     setExpiresAt(Date.now() + r.expiresIn * 1000); setResendAt(Date.now() + r.resendIn * 1000); setNow(Date.now());
-    setInfo(`OTP sent successfully to ${r.masked}`);
+    setInfo(`SMS request accepted for ${r.masked}. Enter the code when it arrives.`);
     return true;
   };
   const finish = async (tokenArg?: string) => {
@@ -117,7 +118,7 @@ export function RegisterFlow({ initialRole }: { initialRole?: string }) {
     const c = code ?? otp.join('');
     if (busy || c.length !== 6) return;
     setBusy(true); setError(''); setInfo('');
-    const r = await verify({ data: { mobile: details['mobile'] ?? '', otp: c } }).catch(() => ({ ok: false as const, error: 'Could not verify the OTP. Please try again.' }));
+    const r = await verify({ data: { mobile: details['mobile'] ?? '', email: details['email'] ?? '', otp: c } }).catch(() => ({ ok: false as const, error: 'Could not verify the OTP. Please try again.' }));
     setBusy(false);
     if (!r.ok) { setError(r.error); setOtp(['', '', '', '', '', '']); if ('expired' in r && r.expired) setExpiresAt(0); return; }
     setOtpToken(r.token);
@@ -134,7 +135,7 @@ export function RegisterFlow({ initialRole }: { initialRole?: string }) {
       <p>{step === 0 ? 'Personal, address and business details are collected later in Verification.' : step === 1 ? `Enter the 6-digit code sent to ${masked || 'your mobile'}.` : 'One final step and your dashboard opens automatically.'}</p>
       <div className="steps">{steps.map((x, i) => <div className={`step ${i === step ? 'active' : ''} ${i < step ? 'done' : ''}`} key={x}><span>{i < step ? '✓' : i + 1}</span>{x}</div>)}</div>
 
-      {step === 0 && <form id="details-form" className="form-grid" onChange={(e) => { const f = new FormData(e.currentTarget); const draft: Record<string, string> = {}; f.forEach((v, k) => { draft[k] = String(v); }); setDetails(draft); }} onSubmit={(e) => { e.preventDefault(); const f = new FormData(e.currentTarget); const d: Record<string, string> = {}; f.forEach((v, k) => { d[k] = String(v); }); if ((d['password'] ?? '').length < 8) { setError('Password must be at least 8 characters.'); return; } if (!/^[6-9]\d{9}$/.test((d['mobile'] ?? '').replace(/\D/g, '').slice(-10))) { setError('Please enter a valid 10-digit Indian mobile number.'); return; } setDetails(d as Details); setError(''); void requestOtp(d['mobile'] ?? '', d['email'] ?? '').then((ok) => { if (ok) setStep(1); }); }}>
+      {step === 0 && <form id="details-form" className="form-grid" onChange={(e) => { const f = new FormData(e.currentTarget); const draft: Record<string, string> = {}; f.forEach((v, k) => { draft[k] = String(v); }); setDetails(draft); }} onSubmit={(e) => { e.preventDefault(); const f = new FormData(e.currentTarget); const d: Record<string, string> = {}; f.forEach((v, k) => { d[k] = String(v); }); if ((d['password'] ?? '').length < 8) { setError('Password must be at least 8 characters.'); return; } if (!mobileSchema.safeParse(d['mobile'] ?? '').success) { setError('Enter an Indian mobile number with optional +91 country code.'); return; } setDetails(d as Details); setError(''); void requestOtp(d['mobile'] ?? '', d['email'] ?? '').then((ok) => { if (ok) setStep(1); }); }}>
         {fields.filter((x) => !x.seller || role === 'seller').map((x) => <div key={x.key} className={`field ${x.full || x.key === 'dob' ? 'full' : ''}`}><label htmlFor={x.key}>{x.label}{x.required && ' *'}</label>
           {x.key === 'gender' ? <select id={x.key} name={x.key} className="field-input" defaultValue={details[x.key] ?? ''}><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select>
             : x.key === 'dob' ? <DobInput name="dob" defaultValue={details['dob']} />
@@ -146,7 +147,7 @@ export function RegisterFlow({ initialRole }: { initialRole?: string }) {
       {step === 1 && <>{info && <Notice>{info}</Notice>}
         <OtpInput value={otp} onChange={setOtp} onComplete={(code) => { void afterOtp(code); }} />
         <p className="muted">{secsLeft > 0 ? `Code expires in ${String(Math.floor(secsLeft / 60)).padStart(2, '0')}:${String(secsLeft % 60).padStart(2, '0')}` : 'Code expired — please request a new OTP.'}</p>
-        <div className="flex gap-2"><Button variant="link" disabled={busy || resendLeft > 0} onClick={() => { void requestOtp(details['mobile'] ?? '', details['email'] ?? ''); }}>{resendLeft > 0 ? `Resend OTP in ${resendLeft}s` : 'Resend OTP'}</Button><Button variant="link" onClick={() => { setStep(0); setInfo(''); setError(''); }}>Change number</Button></div></>}
+        <div className="flex gap-2"><Button variant="link" disabled={busy || resendLeft > 0} onClick={() => { void requestOtp(details['mobile'] ?? '', details['email'] ?? ''); }}>{resendLeft > 0 ? `Resend OTP in ${resendLeft}s` : 'Resend OTP'}</Button><Button variant="link" disabled={busy} onClick={() => { setStep(0); setInfo(''); setError(''); }}>Change number</Button></div></>}
 
       {step === 2 && gateway && <><div className="panel pay-panel"><div className="pay-head"><div><span className="eyebrow">ACTIVATION FEE</span><div className="payment-total">₹{fee.toLocaleString('en-IN')}</div></div><span className="status pending">{pay?.mode === 'live' ? 'RAZORPAY' : 'TEST MODE'}</span></div>
         <p className="muted">You'll pay securely via Razorpay (card, UPI or net banking). Your account activates only after Razorpay confirms the payment.</p>

@@ -1,111 +1,55 @@
 import { createServerFn } from '@tanstack/react-start';
 import { z } from 'zod';
+import { mobileSchema, generateOtp, generateToken, sha256, otpHash, deliverOtp, OTP_SECONDS, RESEND_SECONDS } from '@/lib/otp-security';
 
-const OTP_TTL_MS = 5 * 60 * 1000;
-const RESEND_MS = 60 * 1000;
-const MAX_ATTEMPTS = 5;
-
-const mobileSchema = z.string().trim().transform((v) => v.replace(/\D/g, '').slice(-10)).refine((v) => /^[6-9]\d{9}$/.test(v), 'Please enter a valid 10-digit Indian mobile number.');
-
-async function sha256(s: string) {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
-  return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');
-}
-function randomOtp() {
-  const a = new Uint32Array(1);
-  let n: number;
-  do { crypto.getRandomValues(a); n = a[0]!; } while (n >= 4294000000);
-  return String(n % 1000000).padStart(6, '0');
-}
-function randomToken() {
-  const a = new Uint8Array(32); crypto.getRandomValues(a);
-  return Array.from(a).map((b) => b.toString(16).padStart(2, '0')).join('');
-}
+type OtpResult = { ok: boolean; error?: string; retryAfter?: number; expired?: boolean };
+const emailSchema = z.string().trim().email().max(200).transform((value) => value.toLowerCase());
 
 export const sendOtp = createServerFn({ method: 'POST' })
-  .inputValidator((d) => z.object({ mobile: mobileSchema, email: z.string().trim().email().max(200) }).parse(d))
+  .inputValidator((input) => z.object({ mobile: mobileSchema, email: emailSchema }).parse(input))
   .handler(async ({ data }) => {
-    const missing = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'APITXT_AUTHKEY'].filter((k) => !process.env[k]);
-    if (missing.length) {
-      console.error('[OTP] missing server env vars:', missing.join(', '));
-      return { ok: false as const, error: 'SMS service is not configured yet. Please try again later.' };
-    }
-    const authkey = process.env['APITXT_AUTHKEY']!;
-    let existing: 'active' | 'pending' | null = null;
-    let DUP: Record<string, string> = {};
+    const authkey = process.env['APITXT_AUTHKEY'];
+    if (!authkey) return { ok: false as const, error: 'SMS service is not configured. Please try again later.' };
     try {
-      const m = await import('@/lib/otp.server');
-      DUP = m.DUP_MESSAGES;
-      existing = await m.findExistingAccount(data.email, data.mobile);
-    } catch (e) {
-      console.error('[OTP] database check failed:', e instanceof Error ? e.message : String(e));
-      return { ok: false as const, error: 'Could not send OTP. Please try again.' };
+      const { findExistingAccount, DUP_MESSAGES } = await import('@/lib/otp.server');
+      const existing = await findExistingAccount(data.email, data.mobile);
+      if (existing) return { ok: false as const, duplicate: existing, error: DUP_MESSAGES[existing] };
+      const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+      const otp = generateOtp();
+      const id = crypto.randomUUID();
+      const hash = await otpHash(id, data.email, otp, authkey);
+      const { data: reserved, error: reserveError } = await supabaseAdmin.rpc('reserve_registration_otp', { _id: id, _mobile: data.mobile, _email: data.email, _hash: hash });
+      if (reserveError || !reserved) return { ok: false as const, error: 'Could not prepare OTP securely. Please try again later.' };
+      const reservation = reserved as unknown as OtpResult;
+      if (!reservation.ok) return { ok: false as const, error: reservation.error ?? 'Please wait before requesting another OTP.', retryAfter: reservation.retryAfter };
+      const delivery = await deliverOtp({ authkey, mobile: data.mobile, otp, templateId: process.env['APITXT_TEMPLATE_ID'] });
+      const { data: saved, error: saveError } = await supabaseAdmin.from('otp_verifications').update({ status: delivery.ok ? 'pending' : 'failed' })
+        .eq('id', id).eq('status', 'sending').select('expires_at,created_at').maybeSingle();
+      if (saveError || !saved) return { ok: false as const, error: 'Could not confirm OTP status. Please request a new OTP after the cooldown.' };
+      if (!delivery.ok) return { ok: false as const, error: delivery.error, retryAfter: RESEND_SECONDS };
+      const serverNow = Date.now();
+      return { ok: true as const, masked: `+91 ••••••${data.mobile.slice(-4)}`, expiresIn: Math.max(0, Math.ceil((new Date(saved.expires_at).getTime() - serverNow) / 1000)), resendIn: Math.max(0, Math.ceil((new Date(saved.created_at).getTime() + RESEND_SECONDS * 1000 - serverNow) / 1000)) };
+    } catch {
+      return { ok: false as const, error: 'Could not send OTP. Please try again later.' };
     }
-    if (existing) return { ok: false as const, duplicate: existing, error: DUP[existing]! };
-    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
-    const mobile = data.mobile;
-    const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-    const { data: recent } = await supabaseAdmin.from('otp_verifications').select('created_at').eq('mobile', mobile).gte('created_at', since).order('created_at', { ascending: false }).limit(20);
-    const rows = recent ?? [];
-    const last = rows[0] ? new Date(rows[0].created_at).getTime() : 0;
-    if (Date.now() - last < RESEND_MS) return { ok: false as const, error: 'Please wait before requesting a new OTP.', retryAfter: Math.ceil((RESEND_MS - (Date.now() - last)) / 1000) };
-    const lastMinute = rows.filter((r) => Date.now() - new Date(r.created_at).getTime() < 60000).length;
-    if (lastMinute >= 3 || rows.length >= 10) return { ok: false as const, error: 'Too many OTP requests. Please try again later.' };
-
-    // Invalidate previous OTPs for this number
-    await supabaseAdmin.from('otp_verifications').update({ status: 'invalidated' }).eq('mobile', mobile).eq('status', 'pending');
-
-    const otp = randomOtp();
-    const id = crypto.randomUUID();
-    const { error: insErr } = await supabaseAdmin.from('otp_verifications').insert({ id, mobile, otp_hash: await sha256(`${id}:${otp}`), expires_at: new Date(Date.now() + OTP_TTL_MS).toISOString() });
-    if (insErr) { console.error('[OTP] otp insert failed:', insErr.code, insErr.message); return { ok: false as const, error: 'Could not send OTP. Please try again.' }; }
-
-    let sent = false;
-    try {
-      const res = await fetch('https://apitxt.com/api/sendOTP', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ authkey, mobile: `91${mobile}`, otp, channel: 'sms', country: '91' }).toString(),
-      });
-      const text = await res.text();
-      let status = '';
-      try { status = String((JSON.parse(text) as { status?: unknown }).status ?? '').toLowerCase(); } catch { status = ''; }
-      sent = res.ok && status === 'success';
-      if (!sent) console.error('[OTP] APITXT send failed', { httpStatus: res.status, mobile: `XXXXXX${mobile.slice(-4)}`, body: text.replaceAll(otp, '******').slice(0, 500) });
-    } catch (e) { console.error('[OTP] APITXT request error:', e instanceof Error ? e.message : String(e)); }
-
-    if (!sent) {
-      await supabaseAdmin.from('otp_verifications').update({ status: 'failed' }).eq('id', id);
-      return { ok: false as const, error: 'We could not send the OTP right now. Please try again in a minute.' };
-    }
-    return { ok: true as const, masked: `+91 ${mobile.slice(0, 5)} ${mobile.slice(5)}`, expiresIn: OTP_TTL_MS / 1000, resendIn: RESEND_MS / 1000 };
   });
 
 export const verifyOtp = createServerFn({ method: 'POST' })
-  .inputValidator((d) => z.object({ mobile: mobileSchema, otp: z.string().regex(/^\d{6}$/) }).parse(d))
+  .inputValidator((input) => z.object({ mobile: mobileSchema, email: emailSchema, otp: z.string().regex(/^\d{6}$/) }).parse(input))
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
-    const { data: row } = await supabaseAdmin.from('otp_verifications').select('*').eq('mobile', data.mobile).order('created_at', { ascending: false }).limit(1).maybeSingle();
-    if (!row || row.status === 'failed') return { ok: false as const, error: 'Please request an OTP first.' };
-    if (row.status === 'verified') return { ok: false as const, error: 'This OTP has already been used. Please request a new OTP.' };
-    if (row.status !== 'pending') return { ok: false as const, error: 'This OTP is no longer valid. Please request a new OTP.', expired: true };
-    if (new Date(row.expires_at).getTime() < Date.now()) {
-      await supabaseAdmin.from('otp_verifications').update({ status: 'expired' }).eq('id', row.id);
-      return { ok: false as const, error: 'OTP expired. Please request a new OTP.', expired: true };
+    const authkey = process.env['APITXT_AUTHKEY'];
+    if (!authkey) return { ok: false as const, error: 'SMS service is not configured. Please try again later.' };
+    try {
+      const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+      const { data: latest, error } = await supabaseAdmin.from('otp_verifications').select('id').eq('mobile', data.mobile).order('created_at', { ascending: false }).limit(1).maybeSingle();
+      if (error || !latest) return { ok: false as const, error: 'Please request an OTP first.' };
+      const token = generateToken();
+      const { data: result, error: verifyError } = await supabaseAdmin.rpc('verify_registration_otp', { _mobile: data.mobile, _email: data.email, _hash: await otpHash(latest.id, data.email, data.otp, authkey), _token_hash: await sha256(token) });
+      if (verifyError || !result) return { ok: false as const, error: 'Could not verify OTP securely. Please try again.' };
+      const verification = result as unknown as OtpResult;
+      if (!verification.ok) return { ok: false as const, error: verification.error ?? 'Could not verify OTP.', expired: verification.expired };
+      return { ok: true as const, token };
+    } catch {
+      return { ok: false as const, error: 'Could not verify OTP. Please try again later.' };
     }
-    if (row.attempts >= MAX_ATTEMPTS) return { ok: false as const, error: 'Too many wrong attempts. Please request a new OTP.', expired: true };
-    const match = (await sha256(`${row.id}:${data.otp}`)) === row.otp_hash;
-    if (!match) {
-      const attempts = row.attempts + 1;
-      await supabaseAdmin.from('otp_verifications').update({ attempts, ...(attempts >= MAX_ATTEMPTS ? { status: 'invalidated' } : {}) }).eq('id', row.id);
-      return attempts >= MAX_ATTEMPTS
-        ? { ok: false as const, error: 'Too many wrong attempts. Please request a new OTP.', expired: true }
-        : { ok: false as const, error: `Invalid OTP. Please try again. (${MAX_ATTEMPTS - attempts} attempts left)` };
-    }
-    const token = randomToken();
-    const { data: upd } = await supabaseAdmin.from('otp_verifications').update({ status: 'verified', verified_at: new Date().toISOString(), verify_token_hash: await sha256(token) }).eq('id', row.id).eq('status', 'pending').select('id');
-    if (!upd?.length) return { ok: false as const, error: 'This OTP has already been used. Please request a new OTP.' };
-    await supabaseAdmin.from('audit_logs').insert({ actor_id: null, target_user_id: null, action: 'otp_verified', details: { mobile: `XXXXXX${data.mobile.slice(-4)}` } });
-    return { ok: true as const, token };
   });
-

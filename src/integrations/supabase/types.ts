@@ -358,6 +358,7 @@ export type Database = {
           id: string
           mobile: string
           otp_hash: string
+          registration_email: string | null
           status: string
           verified_at: string | null
           verify_token_hash: string | null
@@ -369,6 +370,7 @@ export type Database = {
           id?: string
           mobile: string
           otp_hash: string
+          registration_email?: string | null
           status?: string
           verified_at?: string | null
           verify_token_hash?: string | null
@@ -380,6 +382,7 @@ export type Database = {
           id?: string
           mobile?: string
           otp_hash?: string
+          registration_email?: string | null
           status?: string
           verified_at?: string | null
           verify_token_hash?: string | null
@@ -1082,6 +1085,10 @@ export type Database = {
         }[]
       }
       claim_first_admin: { Args: never; Returns: boolean }
+      consume_registration_otp: {
+        Args: { _email: string; _mobile: string; _token_hash: string }
+        Returns: boolean
+      }
       enforce_verification_deadlines: { Args: never; Returns: number }
       has_permission: {
         Args: { _perm: string; _user_id: string }
@@ -1094,6 +1101,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      reserve_registration_otp: {
+        Args: { _email: string; _hash: string; _id: string; _mobile: string }
+        Returns: Json
+      }
       seller_interest_summary: {
         Args: never
         Returns: {
@@ -1105,6 +1116,15 @@ export type Database = {
           request_type: string
           status: string
         }[]
+      }
+      verify_registration_otp: {
+        Args: {
+          _email: string
+          _hash: string
+          _mobile: string
+          _token_hash: string
+        }
+        Returns: Json
       }
     }
     Enums: {
