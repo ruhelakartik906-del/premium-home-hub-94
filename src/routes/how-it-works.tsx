@@ -17,6 +17,8 @@ export const Route = createFileRoute('/how-it-works')({
         { title: 'Admin Verification', body: <p>The Eliteoz team reviews submissions and mandates before access is extended.</p> },
         { title: 'Dashboard Access', body: <p>Activated members enter their private Buyer or Seller workspace.</p> },
         { title: 'Qualified Asset Access', body: <p>Verified buyers see qualifying mandates; sellers present assets to verified buyers only.</p> },
+        { title: 'Buyer Property Shortlisting', body: <><p>Buyers review qualifying opportunities and shortlist a property aligned with their requirements.</p><p>Once a buyer shortlists a property, we conduct thorough due diligence to support a smooth transaction from selection to closing.</p></> },
+        { title: 'Buyer Transaction / Closing', body: <p>Transaction assistance continues through the closing process. Buyers must conduct independent professional due diligence before completing any transaction.</p> },
       ]}
     />
   ),
