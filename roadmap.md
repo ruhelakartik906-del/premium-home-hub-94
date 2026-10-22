@@ -1,6 +1,7 @@
 - [x] Build public marketplace, content pages, and account flow previews.
 - [x] Read-only APITXT documentation and current OTP flow audit: provider documents delivery via POST /api/sendOTP and app-side verification; APITXT_AUTHKEY is configured, with no credential validity or delivery verification.
-- [ ] Replace frontend-only instruction and implement real APITXT registration delivery, atomic expiry/attempt/cooldown checks and email-bound verification proof; test server behavior and registration UI.
+- [x] Replace frontend-only instruction; implement documented real APITXT delivery, 10-second timeout, strict +91 validation, atomic expiry/attempt/cooldown checks and email-bound single-use registration proof. Eight security/database tests pass; invalid-country registration UI blocked without runtime errors.
+- [ ] Verify actual APITXT SMS receipt → registration → activation payment end-to-end — needs user-approved test mobile and received OTP; provider credential/default template and real delivery remain unverified. No SMS was sent in automated tests.
 - [x] Prepare all 20 Armani PDF units as isolated Master Admin preview drafts with original PDF, exact AED prices and specifications; all 23 data/filter tests pass.
 - [ ] Verify Armani draft viewing/editing inside Master Admin on desktop/mobile — requesting account is Seller-only and redirects to Seller; requires a Master Admin session. No live records were created.
 - [x] Final finishing pass: optimized referenced photographs by 24.9%, added responsive mobile hero and locally served fonts, removed homepage reveal observer, polished shared controls; verified 22 public pages at three widths and all footer destinations/Back/Forward/anchors.
