@@ -24,7 +24,7 @@ const fields: { key: FieldKey; label: string; type?: string; required?: boolean;
   { key: 'full_name', label: 'Full name', required: true },
   { key: 'email', label: 'Email address', type: 'email', required: true },
   { key: 'mobile', label: 'Mobile number', type: 'tel', required: true },
-  { key: 'password', label: 'Create password (min 8 characters)', type: 'password', required: true },
+  { key: 'password', label: 'Create password', type: 'password', required: true },
 ];
 
 export function OtpInput({ value, onChange, onComplete }: { value: string[]; onChange: (v: string[]) => void; onComplete?: (code: string) => void }) {
