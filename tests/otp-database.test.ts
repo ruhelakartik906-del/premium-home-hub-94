@@ -68,4 +68,4 @@ test.skipIf(!url || !key)('database enforces OTP expiry, limits, email binding, 
     const { error } = await client.from('otp_verifications').delete().eq('mobile', mobile);
     expect(error === null).toBe(true);
   }
-});
+}, 60000);
