@@ -10,6 +10,9 @@ export const getRouter = () => {
     context: { queryClient },
     scrollRestoration: true,
     scrollRestorationBehavior: 'instant',
+    // Let the router reset scroll only after the destination has rendered.
+    defaultViewTransition: false,
+    defaultHashScrollIntoView: { behavior: 'instant', block: 'start' },
     defaultPreloadStaleTime: 0,
   });
 
