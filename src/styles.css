@@ -478,3 +478,14 @@ img{max-width:100%}
 .nx-light .hg-tabs button:not(.on),.nx-ivory .hg-tabs button:not(.on){color:var(--muted-foreground)}
 input:disabled,select:disabled,textarea:disabled{background:var(--disabled-surface);color:var(--disabled-ink);-webkit-text-fill-color:var(--disabled-ink);opacity:1}
 .nx-dark .nx-form input:disabled,.nx-dark .nx-form textarea:disabled{background:var(--nx-charcoal);color:var(--nx-ivory);-webkit-text-fill-color:var(--nx-ivory)}
+
+/* Permanent black text on light surfaces, including interaction states. */
+:root{--light-text:#000;--foreground:var(--light-text);--ink:oklch(.20 .027 235);--nx-charcoal:var(--light-text);--muted-foreground:var(--light-text);--nx-label-ink:var(--light-text);--disabled-ink:var(--light-text)}
+@scope (.nx-light,.nx-ivory,.page-hero,.section,.auth-main,.workspace-content,.workspace-header,.property-info,.panel,.contact-card) to (.nx-dark,.nx-hero,.nx-footer,.dark-band,.verify-card,.hg-side,.property-photo,.market-badge.intl,.market-tabs .active) {
+  :scope{color:var(--light-text)}
+  :is(h1,h2,h3,h4,p,li,dt,dd,label,small,summary,figcaption,th,td,span,strong,em,a,button,input,select,textarea):not(.bg-primary,.bg-destructive,.bg-foreground,.text-primary-foreground,.text-destructive-foreground){color:var(--light-text)!important}
+  :is(a,button,summary):hover:not(.bg-primary,.bg-destructive,.bg-foreground,.text-primary-foreground,.text-destructive-foreground){color:var(--light-text)!important}
+  input::placeholder,textarea::placeholder{color:var(--light-text)!important;opacity:1}
+  input:disabled,select:disabled,textarea:disabled{-webkit-text-fill-color:var(--light-text)}
+  .nx-big-lit{-webkit-text-fill-color:var(--light-text);background:none;text-shadow:none}
+}
