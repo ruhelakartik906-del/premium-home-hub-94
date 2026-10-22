@@ -1,6 +1,7 @@
 import { createServerFn } from '@tanstack/react-start';
 import { z } from 'zod';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
+import { mobileSchema } from '@/lib/otp-security';
 
 export const ACTIVATION_FEE = 50000;
 
@@ -33,7 +34,11 @@ async function createMember(m: Member, opts: { byAdmin: boolean; pendingPayment?
     return { ok: false as const, error: msg };
   }
   const id = created.user.id;
-  await supabaseAdmin.from('user_roles').insert({ user_id: id, role: m.role });
+  const { error: roleError } = await supabaseAdmin.from('user_roles').insert({ user_id: id, role: m.role });
+  if (roleError) {
+    await supabaseAdmin.auth.admin.deleteUser(id);
+    return { ok: false as const, error: 'Could not create the account. Please try again.' };
+  }
   const n = (v?: string) => (v && v.trim() ? v.trim() : null);
   const { error: profErr } = await supabaseAdmin.from('profiles').insert({ id, full_name: m.full_name, email: m.email, mobile: m.mobile, dob: n(m.dob), gender: n(m.gender), country: n(m.country), state: n(m.state), city: n(m.city), address: n(m.address), pincode: n(m.pincode), company_name: n(m.company_name), business_type: n(m.business_type), account_type: m.role, created_by_admin: opts.byAdmin, mobile_verified: !!opts.mobileVerified, ...(opts.pendingPayment ? { status: 'pending_payment' } : {}) });
   if (profErr) {
@@ -52,14 +57,14 @@ async function createMember(m: Member, opts: { byAdmin: boolean; pendingPayment?
 // Public signup. Every self-registered account starts in 'pending_payment' and is
 // activated only by a verified payment (server-side signature/webhook or admin record).
 export const registerMember = createServerFn({ method: 'POST' })
-  .inputValidator((d) => memberSchema.extend({ otpToken: z.string().regex(/^[a-f0-9]{64}$/) }).parse(d))
+  .inputValidator((d) => memberSchema.extend({ mobile: mobileSchema, otpToken: z.string().regex(/^[a-f0-9]{64}$/) }).parse(d))
   .handler(async ({ data: input }) => {
     const { otpToken, ...data } = input;
     const { findExistingAccount, DUP_MESSAGES } = await import('@/lib/otp.server');
     const existing = await findExistingAccount(data.email, data.mobile);
     if (existing) return { ok: false as const, duplicate: existing, error: DUP_MESSAGES[existing] };
     const { consumeOtpToken } = await import('@/lib/otp.server');
-    if (!(await consumeOtpToken(data.mobile, otpToken))) return { ok: false as const, error: 'Mobile verification expired. Please verify your mobile number again.', reverify: true as const };
+    if (!(await consumeOtpToken(data.mobile, data.email, otpToken))) return { ok: false as const, error: 'Mobile verification expired. Please verify your mobile number again.', reverify: true as const };
     const r = await createMember(data, { byAdmin: false, pendingPayment: true, mobileVerified: true });
     return r.ok ? { ...r, needsPayment: true } : r;
   });
