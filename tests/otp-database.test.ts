@@ -32,6 +32,9 @@ test.skipIf(!url || !key)('database enforces OTP expiry, limits, email binding, 
     expect(error === null).toBe(true);
   };
   try {
+    const { data: initialized, error: bootstrapError } = await client.rpc('initialize_first_admin', { _user_id: crypto.randomUUID(), _full_name: 'Security regression test', _email: 'bootstrap-test@example.invalid' });
+    expect(bootstrapError === null).toBe(true);
+    expect(initialized).toBe(false); // Existing administrator prevents any competing setup.
     const first = await reserve();
     expect(first.result.ok).toBe(true);
     expect((await reserve()).result.ok).toBe(false);

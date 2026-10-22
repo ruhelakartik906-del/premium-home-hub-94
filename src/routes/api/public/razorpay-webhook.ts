@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { isCapturedPayment } from '@/lib/payment-security';
 
 export const Route = createFileRoute('/api/public/razorpay-webhook')({
   server: {
@@ -14,7 +15,7 @@ export const Route = createFileRoute('/api/public/razorpay-webhook')({
         const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
         if ((evt.event === 'payment.captured' || evt.event === 'order.paid') && pay?.order_id) {
           const { data: t } = await supabaseAdmin.from('transactions').select('amount,currency').eq('order_id', pay.order_id).maybeSingle();
-          if (t && Math.round(Number(t.amount) * 100) === pay.amount && t.currency === pay.currency) await markOrderPaid(pay.order_id, pay.id, 'webhook');
+          if (t && typeof pay.id === 'string' && isCapturedPayment(pay, { orderId: pay.order_id, amount: Math.round(Number(t.amount) * 100), currency: t.currency })) await markOrderPaid(pay.order_id, pay.id, 'webhook');
         } else if (evt.event === 'payment.failed' && pay?.order_id) {
           await supabaseAdmin.from('transactions').update({ status: 'failed', failure_reason: String(pay.error_description ?? 'Payment failed').slice(0, 300) }).eq('order_id', pay.order_id).in('status', ['created', 'pending']);
         } else if (evt.event === 'refund.processed' && refund?.payment_id) {

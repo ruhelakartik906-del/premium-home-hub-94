@@ -1101,6 +1101,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      initialize_first_admin: {
+        Args: { _email: string; _full_name: string; _user_id: string }
+        Returns: boolean
+      }
       reserve_registration_otp: {
         Args: { _email: string; _hash: string; _id: string; _mobile: string }
         Returns: Json

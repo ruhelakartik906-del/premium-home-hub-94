@@ -1,3 +1,6 @@
+- [x] Resolve dependency vulnerabilities: patched Vite, MCP, Hono, source-map-js, launch-editor, shell-quote and brace-expansion; production scan and full public-registry advisory audit report none. Payment/OTP/listing tests pass and signed-in Seller bypass is blocked.
+- [x] Review backend security: public countries are non-sensitive reference data; OTP attempt limits and service-only RPC access confirmed; payment capture now fails closed, credential fragments removed, first-admin setup atomic, and member payment bypass disabled. Build OK.
+- [ ] Apply updated deployment to Hostinger and rescan its vulnerability page — Hostinger deployment/repository access is not connected here; no external pull request was merged or deployment performed.
 - [x] Build public marketplace, content pages, and account flow previews.
 - [x] Read-only APITXT documentation and current OTP flow audit: provider documents delivery via POST /api/sendOTP and app-side verification; APITXT_AUTHKEY is configured, with no credential validity or delivery verification.
 - [x] Replace frontend-only instruction; implement documented real APITXT delivery, 10-second timeout, strict +91 validation, atomic expiry/attempt/cooldown checks and email-bound single-use registration proof. Eight security/database tests pass; invalid-country registration UI blocked without runtime errors.
