@@ -20,11 +20,11 @@ import { accountAccess } from '@/lib/access';
 type Role = 'buyer' | 'seller';
 type FieldKey = 'full_name' | 'email' | 'password' | 'mobile' | 'dob' | 'gender' | 'country' | 'state' | 'city' | 'address' | 'pincode' | 'company_name' | 'business_type';
 type Details = Partial<Record<FieldKey, string>>;
-const fields: { key: FieldKey; label: string; type?: string; required?: boolean; full?: boolean; seller?: boolean }[] = [
+const fields: { key: FieldKey; label: string; placeholder?: string; type?: string; required?: boolean; full?: boolean; seller?: boolean }[] = [
   { key: 'full_name', label: 'Full name', required: true },
   { key: 'email', label: 'Email address', type: 'email', required: true },
   { key: 'mobile', label: 'Mobile number', type: 'tel', required: true },
-  { key: 'password', label: 'Create password', type: 'password', required: true },
+  { key: 'password', label: 'Create password (minimum 8 characters)', placeholder: 'Create password', type: 'password', required: true },
 ];
 
 export function OtpInput({ value, onChange, onComplete }: { value: string[]; onChange: (v: string[]) => void; onComplete?: (code: string) => void }) {
@@ -138,7 +138,7 @@ export function RegisterFlow({ initialRole }: { initialRole?: string }) {
         {fields.filter((x) => !x.seller || role === 'seller').map((x) => <div key={x.key} className={`field ${x.full || x.key === 'dob' ? 'full' : ''}`}><label htmlFor={x.key}>{x.label}{x.required && ' *'}</label>
           {x.key === 'gender' ? <select id={x.key} name={x.key} className="field-input" defaultValue={details[x.key] ?? ''}><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select>
             : x.key === 'dob' ? <DobInput name="dob" defaultValue={details['dob']} />
-            : x.key === 'password' ? <PasswordInput id={x.key} name={x.key} required={x.required} defaultValue={details[x.key] ?? ''} minLength={8} placeholder={x.label} autoComplete="new-password" />
+            : x.key === 'password' ? <PasswordInput id={x.key} name={x.key} required={x.required} defaultValue={details[x.key] ?? ''} minLength={8} placeholder={x.placeholder ?? x.label} autoComplete="new-password" />
             : <input id={x.key} name={x.key} className="field-input" type={x.type ?? 'text'} required={x.required} defaultValue={details[x.key] ?? ''} placeholder={x.label} />}
           {x.seller && <small className="muted">Set once. Later changes are handled by the Eliteoz team via a support ticket.</small>}</div>)}
       </form>}
