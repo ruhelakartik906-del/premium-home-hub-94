@@ -32,7 +32,7 @@ export function generateToken() {
 }
 
 // Never expose or log the response body: providers can echo credentials or codes.
-export async function deliverOtp(input: { authkey: string; mobile: string; otp: string; templateId?: string }, fetcher: typeof fetch = fetch) {
+export async function deliverOtp(input: { authkey: string; mobile: string; otp: string; templateId?: string | undefined }, fetcher: typeof fetch = fetch) {
   const parameters = new URLSearchParams({ authkey: input.authkey, mobile: `91${input.mobile}`, otp: input.otp, channel: 'sms' });
   if (input.templateId) parameters.set('template_id', input.templateId);
   try {
