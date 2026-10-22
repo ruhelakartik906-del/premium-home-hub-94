@@ -7,7 +7,7 @@ export const Route = createFileRoute('/buyers')({
     <NoirPage
       eyebrow="For Buyers"
       title="Access Without Exposure."
-      intro="For families, promoters and investors seeking assets that never reach the open market."
+      intro="Whether you are seeking a luxury residence, a strategic land parcel, a commercial property, or a high-value business asset, Eliteoz helps you explore opportunities aligned with your preferred location, asset category, and investment requirements. Our team works to identify suitable opportunities through a confidential, verified process tailored to your needs."
       cta={{ label: 'Register as Buyer', to: '/register' }}
       sections={[
         { title: 'Private Access', body: <p>Mandates are visible only inside your member workspace, never on public pages.</p> },
