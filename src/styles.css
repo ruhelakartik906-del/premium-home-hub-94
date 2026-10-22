@@ -361,8 +361,8 @@
 
 /* Global readability layer */
 p{line-height:1.65}
-input::placeholder,textarea::placeholder{color:oklch(.52 .016 240);opacity:1}
-:disabled{opacity:.6}
+input::placeholder,textarea::placeholder{color:var(--muted-foreground);opacity:1}
+:disabled{opacity:1}
 .eyebrow{font-size:12px!important;letter-spacing:.14em!important}
 .footer-grid a:not(.brand){font-size:14px;opacity:.85}.footer-grid p{opacity:.78}.footer-bottom{font-size:13px;opacity:.72}.footer-grid span{font-size:12px}
 .property-location,.intro-facts span{font-size:14px}.property-type,.verified-pill{font-size:11px}
@@ -460,3 +460,21 @@ img{max-width:100%}
 .nx-footer .nx-legal-links{gap:8px;line-height:1.8}
 @media(max-width:900px){.nx-footer-grid{grid-template-columns:1fr;gap:28px}.nx-footer .nx-statement-line{max-width:480px}}
 @media(max-width:480px){.nx-journeys .nx-btn{width:100%;letter-spacing:.06em}.nx .nx-final-tagline{font-size:12px;padding-inline:0}.nx-final-h{padding-bottom:24px}.nx-final-h .nx-horizon{height:72px;margin-top:24px}.nx-footer-bottom{flex-direction:column;gap:16px}}
+
+/* AA text contrast: surface-aware colors, never faded body copy. */
+:root{--nx-charcoal:#202938;--muted-foreground:#394555;--nx-taupe:var(--muted-foreground);--nx-readable-secondary:var(--nx-ivory);--disabled-surface:var(--secondary);--disabled-ink:var(--muted-foreground)}
+.nx-dark,.nx-footer,.nx-header,.nx-strip,.hg-side{--nx-taupe:var(--nx-readable-secondary)}
+.nx-light,.nx-ivory{--nx-taupe:var(--muted-foreground);color:var(--nx-charcoal)}
+.nx-dark p,.nx-dark .nx-cols3 p,.nx-dark .nx-steps p,.nx-dark .nx-faq details p,.nx-dark .nx-way li,.nx-dark .hg-sub,.nx-dark .hg-side p,.nx-dark .nx-why figcaption span{color:var(--nx-readable-secondary)}
+.nx-light .nx-cols3 p,.nx-ivory .nx-cols3 p,.nx-light .nx-steps p,.nx-ivory .nx-steps p,.nx-light .nx-faq details p,.nx-ivory .nx-faq details p,.nx-light .nx-journeys p,.nx-ivory .nx-journeys p{color:var(--muted-foreground)}
+.nx-light .nx-corridor li:last-child h3,.nx-ivory .nx-corridor li:last-child h3,.nx-light .nx-faq summary::after,.nx-ivory .nx-faq summary::after{color:var(--nx-label-ink)}
+.nx-light .nx-faq summary:hover,.nx-ivory .nx-faq summary:hover{color:var(--nx-label-ink)}
+.nx-dark .nx-faq summary:hover{color:var(--nx-ivory)}
+.nx-hero p,.nx-strip span,.nx-contact address,.nx-page-intro,.hg-side p,.hg-dot b,.nx-nav a,.nx-login{color:var(--nx-readable-secondary)}
+.hg-tabs button,.hg-loc,.sidebar-signout,.sidebar-card span,.footer-grid p,.footer-grid a:not(.brand),.footer-bottom,.file-chip button{opacity:1}
+.sidebar-signout,.sidebar-card span,.sidebar-nav a{color:var(--nx-ivory)}
+.workspace-sidebar .brand-dot{color:var(--soft-gold)}
+.hg-tabs button:not(.on){color:var(--nx-readable-secondary)}
+.nx-light .hg-tabs button:not(.on),.nx-ivory .hg-tabs button:not(.on){color:var(--muted-foreground)}
+input:disabled,select:disabled,textarea:disabled{background:var(--disabled-surface);color:var(--disabled-ink);-webkit-text-fill-color:var(--disabled-ink);opacity:1}
+.nx-dark .nx-form input:disabled,.nx-dark .nx-form textarea:disabled{background:var(--nx-charcoal);color:var(--nx-ivory);-webkit-text-fill-color:var(--nx-ivory)}
