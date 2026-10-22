@@ -1,3 +1,4 @@
+import { PasswordInput } from '@/components/password-input';
 import { MarketBadge, MarketTabs, useCountries } from '@/components/market';
 import { formatMoney, flagOf } from '@/lib/eliteoz-data';
 import { Globe } from 'lucide-react';
@@ -331,8 +332,8 @@ function Gateway() {
       <div className="field"><label>Environment</label><select name="mode" className="field-input" defaultValue={s.mode}><option value="test">Test</option><option value="live">Live</option></select></div>
       <div className="field"><label>Activation fee (₹)</label><input name="fee" type="number" min={1} className="field-input" defaultValue={s.fee} /></div>
       <div className="field"><label>Razorpay Key ID</label><input name="key_id" className="field-input" defaultValue={s.keyId ?? ''} placeholder="rzp_test_…" /></div>
-      <div className="field"><label>Key Secret {s.secretMasked && <small className="muted">saved {s.secretMasked} — leave blank to keep</small>}</label><input name="key_secret" type="password" autoComplete="off" className="field-input" /></div>
-      <div className="field full"><label>Webhook Secret {s.webhookMasked && <small className="muted">saved {s.webhookMasked} — leave blank to keep</small>}</label><input name="webhook_secret" type="password" autoComplete="off" className="field-input" /></div>
+      <div className="field"><label>Key Secret {s.secretMasked && <small className="muted">saved {s.secretMasked} — leave blank to keep</small>}</label><PasswordInput name="key_secret" autoComplete="off" className="field-input" /></div>
+      <div className="field full"><label>Webhook Secret {s.webhookMasked && <small className="muted">saved {s.webhookMasked} — leave blank to keep</small>}</label><PasswordInput name="webhook_secret" autoComplete="off" className="field-input" /></div>
     </div>
     <div className="preview-warning"><strong>Webhook URL:</strong> {hookUrl} — add it in Razorpay Dashboard → Webhooks with events payment.captured, payment.failed, order.paid and refund.processed, using the same webhook secret. Secrets are never shown again after saving.</div>
     <div className="form-actions"><Button type="submit" disabled={busy}><Wallet /> Save Razorpay settings</Button></div>

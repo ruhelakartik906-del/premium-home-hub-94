@@ -1,3 +1,4 @@
+import { PasswordInput } from '@/components/password-input';
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useServerFn } from '@tanstack/react-start';
@@ -106,7 +107,7 @@ export function StaffSection() {
     }}>
       <F label="Full name"><input name="full_name" className="field-input" required minLength={2} /></F>
       <F label="Email"><input name="email" type="email" className="field-input" required /></F>
-      <F label="Temporary password" full><input name="password" type="password" className="field-input" required minLength={8} /></F>
+      <F label="Temporary password" full><PasswordInput name="password" className="field-input" required minLength={8} /></F>
       <PermGrid selected={['view_users']} />
       <p className="muted full">Permanent deletion is reserved for the Master Admin and cannot be assigned.</p>
       <div className="form-actions full"><Button variant="outline" type="button" onClick={() => setCreating(false)}>Cancel</Button><Button type="submit" disabled={busy}>{busy ? 'Creating…' : 'Create staff'}</Button></div>

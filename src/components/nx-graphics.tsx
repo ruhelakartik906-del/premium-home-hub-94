@@ -5,12 +5,9 @@ export function useReveal() {
   useEffect(() => {
     const els = document.querySelectorAll<HTMLElement>('[data-reveal]');
     if (!('IntersectionObserver' in window)) { els.forEach((e) => e.classList.add('nx-in')); return; }
-    const io = new IntersectionObserver((entries) => entries.forEach((en) => { if (en.isIntersecting) { en.target.classList.add('nx-in'); io.unobserve(en.target); } }), { threshold: 0.18 });
+    const io = new IntersectionObserver((entries) => entries.forEach((en) => { if (en.isIntersecting) { en.target.classList.add('nx-in'); io.unobserve(en.target); } }), { threshold: 0, rootMargin: '160px 0px' });
     els.forEach((e) => io.observe(e));
-    const hero = document.querySelector<HTMLElement>('.nx-hero');
-    const onScroll = () => { if (hero) hero.style.setProperty('--nx-s', String(Math.min(window.scrollY / 800, 1))); };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => { io.disconnect(); window.removeEventListener('scroll', onScroll); };
+    return () => io.disconnect();
   }, []);
 }
 

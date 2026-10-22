@@ -1,4 +1,6 @@
-import { Link, useNavigate } from '@tanstack/react-router';
+import { useRegistrationDraft } from '@/components/registration-draft';
+import { PasswordInput } from '@/components/password-input';
+import { Link, useNavigate, useRouter } from '@tanstack/react-router';
 import { useServerFn } from '@tanstack/react-start';
 import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, BriefcaseBusiness, CheckCircle2, LockKeyhole, UserRound } from 'lucide-react';
@@ -60,9 +62,10 @@ import { usePayActivation } from '@/components/activation-banner';
 export function RegisterFlow({ initialRole }: { initialRole?: string }) {
   const navigate = useNavigate();
   const register = useServerFn(registerMember);
-  const [role, setRole] = useState<Role | null>(initialRole === 'buyer' || initialRole === 'seller' ? initialRole : null);
+  const role: Role | null = initialRole === 'buyer' || initialRole === 'seller' ? initialRole : null;
+  const router = useRouter();
   const [step, setStep] = useState(0);
-  const [details, setDetails] = useState<Details>({});
+  const { details, setDetails } = useRegistrationDraft();
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const payActivation = usePayActivation();
   const [agree, setAgree] = useState(false);
@@ -107,6 +110,7 @@ export function RegisterFlow({ initialRole }: { initialRole?: string }) {
     setBusy(false);
     if (signErr) { toast.error('Account created. Please log in to complete payment.'); navigate({ to: '/login' }); return; }
     toast.success('Mobile verified — one last step: activation payment');
+    setDetails({});
     navigate({ to: '/activate', replace: true });
   };
   const afterOtp = async (code?: string) => {
@@ -123,17 +127,18 @@ export function RegisterFlow({ initialRole }: { initialRole?: string }) {
   return <PageShell><div className="auth-wrap"><aside className="auth-image"><img src={hero} alt="Luxury residence" /><div className="auth-caption">A more considered<br />way to move.</div></aside><main className="auth-main"><div className="auth-panel">
     <span className="eyebrow">ELITEOZ MEMBERSHIP</span>
     {!role ? <><h1 className="auth-hero-title">Welcome to Eliteoz</h1><p><strong>Eliteoz Club Membership</strong> provides access to a private dashboard after the required registration, verification, and activation steps are completed. Choose your membership type — Buyer or Seller.</p><div className="preview-warning" role="note">{SOURCING_NOTE}</div><div className="role-grid">
-      <button className="role-card" onClick={() => setRole('buyer')}><UserRound size={27} /><strong>Buyer</strong><span>Explore verified high-value assets, compare and save the ones you like, and send your interest — our team will contact you.</span></button>
-      <button className="role-card" onClick={() => setRole('seller')}><BriefcaseBusiness size={27} /><strong>Seller</strong><span>Present high-value assets to a considered audience, and manage your listings and documents from one dashboard.</span></button>
+      <Link to="/register" search={{ role: 'buyer' }} className="role-card"><UserRound size={27} /><strong>Buyer</strong><span>Explore verified high-value assets, compare and save the ones you like, and send your interest — our team will contact you.</span></Link>
+      <Link to="/register" search={{ role: 'seller' }} className="role-card"><BriefcaseBusiness size={27} /><strong>Seller</strong><span>Present high-value assets to a considered audience, and manage your listings and documents from one dashboard.</span></Link>
     </div><TermsPanel /></> : <>
       <h1 className={step === 0 ? 'auth-hero-title' : ''}>{step === 0 ? <>Welcome to Eliteoz</> : step === 1 ? 'Verify your mobile' : 'Activate your membership'}</h1>
       <p>{step === 0 ? 'Personal, address and business details are collected later in Verification.' : step === 1 ? `Enter the 6-digit code sent to ${masked || 'your mobile'}.` : 'One final step and your dashboard opens automatically.'}</p>
       <div className="steps">{steps.map((x, i) => <div className={`step ${i === step ? 'active' : ''} ${i < step ? 'done' : ''}`} key={x}><span>{i < step ? '✓' : i + 1}</span>{x}</div>)}</div>
 
-      {step === 0 && <form id="details-form" className="form-grid" onSubmit={(e) => { e.preventDefault(); const f = new FormData(e.currentTarget); const d: Record<string, string> = {}; f.forEach((v, k) => { d[k] = String(v); }); if ((d['password'] ?? '').length < 8) { setError('Password must be at least 8 characters.'); return; } if (!/^[6-9]\d{9}$/.test((d['mobile'] ?? '').replace(/\D/g, '').slice(-10))) { setError('Please enter a valid 10-digit Indian mobile number.'); return; } setDetails(d as Details); setError(''); void requestOtp(d['mobile'] ?? '', d['email'] ?? '').then((ok) => { if (ok) setStep(1); }); }}>
+      {step === 0 && <form id="details-form" className="form-grid" onChange={(e) => { const f = new FormData(e.currentTarget); const draft: Record<string, string> = {}; f.forEach((v, k) => { draft[k] = String(v); }); setDetails(draft); }} onSubmit={(e) => { e.preventDefault(); const f = new FormData(e.currentTarget); const d: Record<string, string> = {}; f.forEach((v, k) => { d[k] = String(v); }); if ((d['password'] ?? '').length < 8) { setError('Password must be at least 8 characters.'); return; } if (!/^[6-9]\d{9}$/.test((d['mobile'] ?? '').replace(/\D/g, '').slice(-10))) { setError('Please enter a valid 10-digit Indian mobile number.'); return; } setDetails(d as Details); setError(''); void requestOtp(d['mobile'] ?? '', d['email'] ?? '').then((ok) => { if (ok) setStep(1); }); }}>
         {fields.filter((x) => !x.seller || role === 'seller').map((x) => <div key={x.key} className={`field ${x.full || x.key === 'dob' ? 'full' : ''}`}><label htmlFor={x.key}>{x.label}{x.required && ' *'}</label>
           {x.key === 'gender' ? <select id={x.key} name={x.key} className="field-input" defaultValue={details[x.key] ?? ''}><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select>
             : x.key === 'dob' ? <DobInput name="dob" defaultValue={details['dob']} />
+            : x.key === 'password' ? <PasswordInput id={x.key} name={x.key} required={x.required} defaultValue={details[x.key] ?? ''} minLength={8} placeholder={x.label} autoComplete="new-password" />
             : <input id={x.key} name={x.key} className="field-input" type={x.type ?? 'text'} required={x.required} defaultValue={details[x.key] ?? ''} minLength={x.key === 'password' ? 8 : undefined} placeholder={x.label} />}
           {x.seller && <small className="muted">Set once. Later changes are handled by the Eliteoz team via a support ticket.</small>}</div>)}
       </form>}
@@ -152,7 +157,7 @@ export function RegisterFlow({ initialRole }: { initialRole?: string }) {
       {error && <p role="alert" className="form-error">{error}</p>}
       {dup && <Button onClick={() => navigate({ to: '/login' })}>{dup === 'pending' ? 'Login & Continue' : 'Login'} <ArrowRight /></Button>}
       <div className="form-actions">
-        <Button variant="outline" disabled={busy} onClick={() => { setError(''); if (step === 0) setRole(null); else setStep(step - 1); }}><ArrowLeft /> Back</Button>
+        <Button variant="outline" disabled={busy} onClick={() => { setError(''); if (step === 0) { if (router.history.canGoBack()) router.history.back(); else void navigate({ to: '/register', search: {}, replace: true }); } else setStep(step - 1); }}><ArrowLeft /> Back</Button>
         {step === 0 && <Button type="submit" form="details-form" disabled={busy}>{busy ? 'Sending OTP…' : <>Send OTP <ArrowRight /></>}</Button>}
         {step === 1 && <Button disabled={busy || otp.join('').length !== 6 || secsLeft === 0} onClick={() => { void afterOtp(); }}>{busy ? 'Please wait…' : <>Verify & continue to payment <ArrowRight /></>}</Button>}
         {step === 2 && <Button disabled={busy} onClick={() => { void finish(); }}>{busy ? 'Processing…' : <>Pay ₹{fee.toLocaleString('en-IN')} <LockKeyhole /></>}</Button>}
@@ -196,7 +201,7 @@ export function LoginPage({ kind }: { kind: 'login' | 'forgot-password' | 'reset
     <p>{kind === 'login' ? 'Access your private Eliteoz workspace. You will be taken to the right dashboard automatically.' : kind === 'forgot-password' ? 'We will email you a secure reset link.' : 'Enter a new password for your account.'}</p>
     <form className="form-grid" onSubmit={submit}>
       {kind !== 'reset-password' && <div className="field full"><label htmlFor="email">Email address</label><input id="email" name="email" type="email" className="field-input" required placeholder="you@example.com" /></div>}
-      {kind !== 'forgot-password' && <div className="field full"><label htmlFor="password">{kind === 'login' ? 'Password' : 'New password'}</label><input id="password" name="password" type="password" minLength={kind === 'login' ? undefined : 8} className="field-input" required placeholder="Enter password" /></div>}
+      {kind !== 'forgot-password' && <div className="field full"><label htmlFor="password">{kind === 'login' ? 'Password' : 'New password'}</label><PasswordInput id="password" name="password" minLength={kind === 'login' ? undefined : 8} className="field-input" required placeholder="Enter password" /></div>}
       <div className="field full"><Button type="submit" disabled={busy}>{busy ? 'Please wait…' : kind === 'login' ? 'Log in' : 'Continue'} <ArrowRight /></Button></div>
     </form>
     {msg && <p role="alert" className="form-error">{msg}</p>}
@@ -220,7 +225,7 @@ export function AdminSetup({ available }: { available: boolean }) {
     }}>
       <div className="field full"><label>Full name</label><input name="full_name" className="field-input" required /></div>
       <div className="field full"><label>Email</label><input name="email" type="email" className="field-input" required /></div>
-      <div className="field full"><label>Password (min 8)</label><input name="password" type="password" minLength={8} className="field-input" required /></div>
+      <div className="field full"><label>Password (min 8)</label><PasswordInput name="password" minLength={8} className="field-input" required /></div>
       <div className="field full"><Button type="submit" disabled={busy}><CheckCircle2 /> {busy ? 'Creating…' : 'Create Master Admin'}</Button></div>
       {err && <p className="form-error">{err}</p>}
     </form>}

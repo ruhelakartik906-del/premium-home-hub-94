@@ -1,3 +1,4 @@
+import { PasswordInput } from '@/components/password-input';
 import { Link } from '@tanstack/react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
@@ -333,7 +334,7 @@ function Support({ me }: { me: Me }) {
 function Security() {
   const [busy, setBusy] = useState(false);
   return <form className="panel" onSubmit={async (e) => { e.preventDefault(); const form = e.currentTarget; const f = new FormData(form); const pw = String(f.get('pw')); if (pw !== String(f.get('pw2'))) { toast.error('Passwords do not match'); return; } setBusy(true); const { error } = await supabase.auth.updateUser({ password: pw, current_password: String(f.get('current')) } as { password: string }); setBusy(false); if (error) toast.error(error.message); else { toast.success('Password changed'); form.reset(); } }}>
-    <h2>Change password</h2><div className="form-grid"><div className="field full"><label>Current password</label><input name="current" type="password" required className="field-input" /></div><div className="field"><label>New password</label><input name="pw" type="password" minLength={8} required className="field-input" /></div><div className="field"><label>Confirm new password</label><input name="pw2" type="password" minLength={8} required className="field-input" /></div></div>
+    <h2>Change password</h2><div className="form-grid"><div className="field full"><label>Current password</label><PasswordInput name="current" required className="field-input" /></div><div className="field"><label>New password</label><PasswordInput name="pw" minLength={8} required className="field-input" /></div><div className="field"><label>Confirm new password</label><PasswordInput name="pw2" minLength={8} required className="field-input" /></div></div>
     <div className="form-actions"><Button type="submit" disabled={busy}>Update password</Button></div>
   </form>;
 }
