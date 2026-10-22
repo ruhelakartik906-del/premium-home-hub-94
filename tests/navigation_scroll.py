@@ -7,7 +7,7 @@ async def main():
    page=await browser.new_page(viewport={'width':width,'height':1800})
    errors=[]
    page.on('pageerror', lambda error: errors.append(str(error)))
-   await page.goto('http://localhost:8080')
+   await page.goto('http://localhost:8080', wait_until='networkidle')
    await page.wait_for_timeout(1000)
    destinations=await page.locator('footer a[href^="/"]').evaluate_all('(links)=>links.map(a=>({href:a.getAttribute("href"),text:a.textContent}))')
    for destination in destinations:
@@ -24,7 +24,7 @@ async def main():
     assert not await page.evaluate('window.outgoingTop'), destination
     assert await page.evaluate('scrollY')==0, destination
    print(width,':',len(destinations),'footer destinations at top; outgoing page never scrolled to top')
-   await page.goto('http://localhost:8080')
+   await page.goto('http://localhost:8080', wait_until='networkidle')
    await page.wait_for_timeout(500)
    await page.locator('footer').scroll_into_view_if_needed()
    start=await page.evaluate('scrollY')
@@ -39,13 +39,13 @@ async def main():
    await page.go_forward()
    await page.wait_for_timeout(400)
    assert page.url.endswith('/about') and await page.evaluate('scrollY')==0
-   await page.goto('http://localhost:8080')
+   await page.goto('http://localhost:8080', wait_until='networkidle')
    await page.wait_for_timeout(500)
    # Exercise native same-page anchor behavior without adding visible application content.
    await page.evaluate('''()=>{const a=document.createElement('a');a.href='#standard';a.id='anchor-check';a.textContent='Anchor test';document.querySelector('main').prepend(a)}''')
    await page.locator('#anchor-check').click()
    await page.wait_for_timeout(300)
-   assert page.url.endswith('/#standard')
+   assert page.url.endswith('/#standard'), page.url
    assert abs(await page.locator('#standard').evaluate('(el)=>el.getBoundingClientRect().top'))<3
    await page.screenshot(path=f'/tmp/browser/navigation-scroll/anchor-{width}.png')
    print(width,': Back/Forward restored position; same-page anchor reached target; runtime errors:',len(errors))
