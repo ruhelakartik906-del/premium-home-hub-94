@@ -9,7 +9,7 @@ export const Route = createFileRoute('/how-it-works')({
       title={<>Measured Steps.<br />Controlled Access.</>}
       intro="Registration does not automatically mean dashboard access. A registered account remains pending until the required verification and activation conditions are complete."
       sections={[
-        { title: 'Registration', body: <p>Choose Buyer or Seller and provide your name, mobile number, email and the required details.</p> },
+        { title: 'Registration', to: '/register', body: <p>Choose Buyer or Seller and provide your name, mobile number, email and the required details.</p> },
         { title: 'Mobile / Email Verification', body: <p>Confirm your contact details with a one-time code.</p> },
         { title: 'Role Selection', body: <p>Your role determines your private workspace — Buyer or Seller. Authorised representatives may register on behalf of a principal.</p> },
         { title: 'Account Verification', body: <p>Submit identity and supporting documents from your private dashboard within the stated verification window. Incomplete verification may lead to suspension.</p> },

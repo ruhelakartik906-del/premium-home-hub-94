@@ -2,7 +2,7 @@ import { Link } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
 import { PageShell } from '@/components/eliteoz';
 
-export type NoirSection = { title: string; body: ReactNode };
+export type NoirSection = { title: string; body: ReactNode; to?: '/register' };
 
 export function NoirPage({ eyebrow, title, intro, sections, aside, cta = true, legal = false, children }: { eyebrow: string; title: ReactNode; intro?: ReactNode; sections?: NoirSection[]; aside?: ReactNode; cta?: boolean | { label: string; to: '/register' | '/login' }; legal?: boolean; children?: ReactNode }) {
   const ctaLink = typeof cta === 'object' ? cta : { label: 'Private Access', to: '/register' as const };
@@ -22,9 +22,9 @@ export function NoirPage({ eyebrow, title, intro, sections, aside, cta = true, l
               {aside && <aside>{aside}</aside>}
               <div className={legal ? 'nx-legal' : 'nx-page-list'}>
                 {sections?.map((s, i) => (
-                  <article key={s.title}>
+                  <article key={s.title} className={s.to ? 'relative' : undefined}>
                     {!legal && <span className="nx-num">{String(i + 1).padStart(2, '0')}</span>}
-                    <h2>{s.title}</h2>
+                    <h2>{s.to ? <Link to={s.to} className="focus-visible:outline-none"><span aria-hidden="true" className="absolute inset-0 focus-visible:ring-2" />{s.title}</Link> : s.title}</h2>
                     <div className="nx-page-body">{s.body}</div>
                   </article>
                 ))}
