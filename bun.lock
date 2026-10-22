@@ -5,6 +5,10 @@
     "": {
       "name": "tanstack_start_ts",
       "dependencies": {
+        "@fontsource-variable/cormorant-garamond": "^5.3.0",
+        "@fontsource-variable/manrope": "^5.3.0",
+        "@fontsource-variable/noto-sans-devanagari": "^5.3.0",
+        "@fontsource/dm-serif-display": "^5.3.0",
         "@hookform/resolvers": "^5.2.2",
         "@lovable.dev/mcp-js": "^3.0.4",
         "@radix-ui/react-accordion": "^1.2.12",
@@ -221,6 +225,14 @@
     "@floating-ui/react-dom": ["@floating-ui/react-dom@2.1.9", "", { "dependencies": { "@floating-ui/dom": "^1.8.0" }, "peerDependencies": { "react": ">=16.8.0", "react-dom": ">=16.8.0" } }, "sha512-JDjEFGCpImxDCA7JJKviA0M9+RtmJdj0m/NVU5IMgBK+AmZouAQQ7/+2GLH0GXXY0YMw9oXPB8hKdbPYg5QLYg=="],
 
     "@floating-ui/utils": ["@floating-ui/utils@0.2.12", "", {}, "sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww=="],
+
+    "@fontsource-variable/cormorant-garamond": ["@fontsource-variable/cormorant-garamond@5.3.0", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@fontsource-variable/cormorant-garamond/-/cormorant-garamond-5.3.0.tgz", {}, "sha512-rgZJ/5w3hi60swAPnrOXpZf5wEH6NTrvm4H8D9Y4b1QIFUqlX14eM3QTMU/eAznjfh0eXpO1QUqsFhiy58aoMg=="],
+
+    "@fontsource-variable/manrope": ["@fontsource-variable/manrope@5.3.0", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@fontsource-variable/manrope/-/manrope-5.3.0.tgz", {}, "sha512-6D5dgokHsWDDMtmXHznKa0hK229NN+1a4BLPmUCLqcO1Pw5EEhWY5RFt0AcXnVRAljFFPfRtLkJePQj6LSsV6g=="],
+
+    "@fontsource-variable/noto-sans-devanagari": ["@fontsource-variable/noto-sans-devanagari@5.3.0", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@fontsource-variable/noto-sans-devanagari/-/noto-sans-devanagari-5.3.0.tgz", {}, "sha512-52XBcJS3jRvZ5ugFXJvdKgffXPYnN08LeodXkgCbepOdMKVRVTQu1yj071cq8S3zmUwT6w6XKKXRSQlQkwwNNg=="],
+
+    "@fontsource/dm-serif-display": ["@fontsource/dm-serif-display@5.3.0", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@fontsource/dm-serif-display/-/dm-serif-display-5.3.0.tgz", {}, "sha512-ecRclUcYeto9fB7ghkB36H4MtUoaUYFjjornWYYeLCMHzaWEDPk2kIWgZOq0mKBNRxclRSieKcFeLonlMYDTKg=="],
 
     "@hono/node-server": ["@hono/node-server@1.19.17", "https://europe-west4-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@hono/node-server/-/node-server-1.19.17.tgz", { "peerDependencies": { "hono": "^4" } }, "sha512-dSneS5qhiauZWGDCeK4o695Xd9nUNjviSZCMQrj10eetr8Uln1ucn6bbphOM6UynAMMtNIzZNSpL9vnASJwrPQ=="],
 

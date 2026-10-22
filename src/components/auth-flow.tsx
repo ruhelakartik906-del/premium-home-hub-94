@@ -124,7 +124,7 @@ export function RegisterFlow({ initialRole }: { initialRole?: string }) {
     await finish(r.token);
   };
 
-  return <PageShell><div className="auth-wrap"><aside className="auth-image"><img src={hero} alt="Luxury residence" /><div className="auth-caption">A more considered<br />way to move.</div></aside><main className="auth-main"><div className="auth-panel">
+  return <PageShell><div className="auth-wrap"><aside className="auth-image"><img src={hero} alt="Luxury residence" width={1600} height={960} loading="lazy" decoding="async" /><div className="auth-caption">A more considered<br />way to move.</div></aside><main className="auth-main"><div className="auth-panel">
     <span className="eyebrow">ELITEOZ MEMBERSHIP</span>
     {!role ? <><h1 className="auth-hero-title">Welcome to Eliteoz</h1><p><strong>Eliteoz Club Membership</strong> provides access to a private dashboard after the required registration, verification, and activation steps are completed. Choose your membership type — Buyer or Seller.</p><div className="preview-warning" role="note">{SOURCING_NOTE}</div><div className="role-grid">
       <Link to="/register" search={{ role: 'buyer' }} className="role-card"><UserRound size={27} /><strong>Buyer</strong><span>Explore verified high-value assets, compare and save the ones you like, and send your interest — our team will contact you.</span></Link>
@@ -196,7 +196,7 @@ export function LoginPage({ kind }: { kind: 'login' | 'forgot-password' | 'reset
       toast.success('Password updated'); const to = await routeForUser(); navigate({ to: to ?? '/login' });
     }
   };
-  return <PageShell><div className="auth-wrap"><aside className="auth-image"><img src={hero} alt="Luxury residence" /><div className="auth-caption">Your next move<br />starts here.</div></aside><main className="auth-main"><div className="auth-panel">
+  return <PageShell><div className="auth-wrap"><aside className="auth-image"><img src={hero} alt="Luxury residence" width={1600} height={960} loading="lazy" decoding="async" /><div className="auth-caption">Your next move<br />starts here.</div></aside><main className="auth-main"><div className="auth-panel">
     <span className="eyebrow">MEMBER ACCESS</span>
     <h1>{kind === 'login' ? 'Welcome back.' : kind === 'forgot-password' ? 'Reset your password.' : 'Choose a new password.'}</h1>
     <p>{kind === 'login' ? 'Access your private Eliteoz workspace. You will be taken to the right dashboard automatically.' : kind === 'forgot-password' ? 'We will email you a secure reset link.' : 'Enter a new password for your account.'}</p>
@@ -215,7 +215,7 @@ export function AdminSetup({ available }: { available: boolean }) {
   const create = useServerFn(createFirstAdmin);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
-  return <PageShell><div className="auth-wrap"><aside className="auth-image"><img src={hero} alt="" /><div className="auth-caption">Master Admin<br />setup.</div></aside><main className="auth-main"><div className="auth-panel">
+  return <PageShell><div className="auth-wrap"><aside className="auth-image"><img src={hero} alt="" width={1600} height={960} loading="lazy" decoding="async" /><div className="auth-caption">Master Admin<br />setup.</div></aside><main className="auth-main"><div className="auth-panel">
     <span className="eyebrow">ONE-TIME SETUP</span><h1>Create the Master Admin.</h1>
     {!available ? <><p>A Master Admin already exists. Please log in.</p><Button asChild><Link to="/login">Log in</Link></Button></> : <form className="form-grid" onSubmit={async (e) => {
       e.preventDefault(); const f = new FormData(e.currentTarget); setBusy(true); setErr('');

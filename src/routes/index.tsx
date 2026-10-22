@@ -1,12 +1,12 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { Footer, PublicHeader } from '@/components/eliteoz';
-import logoSrc from '@/assets/eliteoz-logo.webp';
-const logo = { url: logoSrc };
 import portraitSrc from '@/assets/col-nk-yadav.webp';
 const portrait = { url: portraitSrc };
 // Bundled locally so the hero works on any host (e.g. Hostinger), not only Lovable's asset CDN.
-import heroImg from '@/assets/golden-hour-mountain-villa.jpg';
-import { useReveal, SelectiveGrid, PrincipleMark, AssetSilhouettes, Horizon } from '@/components/nx-graphics';
+import heroImg from '@/assets/golden-hour-mountain-villa.webp';
+import heroMobile from '@/assets/golden-hour-mountain-villa-mobile.webp';
+const heroSrcSet = `${heroMobile} 840w, ${heroImg} 1672w`;
+import { SelectiveGrid, PrincipleMark, AssetSilhouettes, Horizon } from '@/components/nx-graphics';
 import { MarketSplit } from '@/components/home-global';
 import { SOURCING_NOTE } from '@/lib/terms';
 import { Building2, Factory, Warehouse, Landmark, Home as HomeIcon, Trees, Map, Building, GraduationCap, Library, HeartPulse, Briefcase, Gem, type LucideIcon } from 'lucide-react';
@@ -23,7 +23,7 @@ export const Route = createFileRoute('/')({
       { property: 'og:type', content: 'website' },
       { name: 'twitter:card', content: 'summary_large_image' },
     ],
-    links: [{ rel: 'preload', as: 'image', href: heroImg, fetchPriority: 'high' }],
+    links: [{ rel: 'preload', as: 'image', href: heroImg, fetchPriority: 'high', imageSrcSet: heroSrcSet, imageSizes: '100vw' }],
   }),
   component: Home,
 });
@@ -53,13 +53,12 @@ const buyers = ['Serious investors', 'HNI / UHNI buyers', 'Industrial groups', '
 const notFor = ['Casual asset browsing', 'Mass-market asset enquiries', 'Unverified intermediaries', 'Low-value asset searches', 'Unnecessary broker chains', 'Public marketplace-style transactions'];
 
 function Home() {
-  useReveal();
   return (
     <div className="nx">
       <NoirHeader />
       <main>
         <section className="nx-hero">
-          <img src={heroImg} alt="Golden hour view over a hillside estate with an infinity pool" width={1672} height={941} fetchPriority="high" decoding="async" />
+          <img src={heroImg} srcSet={heroSrcSet} sizes="100vw" alt="Golden hour view over a hillside estate with an infinity pool" width={1672} height={941} fetchPriority="high" decoding="async" />
           <div className="nx-wrap nx-hero-inner nx-fade">
             <span className="nx-om" lang="sa">ॐ गणेशाय नमः</span>
             <span className="nx-eyebrow">Off-Market. Discreet. Genuine.</span>
@@ -176,7 +175,7 @@ function Home() {
 
         <section className="nx-dark nx-sec nx-grain">
           <div className="nx-wrap nx-why nx-why-dark" data-reveal>
-            <figure><img src={portrait.url} alt="Col. N.K. Yadav (Retd.), Indian Army" width={560} height={700} loading="lazy" /><figcaption><strong>Col. N.K. Yadav (Retd.)</strong><span>Indian Army</span></figcaption></figure>
+            <figure><img src={portrait.url} alt="Col. N.K. Yadav (Retd.), Indian Army" width={560} height={700} loading="lazy" decoding="async" /><figcaption><strong>Col. N.K. Yadav (Retd.)</strong><span>Indian Army</span></figcaption></figure>
             <div>
               <span className="nx-eyebrow">Eliteoz</span>
               <h2>Leadership &amp;<br />Oversight.</h2>

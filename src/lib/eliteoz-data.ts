@@ -1,7 +1,7 @@
-import hero from '@/assets/eliteoz-hero.jpg';
-import villa from '@/assets/property-villa.jpg';
-import penthouse from '@/assets/property-penthouse.jpg';
-import estate from '@/assets/property-estate.jpg';
+import hero from '@/assets/eliteoz-hero.webp';
+import villa from '@/assets/property-villa.webp';
+import penthouse from '@/assets/property-penthouse.webp';
+import estate from '@/assets/property-estate.webp';
 
 export { hero };
 export const propertyImages: Record<string, string> = { villa, penthouse, estate, hero };

@@ -1,9 +1,14 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
+@import "@fontsource-variable/manrope";
+@import "@fontsource-variable/cormorant-garamond";
+@import "@fontsource/dm-serif-display/latin-400.css";
+@import "@fontsource/dm-serif-display/latin-400-italic.css";
+@import "@fontsource-variable/noto-sans-devanagari";
 @custom-variant dark (&:is(.dark *));
 @theme inline {
- --color-background:var(--background);--color-foreground:var(--foreground);--color-card:var(--card);--color-card-foreground:var(--foreground);--color-popover:var(--card);--color-popover-foreground:var(--foreground);--color-primary:var(--primary);--color-primary-foreground:var(--primary-foreground);--color-secondary:var(--secondary);--color-secondary-foreground:var(--foreground);--color-muted:var(--muted);--color-muted-foreground:var(--muted-foreground);--color-accent:var(--accent);--color-accent-foreground:var(--foreground);--color-destructive:var(--destructive);--color-destructive-foreground:var(--primary-foreground);--color-border:var(--border);--color-input:var(--border);--color-ring:var(--primary);--color-success:var(--success);--color-ink:var(--ink);--color-canvas:var(--canvas);--color-line:var(--line);--color-soft-gold:var(--soft-gold);--font-sans:"Manrope",sans-serif;--font-display:"DM Serif Display",serif;--radius-sm:3px;--radius-md:5px;--radius-lg:7px;
+ --color-background:var(--background);--color-foreground:var(--foreground);--color-card:var(--card);--color-card-foreground:var(--foreground);--color-popover:var(--card);--color-popover-foreground:var(--foreground);--color-primary:var(--primary);--color-primary-foreground:var(--primary-foreground);--color-secondary:var(--secondary);--color-secondary-foreground:var(--foreground);--color-muted:var(--muted);--color-muted-foreground:var(--muted-foreground);--color-accent:var(--accent);--color-accent-foreground:var(--foreground);--color-destructive:var(--destructive);--color-destructive-foreground:var(--primary-foreground);--color-border:var(--border);--color-input:var(--border);--color-ring:var(--primary);--color-success:var(--success);--color-ink:var(--ink);--color-canvas:var(--canvas);--color-line:var(--line);--color-soft-gold:var(--soft-gold);--font-sans:"Manrope Variable",sans-serif;--font-display:"DM Serif Display",serif;--radius-sm:3px;--radius-md:5px;--radius-lg:7px;
 }
 :root{--background:oklch(.985 .004 85);--foreground:oklch(.22 .024 240);--card:oklch(1 0 0);--primary:oklch(.44 .075 65);--primary-foreground:oklch(.99 .003 85);--secondary:oklch(.955 .008 75);--muted:oklch(.96 .005 85);--muted-foreground:oklch(.45 .018 240);--accent:oklch(.94 .015 75);--destructive:oklch(.55 .18 28);--border:oklch(.88 .008 85);--success:oklch(.46 .12 155);--ink:oklch(.20 .027 235);--canvas:oklch(.975 .006 90);--line:oklch(.9 .008 85);--soft-gold:oklch(.91 .055 78);--radius:5px}
 *{box-sizing:border-box}html{scroll-behavior:auto}body{margin:0;background:var(--background);color:var(--foreground);font-family:var(--font-sans);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}button,input,select,textarea{font:inherit}button{cursor:pointer}a{text-decoration:none;color:inherit}img{max-width:100%;display:block}h1,h2,h3,p{margin-top:0}h1,h2,h3{letter-spacing:0}h1,h2{font-family:var(--font-display);font-weight:400}.container{width:min(100% - 64px,1360px);margin-inline:auto}.eyebrow{font:700 12px var(--font-sans);letter-spacing:.18em;color:var(--primary)}.brand{font-weight:800;font-size:22px;letter-spacing:.06em;color:var(--ink);white-space:nowrap}.brand-dot{color:var(--primary)}.brand-light{color:var(--primary-foreground)}
@@ -96,8 +101,8 @@
 @media (max-width:480px){.alert-band{flex-wrap:wrap}.alert-band>div{flex:1 1 200px;min-width:0}}
 
 /* ===== Homepage — Noir Gold ===== */
-:root{--nx-black:oklch(.2 .05 262);--nx-charcoal:oklch(.25 .04 262);--nx-gold:oklch(.74 .06 75);--nx-ivory:oklch(.965 .005 75);--nx-taupe:oklch(.6 .02 70);--nx-serif:"Cormorant Garamond","DM Serif Display",Georgia,serif}
-.nx{background:var(--nx-ivory);color:var(--nx-charcoal);font-family:Manrope,system-ui,sans-serif;overflow-x:hidden}
+:root{--nx-black:oklch(.2 .05 262);--nx-charcoal:oklch(.25 .04 262);--nx-gold:oklch(.74 .06 75);--nx-ivory:oklch(.965 .005 75);--nx-taupe:oklch(.6 .02 70);--nx-serif:"Cormorant Garamond Variable","DM Serif Display",Georgia,serif}
+.nx{background:var(--nx-ivory);color:var(--nx-charcoal);font-family:"Manrope Variable",system-ui,sans-serif;overflow-x:hidden}
 .nx-wrap{width:min(1240px,100% - 3rem);margin-inline:auto}
 .nx h1,.nx h2,.nx h3{font-family:var(--nx-serif);font-weight:500;letter-spacing:-.01em;line-height:1.05;overflow-wrap:anywhere}
 .nx h2{font-size:clamp(2.2rem,5vw,4rem);margin:.6rem 0 1.5rem}
@@ -130,9 +135,9 @@
 .nx-hero-inner{position:relative;z-index:1;padding:6rem 0;max-width:1240px}
 .nx-hero h1{font-size:clamp(3rem,9vw,7.2rem);margin:1.4rem 0 0;color:var(--nx-ivory)}
 .nx-hero p{max-width:36rem;color:oklch(.82 .01 75)}.nx-hero .nx-lead{font-family:var(--nx-serif);font-size:clamp(1.3rem,2.2vw,1.65rem);line-height:1.45;color:var(--nx-ivory)}
-.nx-om{display:block;font-family:"Noto Sans Devanagari",system-ui,sans-serif;font-size:26px;line-height:1.65;color:var(--nx-notice-gold);margin-bottom:1.6rem;letter-spacing:0;overflow-wrap:normal}
+.nx-om{display:block;font-family:"Noto Sans Devanagari Variable",system-ui,sans-serif;font-size:26px;line-height:1.65;color:var(--nx-notice-gold);margin-bottom:1.6rem;letter-spacing:0;overflow-wrap:normal}
 @media(max-width:600px){.nx-om{font-size:22px}}
-.nx-fade{animation:nxFade .2s ease-out both}@keyframes nxFade{from{opacity:0}to{opacity:1}}
+.nx-fade{animation:none}@keyframes nxFade{from{opacity:0}to{opacity:1}}
 .nx-strip{background:var(--nx-black);border-top:1px solid oklch(.74 .06 75/.25)}
 .nx-strip-grid{display:grid;grid-template-columns:repeat(4,1fr)}
 .nx-strip-grid div{padding:2.2rem 1rem;border-left:1px solid oklch(1 0 0/.08);text-align:center}.nx-strip-grid div:first-child{border-left:0}
@@ -170,7 +175,7 @@
 .nx-faq details{border-bottom:1px solid oklch(.6 .02 70/.3)}
 .nx-faq summary{cursor:pointer;list-style:none;padding:1.4rem 2rem 1.4rem 0;font-family:var(--nx-serif);font-size:1.3rem;position:relative;min-height:44px}
 .nx-faq summary::-webkit-details-marker{display:none}
-.nx-faq summary::after{content:"+";position:absolute;right:0;top:1.3rem;color:var(--nx-gold);font-family:Manrope,sans-serif;transition:transform .3s}
+.nx-faq summary::after{content:"+";position:absolute;right:0;top:1.3rem;color:var(--nx-gold);font-family:"Manrope Variable",sans-serif;transition:transform .3s}
 .nx-faq details[open] summary::after{transform:rotate(45deg)}
 .nx-faq details p{color:var(--nx-taupe);margin:0 0 1.4rem;max-width:38rem}
 .nx-final{text-align:center}.nx-final .nx-muted{margin-inline:auto}
@@ -241,7 +246,7 @@
 .nx-mark{width:52px;height:52px;margin-bottom:1.4rem;display:block;transition:transform .8s ease}
 .nx-cols4 article:hover .nx-mark{transform:translateY(-2px)}
 #standard .nx-cols3 p{color:oklch(.72 .01 75)}
-.nx-journey{position:relative}.nx-journey::before{content:"";position:absolute;top:0;left:0;height:1px;width:0;background:var(--nx-gold);transition:width 2.4s ease .3s}
+.nx-journey{position:relative}.nx-journey::before{content:"";position:absolute;top:0;left:0;height:1px;width:100%;background:var(--nx-gold)}
 .nx-journey.nx-in::before{width:100%}.nx-journey article{border-top-color:transparent}
 .nx-why-dark img{background:var(--nx-black);max-width:220px}.nx-why-dark>div{border-left:1px solid var(--nx-gold);padding-left:clamp(1.5rem,4vw,3.5rem)}
 .nx-why-dark figcaption span,.nx-why-dark .nx-body p{color:oklch(.78 .01 75)}
@@ -488,3 +493,13 @@ input:disabled,select:disabled,textarea:disabled{background:var(--disabled-surfa
   input:disabled,select:disabled,textarea:disabled{-webkit-text-fill-color:var(--light-text)}
   .nx-big-lit{-webkit-text-fill-color:var(--light-text);background:none;text-shadow:none}
 }
+
+/* Stable, accessible finishing for shared public and workspace controls. */
+:where(a,button,input,select,textarea):focus-visible{outline:2px solid var(--ring);outline-offset:3px}
+:where(.field-input,.password-input-wrap,.field textarea){min-width:0}
+:where(.nx-page-title,.auth-panel h1,.workspace-content h1){overflow-wrap:break-word}
+:where(.nx-form input,.nx-form select,.nx-form textarea,.field-input){font-size:16px}
+.nx-btn,.nx-btn-ghost{min-height:44px}
+.nx-hero{min-height:min(92svh,860px)}
+.nx-assets li{transition:color .2s}
+.nx-assets li:hover{padding-left:0}
