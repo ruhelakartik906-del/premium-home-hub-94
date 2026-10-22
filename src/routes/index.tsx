@@ -192,7 +192,7 @@ function Home() {
           <div className="nx-wrap">
             <span className="nx-eyebrow">The Process</span><h2>Private Access.<br />By Design.</h2>
             <ol className="nx-steps nx-corridor" data-reveal>
-              {[['Register', 'Create your Buyer or Seller account.'], ['Verify', 'Complete the required identity and account verification process.'], ['Activate', 'Complete the applicable activation/payment requirements.'], ['Access', 'Receive access according to your verified role and account status.']].map(([t, d], i) => <li key={t}><span className="nx-num">0{i + 1}</span><h3>{t}</h3><p>{d}</p></li>)}
+              {[['Register', 'Create your Buyer or Seller account.'], ['Verify', 'Complete the required identity and account verification process.'], ['Activate', 'Complete the applicable activation/payment requirements.'], ['Access', 'Receive access according to your verified role and account status.']].map(([t, d], i) => <li key={t}><span className="nx-num">0{i + 1}</span><h3>{t === 'Register' ? <Link to="/register">{t}</Link> : t}</h3><p>{d}</p></li>)}
             </ol>
           </div>
         </section>
