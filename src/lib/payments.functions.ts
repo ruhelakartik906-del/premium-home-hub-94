@@ -1,8 +1,9 @@
 import { createServerFn } from '@tanstack/react-start';
 import { z } from 'zod';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
+import { canBypassActivation, configuredSecretStatus, isCapturedPayment, matchesPaymentOrder, type PaymentEvidence } from './payment-security';
 
-const mask = (v: string | null) => (v ? `${'•'.repeat(8)}${v.slice(-4)}` : null);
+const mask = configuredSecretStatus;
 
 async function assertAdmin(ctx: { supabase: any; userId: string }) {
   const { data } = await ctx.supabase.rpc('has_role', { _user_id: ctx.userId, _role: 'admin' });
@@ -82,12 +83,14 @@ export const verifyActivationPayment = createServerFn({ method: 'POST' })
     if (!cfg.keySecret) return { ok: false as const, error: 'Payment gateway is not configured.' };
     if (!safeEqualHex(hmac(cfg.keySecret, `${data.orderId}|${data.paymentId}`), data.signature)) return { ok: false as const, error: 'Payment signature is invalid.' };
     try {
-      const pay = await rzp<{ order_id: string; amount: number; currency: string; status: string }>(cfg, `/payments/${encodeURIComponent(data.paymentId)}`);
-      if (pay.order_id !== data.orderId || pay.amount !== Math.round(Number(t.amount) * 100) || pay.currency !== t.currency || !['captured', 'authorized'].includes(pay.status))
+      let pay = await rzp<PaymentEvidence>(cfg, `/payments/${encodeURIComponent(data.paymentId)}`);
+      const expected = { orderId: data.orderId, amount: Math.round(Number(t.amount) * 100), currency: t.currency };
+      if (!matchesPaymentOrder(pay, expected) || !['captured', 'authorized'].includes(pay.status))
         return { ok: false as const, error: 'Payment details do not match the order.' };
-      if (pay.status === 'authorized') await rzp(cfg, `/payments/${encodeURIComponent(data.paymentId)}/capture`, { method: 'POST', body: { amount: pay.amount, currency: pay.currency } }).catch(() => undefined);
+      if (pay.status === 'authorized') pay = await rzp<PaymentEvidence>(cfg, `/payments/${encodeURIComponent(data.paymentId)}/capture`, { method: 'POST', body: { amount: pay.amount, currency: pay.currency } });
+      if (!isCapturedPayment(pay, expected)) return { ok: false as const, error: 'Payment capture is not confirmed yet. Please try again shortly.' };
+      await markOrderPaid(data.orderId, data.paymentId, 'checkout');
     } catch { return { ok: false as const, error: 'Could not confirm the payment with Razorpay. If money was debited it will be confirmed automatically.' }; }
-    await markOrderPaid(data.orderId, data.paymentId, 'checkout');
     return { ok: true as const, already: false };
   });
 
@@ -205,16 +208,18 @@ async function bypassState() {
 
 export const getActivationOptions = createServerFn({ method: 'GET' })
   .middleware([requireSupabaseAuth])
-  .handler(async () => {
+  .handler(async ({ context }) => {
     const s = await bypassState();
-    return { bypassAllowed: s.allowed, gatewayReady: s.configured, paymentMode: s.paymentMode, fee: s.cfg.fee };
+    const { data: isAdmin } = await context.supabase.rpc('has_role', { _user_id: context.userId, _role: 'admin' });
+    return { bypassAllowed: canBypassActivation(isAdmin === true, s.configured, s.paymentMode), gatewayReady: s.configured, paymentMode: s.paymentMode, fee: s.cfg.fee };
   });
 
 export const skipActivationPayment = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const s = await bypassState();
-    if (!s.allowed) return { ok: false as const, error: 'Testing bypass is switched off. Please complete the payment.' };
+    const { data: isAdmin } = await context.supabase.rpc('has_role', { _user_id: context.userId, _role: 'admin' });
+    if (!canBypassActivation(isAdmin === true, s.configured, s.paymentMode)) return { ok: false as const, error: 'Please complete the activation payment. Testing bypass is restricted to administrators.' };
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
     const { data: p } = await supabaseAdmin.from('profiles').select('full_name,email,status,account_type,mobile_verified,created_by_admin').eq('id', context.userId).maybeSingle();
     if (!p) return { ok: false as const, error: 'Profile not found.' };

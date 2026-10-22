@@ -17,3 +17,5 @@
 - Serve the existing typography from Fontsource packages and use modern responsive bundled photography, keeping above-fold hero preloads aligned with the displayed image to avoid duplicate transfers.
 - Keep uploaded availability-report drafts in isolated frontend-only modules and Master Admin preview sections, never feeding live listing mutations, so unconfirmed source records cannot accidentally be published.
 - Implement APITXT delivery through TanStack server functions with server-only credentials and atomic database challenge checks, so concurrent resend or verification cannot bypass limits or registration proof.
+- Keep security-sensitive payment checks in shared pure predicates: only matching captured payments activate ordinary accounts, test bypass requires a server-verified administrator, and credential status never returns credential fragments.
+- Initialize the first administrator through a service-only atomic database function; fail closed on lookup errors and roll back failed account creation to prevent competing setup requests granting extra administrators.

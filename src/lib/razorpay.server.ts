@@ -32,8 +32,9 @@ export async function rzp<T>(cfg: GatewayConfig, path: string, init?: { method?:
 /** Idempotently mark an activation order as paid. Returns true if this call changed it. */
 export async function markOrderPaid(orderId: string, paymentId: string, via: 'checkout' | 'webhook') {
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
-  const { data } = await supabaseAdmin.from('transactions')
+  const { data, error } = await supabaseAdmin.from('transactions')
     .update({ status: 'success', payment_id: paymentId, verified_via: via, verified_at: new Date().toISOString(), failure_reason: null })
-    .eq('order_id', orderId).neq('status', 'success').select('id');
+    .eq('order_id', orderId).in('status', ['created', 'pending', 'failed']).select('id');
+  if (error) throw new Error('Could not record confirmed payment');
   return (data?.length ?? 0) > 0;
 }

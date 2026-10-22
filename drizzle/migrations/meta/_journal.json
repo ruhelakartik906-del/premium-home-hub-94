@@ -36,6 +36,13 @@
       "when": 1792661741659,
       "tag": "0004_protect_registration_mobile_proof",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792662364483,
+      "tag": "0005_atomic_first_admin_security",
+      "breakpoints": true
     }
   ]
 }

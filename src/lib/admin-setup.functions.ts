@@ -3,7 +3,8 @@ import { z } from 'zod';
 
 async function adminCount() {
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
-  const { count } = await supabaseAdmin.from('user_roles').select('id', { count: 'exact', head: true }).eq('role', 'admin');
+  const { count, error } = await supabaseAdmin.from('user_roles').select('id', { count: 'exact', head: true }).eq('role', 'admin');
+  if (error || count === null) throw new Error('Could not confirm administrator setup status');
   return count ?? 0;
 }
 
@@ -17,7 +18,10 @@ export const createFirstAdmin = createServerFn({ method: 'POST' })
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
     const { data: created, error } = await supabaseAdmin.auth.admin.createUser({ email: data.email, password: data.password, email_confirm: true, user_metadata: { full_name: data.full_name } });
     if (error || !created.user) return { ok: false as const, error: 'Could not create the admin account.' };
-    await supabaseAdmin.from('user_roles').insert({ user_id: created.user.id, role: 'admin' });
-    await supabaseAdmin.from('profiles').insert({ id: created.user.id, full_name: data.full_name, email: data.email, account_type: 'admin', verification_status: 'approved', created_by_admin: true });
+    const { data: initialized, error: setupError } = await supabaseAdmin.rpc('initialize_first_admin', { _user_id: created.user.id, _full_name: data.full_name, _email: data.email });
+    if (setupError || initialized !== true) {
+      await supabaseAdmin.auth.admin.deleteUser(created.user.id);
+      return { ok: false as const, error: 'Administrator setup is unavailable. No administrator access was granted.' };
+    }
     return { ok: true as const };
   });
