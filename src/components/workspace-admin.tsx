@@ -1,4 +1,5 @@
 import { PasswordInput } from '@/components/password-input';
+import { ArmaniPreviewDrafts } from '@/components/armani-preview-drafts';
 import { MarketBadge, MarketTabs, useCountries } from '@/components/market';
 import { formatMoney, flagOf } from '@/lib/eliteoz-data';
 import { Globe } from 'lucide-react';
@@ -174,6 +175,7 @@ function PropertiesSection() {
   if (formMode && meData) return <><div className="toolbar"><Button variant="outline" onClick={() => setFormMode(null)}><X size={15} /> Back to all properties</Button><strong>{formMode === 'new' ? 'Add property (Master Admin listing)' : `Edit: ${formMode.title}`}</strong></div><ListingForm key={formMode === 'new' ? 'new' : formMode.id} me={meData} admin edit={formMode === 'new' ? undefined : formMode} onDone={() => setFormMode(null)} /></>;
   return <>
     <div className="toolbar"><Button onClick={() => setFormMode('new')}><Plus size={15} /> Add property</Button></div>
+    {meData?.isMaster && <ArmaniPreviewDrafts />}
     <div className="stats-grid"><Stat icon={Building2} label="Total properties" value={all.length} hint={`${n('draft')} drafts`} /><Stat icon={FileCheck} label="Pending review" value={n('pending', 'under_review')} hint={`${n('approved')} approved, not yet live`} /><Stat icon={Eye} label="Published" value={n('published')} hint={`${n('sold')} sold / closed`} /><Stat icon={AlertTriangle} label="Rejected / suspended" value={n('rejected') + n('suspended')} hint={`${n('changes_required')} awaiting seller changes`} /></div>
     <div className="stats-grid"><Stat icon={Building2} label="India properties" value={all.filter((p) => p.market === 'india').length} /><Stat icon={Globe} label="Global properties" value={all.filter((p) => p.market === 'international').length} hint={`${countryOpts.length} countries`} /><Stat icon={BadgeCheck} label="Approved / live" value={n('approved', 'published')} /><Stat icon={Globe} label="Top markets" value={byCountry[0]?.[0] ?? '—'} hint={byCountry.slice(0, 4).map(([c, k]) => `${c} ${k}`).join(' · ')} /></div>
     <Panel><Tabs value={tab} onChange={setTab} options={[['review', `Review (${n('pending', 'under_review')})`], ['approved', 'Approved'], ['published', 'Published'], ['changes_required', 'Changes required'], ['rejected', 'Rejected'], ['suspended', 'Suspended'], ['unpublished', 'Unpublished'], ['sold', 'Sold'], ['draft', 'Drafts'], ['featured', 'Featured'], ['all', 'All']]} />
