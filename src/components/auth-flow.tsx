@@ -173,6 +173,7 @@ export async function routeForUser() {
 
 export function LoginPage({ kind }: { kind: 'login' | 'forgot-password' | 'reset-password' }) {
   const navigate = useNavigate();
+  const router = useRouter();
   const recordAuth = useServerFn(recordAuthEvent);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
@@ -184,7 +185,7 @@ export function LoginPage({ kind }: { kind: 'login' | 'forgot-password' | 'reset
       if (error) { setBusy(false); setMsg('Incorrect email or password.'); return; }
       void recordAuth({ data: { event: 'login' } }).catch(() => null);
       const nextParam = new URLSearchParams(window.location.search).get('next');
-      if (nextParam && nextParam.startsWith('/') && !nextParam.startsWith('//')) { setBusy(false); await routerNavigate(nextParam); return; }
+      if (nextParam && nextParam.startsWith('/') && !nextParam.startsWith('//')) { setBusy(false); await router.navigate({ href: nextParam }); return; }
       const to = await routeForUser(); setBusy(false); navigate({ to: to ?? '/' });
     } else if (kind === 'forgot-password') {
       await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` });
