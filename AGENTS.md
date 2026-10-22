@@ -15,3 +15,4 @@
 - Use a shared PasswordInput for masked fields; registration role selection is URL-backed and its draft lives only in a per-app React provider, so Back/Forward preserves unsent inputs without storing credentials on disk.
 - Let TanStack Router own destination scroll resets and history restoration with instant behavior and no route view transitions; never scroll the outgoing page in link handlers.
 - Serve the existing typography from Fontsource packages and use modern responsive bundled photography, keeping above-fold hero preloads aligned with the displayed image to avoid duplicate transfers.
+- Keep uploaded availability-report drafts in isolated frontend-only modules and Master Admin preview sections, never feeding live listing mutations, so unconfirmed source records cannot accidentally be published.
