@@ -10,7 +10,7 @@ export const Route = createFileRoute('/sellers')({
       intro="For owners of trophy assets who value discretion as much as price."
       cta={{ label: 'Register as Seller', to: '/register' }}
       sections={[
-        { title: 'Private Mandate', body: <p>Your asset is held as a confidential mandate, not a public advertisement.</p> },
+        { title: 'Private Mandate', body: <><p>Your asset is held as a confidential mandate, not a public advertisement.</p><p>Even with an active mandate, sellers may independently sell their property to buyers outside the Eliteoz buyer network.</p></> },
         { title: 'Controlled Exposure', body: <p>Details are shared only with verified, activated buyers.</p> },
         { title: 'Verified Buyers', body: <p>Buyers are reviewed before they gain access to mandates.</p> },
         { title: 'Confidential Process', body: <p>Ownership documents are reviewed privately by Eliteoz and never shown to other members.</p> },
