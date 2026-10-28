@@ -503,3 +503,12 @@ input:disabled,select:disabled,textarea:disabled{background:var(--disabled-surfa
 .nx-hero{min-height:min(92svh,860px)}
 .nx-assets li{transition:color .2s}
 .nx-assets li:hover{padding-left:0}
+
+/* Registration sourcing highlight */
+.preview-warning.sourcing-highlight{font-size:clamp(1.05rem,1.6vw,1.2rem);line-height:1.6;font-weight:600;color:#111 !important;background:oklch(.95 .04 85);border-left:4px solid oklch(.62 .11 75);padding:16px 20px;border-radius:6px}
+
+/* Homepage light sections: bolder, black text */
+.nx-light,.nx-ivory{color:#000}
+.nx-light :is(p,li,span,.nx-muted,.nx-caption,.nx-page-body,.nx-page-intro):not(.nx-eyebrow),
+.nx-ivory :is(p,li,span,.nx-muted,.nx-caption,.nx-page-body,.nx-page-intro):not(.nx-eyebrow){color:#000 !important;font-weight:500}
+.nx-light :is(h1,h2,h3,h4,strong),.nx-ivory :is(h1,h2,h3,h4,strong){color:#000 !important;font-weight:600}
