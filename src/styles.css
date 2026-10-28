@@ -510,5 +510,5 @@ input:disabled,select:disabled,textarea:disabled{background:var(--disabled-surfa
 /* Homepage light sections: bolder, black text */
 .nx-light,.nx-ivory{color:#000}
 .nx-light :is(p,li,span,.nx-muted,.nx-caption,.nx-page-body,.nx-page-intro):not(.nx-eyebrow),
-.nx-ivory :is(p,li,span,.nx-muted,.nx-caption,.nx-page-body,.nx-page-intro):not(.nx-eyebrow){color:#000 !important;font-weight:500}
+.nx-ivory :is(p,li,span,.nx-muted,.nx-caption,.nx-page-body,.nx-page-intro):not(.nx-eyebrow){color:#000 !important;font-weight:400}
 .nx-light :is(h1,h2,h3,h4,strong),.nx-ivory :is(h1,h2,h3,h4,strong){color:#000 !important;font-weight:600}
